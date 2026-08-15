@@ -20,7 +20,7 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 
 | Environment | Trigger | URL |
 |-------------|---------|-----|
-| Local | `npm run dev` (or `bun run dev`) | `http://localhost:3000` |
+| Local | `bun run dev` | `http://localhost:3000` |
 | Staging | Push to feature branch → Vercel preview | Vercel preview URL |
 | Production | Push to `main` → Vercel auto-deploy | Production URL |
 
@@ -53,7 +53,7 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 - [ ] No secrets in source control (check `.gitignore`)
 - [ ] Drizzle schema migrations applied to production database
 - [ ] RLS policies verified on production (defense-in-depth; confirm app-level checks are what's actually protecting data)
-- [ ] Build passes locally: `npm run build` (or `bun run build`)
+- [ ] Build passes locally: `bun run build`
 
 ### Deploy
 ```bash

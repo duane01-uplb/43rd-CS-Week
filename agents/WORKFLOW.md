@@ -21,6 +21,7 @@ Full sprint breakdown: `plans/cs-week-website-plan.md`.
 ## Guardrails
 - Before starting a sprint: goal is achievable in one week, dependencies available
 - Before production: staging smoke test passes, env vars verified, rollback path known
+ - Before starting: confirm dependencies were installed with `bun install` at the repo root (mixed npm/Bun installs cause lockfile and resolution conflicts)
 
 ## Rule
 "Sprint 6 will absorb it" is not permission for unlimited scope creep. Security,

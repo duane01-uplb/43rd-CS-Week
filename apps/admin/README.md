@@ -10,9 +10,9 @@ Quick setup
 1. From the repo root, install dependencies for your Svelte app (run in the app when present):
 
 ```bash
-# from repo root or apps/admin when you have a package.json
-npm install @supabase/supabase-js drizzle-orm postgres
-npm install -D drizzle-kit
+# from repo root
+bun add @supabase/supabase-js drizzle-orm postgres
+bun add -d drizzle-kit
 ```
 
 1. Set environment variables (see repo root `.env` or your secret manager):

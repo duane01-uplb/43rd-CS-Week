@@ -16,9 +16,9 @@ description: How to safely create, test, and deploy Drizzle schema changes for t
 
 ## Workflow
 1. Edit `schema.ts`
-2. `npx drizzle-kit generate` — generates a migration file in `drizzle/`
+2. `bunx drizzle-kit generate` — generates a migration file in `drizzle/`
 3. Review the generated SQL before applying
-4. `npx drizzle-kit push` (or `migrate`) to apply
+4. `bunx drizzle-kit push` (or `migrate`) to apply
 5. Update `agents/DATABASE.md` to reflect the change
 6. Append to `agents/DECISIONS.md` if this reflects a design decision
 
