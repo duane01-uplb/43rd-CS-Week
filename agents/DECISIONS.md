@@ -11,3 +11,5 @@
 Add new rows as decisions are made — do not delete history, only append.
 
 | 2026-08-15 | Frontend framework: Svelte / SvelteKit (replaces Next.js) | The frontend was rebuilt on Svelte/SvelteKit; `next-scaffold/` is intentionally abandoned and kept for history only |
+
+| 2026-08-16 | Per-event registration fields via `event_registration_fields` + `registrations.responses` jsonb (not fixed columns) | Organizer requirements not yet finalized per event; avoids migration-per-event |

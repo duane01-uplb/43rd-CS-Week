@@ -8,6 +8,15 @@ Public listing and detail pages for all CS Week events, including the flagship e
 - Event detail: description, schedule, fee/free status, capacity
 - Flagship event highlighted on homepage
 
+## Sprint 1 Event Roster (flagship + others)
+- Code Wars
+- Career Orientation
+- Job Fair
+- Warframes
+- Games Day
+
+Note: exact registration field requirements pending per-organizer input. See registration.md and DECISIONS.md for the dynamic-fields approach.
+
 ## Dependencies
 - None (read-only, public)
 
