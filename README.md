@@ -69,7 +69,7 @@ See [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) for full architecture det
 
 | Document | Purpose |
 |----------|---------|
-| [`cs-week-website-plan.md`](cs-week-website-plan.md) | Sprint plan (canonical) |
+| [`cs-week-website-plan.md`](plans/cs-week-website-plan.md) | Sprint plan (canonical) |
 | [`agents/AGENTS.md`](agents/AGENTS.md) | Documentation index |
 | [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) | Stack and folder structure |
 | [`agents/DATABASE.md`](agents/DATABASE.md) | Schema and migrations |

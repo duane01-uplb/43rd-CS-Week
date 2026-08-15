@@ -13,7 +13,7 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 ## Before You Start
 1. Read [`agents/ARCHITECTURE.md`](../../agents/ARCHITECTURE.md) for environment setup
 2. Read [`agents/WORKFLOW.md`](../../agents/WORKFLOW.md) for before-production checklist
-3. Read `cs-week-website-plan.md` Sprint 6 tasks
+3. Read `plans/cs-week-website-plan.md` Sprint 6 tasks
 4. Verify all prior sprint DoDs are met
 
 ## Environments

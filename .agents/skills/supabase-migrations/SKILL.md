@@ -14,7 +14,7 @@ description: How to safely create, test, and deploy Supabase database migrations
 1. Read [`agents/DATABASE.md`](../../agents/DATABASE.md) for current schema and relationships
 2. Read [`agents/DECISIONS.md`](../../agents/DECISIONS.md) for any schema-related decisions
 3. Check existing migrations in `supabase/migrations/` for naming convention and sequence
-4. Confirm the change is required by the current sprint's tasks (see `cs-week-website-plan.md`)
+4. Confirm the change is required by the current sprint's tasks (see `plans/cs-week-website-plan.md`)
 
 ## Workflow
 
