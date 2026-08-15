@@ -5,7 +5,8 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
 ## Stack
 
 - **Framework:** SvelteKit + TypeScript
-- **Backend/DB:** Supabase (Postgres, Auth, Storage)
+- **Auth/Storage:** Supabase (Auth, Storage)
+- **Data Layer:** Drizzle ORM (direct Postgres connection to Supabase's DB)
 - **Styling:** Tailwind CSS
 - **Hosting:** Vercel
 - **Package Manager:** Bun
@@ -34,7 +35,7 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
    ```bash
    cp .env .env.local # or create a local .env file from your secret store
    ```
-   Fill in your Supabase project URL and keys. SvelteKit exposes public environment variables prefixed with `PUBLIC_` (e.g. `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`). Do NOT commit secrets to source control.
+   Fill in your Supabase project URL and keys. SvelteKit exposes public environment variables prefixed with `PUBLIC_` (e.g. `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`) — these are used for Supabase Auth only. Also set `DATABASE_URL` (the Supabase Postgres pooler connection string, server-side only, never `PUBLIC_`-prefixed) — this is what Drizzle connects with for all data queries. Do NOT commit secrets to source control.
 
 4. **Run the development server**
    ```bash
@@ -72,7 +73,7 @@ See [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) for full architecture det
 | [`cs-week-website-plan.md`](plans/cs-week-website-plan.md) | Sprint plan (canonical) |
 | [`agents/AGENTS.md`](agents/AGENTS.md) | Documentation index |
 | [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) | Stack and folder structure |
-| [`agents/DATABASE.md`](agents/DATABASE.md) | Schema and migrations |
+| [`agents/DATABASE.md`](agents/DATABASE.md) | Schema and migrations (Drizzle) |
 | [`agents/DECISIONS.md`](agents/DECISIONS.md) | Decision log |
 | [`agents/WORKFLOW.md`](agents/WORKFLOW.md) | Sprint cadence and guardrails |
 

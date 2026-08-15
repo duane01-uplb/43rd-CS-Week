@@ -3,6 +3,9 @@
 ## Conventions
  - Prefer SvelteKit form actions (`+page.server.ts` actions) for form-driven mutations when possible.
  - Use SvelteKit endpoints (`src/routes/api/*/+server.ts`) for plain HTTP JSON endpoints or webhook handlers.
+ - Prefer SvelteKit form actions (`+page.server.ts` actions) for form-driven mutations when possible.
+ - Use SvelteKit endpoints (`src/routes/api/*/+server.ts`) for plain HTTP JSON endpoints or webhook handlers.
+ - All data reads/writes (events, registrations, profiles) go through Drizzle. Every action/endpoint handler must check `locals.session` (and role, for admin endpoints) before querying — Drizzle bypasses RLS, so this check is not optional. See `agents/AUTHORIZATION.md`.
 
 ## Endpoints (draft — expand as built)
 

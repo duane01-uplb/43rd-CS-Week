@@ -3,7 +3,7 @@
 ## Project Context
 
 **Project:** CS Week event website
-**Stack:** SvelteKit (apps/web + apps/admin) + Supabase (Auth, Postgres, Storage) + Vercel
+**Stack:** SvelteKit (apps/web + apps/admin) + Supabase (Auth, Storage) + Drizzle ORM (data layer, direct Postgres connection) + Vercel
 **Payments:** Not implemented — all events are free registration (see /agents/DECISIONS.md)
 **Team:** Solo developer
 **Development style:** Fast, AI-assisted ("vibe-coding") with deliberate engineering discipline

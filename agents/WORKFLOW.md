@@ -11,6 +11,12 @@ Full sprint breakdown: `plans/cs-week-website-plan.md`.
 - DB changes via migrations
 - No secrets committed
 - Critical flow manually tested
+ - Feature works locally and on staging
+ - Error/empty/loading states considered
+ - Authorization/security behavior checked — every server-side query has an explicit session/role check (Drizzle bypasses RLS; app code is the enforcement layer, see AUTHORIZATION.md)
+ - DB changes via Drizzle schema + `drizzle-kit generate` (see `.agents/skills/drizzle-migrations/SKILL.md`)
+ - No secrets committed (`DATABASE_URL` included)
+ - Critical flow manually tested
 
 ## Guardrails
 - Before starting a sprint: goal is achievable in one week, dependencies available
