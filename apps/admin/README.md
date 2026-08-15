@@ -13,9 +13,9 @@ Quick setup
 npm install @supabase/supabase-js
 ```
 
-2. Set environment variables (see `.env.example`):
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+2. Set environment variables (see repo root `.env` or your secret manager):
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_ANON_KEY`
 
 Notes
 - This is a lightweight skeleton. Replace with your actual SvelteKit routing, server endpoints, and build scripts as appropriate.

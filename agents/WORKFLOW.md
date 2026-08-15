@@ -2,7 +2,7 @@
 
 ## Cadence
 7 weekly sprints + Sprint 0 foundation. One sprint goal each.
-Full sprint breakdown: `cs-week-website-plan.md`.
+Full sprint breakdown: `plans/cs-week-website-plan.md`.
 
 ## Definition of Done (per sprint, see plan for sprint-specific items)
 - Feature works locally and on staging

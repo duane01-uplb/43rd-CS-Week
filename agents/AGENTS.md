@@ -18,6 +18,6 @@ do not duplicate information across files.
 | DECISIONS.md | Log of key decisions and why they were made |
 | features/*.md | Per-feature spec: registration, events, admin |
 
-Reference: sprint plan lives in `cs-week-website-plan.md` (project root/outputs).
+Reference: sprint plan lives in `plans/cs-week-website-plan.md`.
 
 Note: project-specific AI skills live under `.agents/skills/` (examples: `auth-and-rls`, `event-registration-flow`, `supabase-migrations`). Use those SKILL.md documents for repeatable agent workflows and repository-specific rules.

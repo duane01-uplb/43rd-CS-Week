@@ -4,7 +4,7 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
 
 ## Stack
 
-- **Framework:** Next.js (App Router) + TypeScript
+- **Framework:** SvelteKit + TypeScript
 - **Backend/DB:** Supabase (Postgres, Auth, Storage)
 - **Styling:** Tailwind CSS
 - **Hosting:** Vercel
@@ -24,37 +24,43 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
    cd 43rd-CS-Week
    ```
 
-2. **Install dependencies**
+2. **Install dependencies** (run per app)
    ```bash
-   bun install
+   cd apps/web && bun install
+   cd ../admin && bun install
    ```
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env.local
+   cp .env .env.local # or create a local .env file from your secret store
    ```
-   Fill in your Supabase project URL and keys (see `.env.example`).
+   Fill in your Supabase project URL and keys. SvelteKit exposes public environment variables prefixed with `PUBLIC_` (e.g. `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`). Do NOT commit secrets to source control.
 
 4. **Run the development server**
    ```bash
-   bun dev
+   bun run dev
    ```
 
-5. **Open** [http://localhost:3000](http://localhost:3000)
+5. **Open** [http://localhost:5173](http://localhost:5173)
 
 ## Project Structure
 
 ```
-app/              # Next.js App Router pages and layouts
-  (public)/       # Public pages (homepage, events, event detail)
-  (auth)/         # Authentication pages (sign-up, login)
-  admin/          # Protected admin routes
-  api/            # Route handlers
-lib/              # Utilities, Supabase client
-components/       # Shared UI components
-supabase/         # Migrations and seed data
-agents/           # AI-agent project documentation
-.agents/          # AI workflow skills
+apps/
+   web/              # Public-facing SvelteKit app (homepage, events, registration, auth)
+    src/
+      routes/       # SvelteKit file-based routing: +page.svelte, +page.server.ts
+      lib/          # Utilities, Supabase client, shared components
+  admin/            # Admin-facing SvelteKit app (event CRUD, registrations)
+    src/
+      routes/
+      lib/
+        components/
+        domains/
+supabase/           # Migrations and seed data
+agents/             # AI-agent project documentation
+.agents/            # AI workflow skills
+next-scaffold/      # Abandoned Next.js scaffold — history only, not in use
 ```
 
 See [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) for full architecture details.
@@ -63,7 +69,7 @@ See [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) for full architecture det
 
 | Document | Purpose |
 |----------|---------|
-| [`cs-week-website-plan.md`](cs-week-website-plan.md) | Sprint plan (canonical) |
+| [`cs-week-website-plan.md`](plans/cs-week-website-plan.md) | Sprint plan (canonical) |
 | [`agents/AGENTS.md`](agents/AGENTS.md) | Documentation index |
 | [`agents/ARCHITECTURE.md`](agents/ARCHITECTURE.md) | Stack and folder structure |
 | [`agents/DATABASE.md`](agents/DATABASE.md) | Schema and migrations |

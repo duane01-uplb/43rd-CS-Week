@@ -20,20 +20,20 @@ description: Building the admin dashboard for event and registration management 
 
 ### Route Structure
 ```
-app/admin/
-  layout.tsx          # Admin layout with role gate
-  page.tsx            # Dashboard overview
+src/routes/admin/
+  +layout.svelte        # Admin layout with role gate (server load or hooks check)
+  +page.svelte          # Dashboard overview
   events/
-    page.tsx          # Event list (admin view)
-    new/page.tsx      # Create event
-    [id]/edit/page.tsx # Edit event
+    +page.svelte        # Event list (admin view)
+    new/+page.svelte    # Create event
+    [id]/edit/+page.svelte # Edit event
   registrations/
-    page.tsx          # Registration table
+    +page.svelte        # Registration table
 ```
 
 ### Access Control (3 layers)
 1. **RLS policies** — admin-only INSERT/UPDATE/DELETE on events; admin SELECT all on registrations
-2. **Layout guard** — `app/admin/layout.tsx` checks session + role, redirects non-admins
+2. **Layout guard** — use `src/routes/admin/+layout.server.ts` or a `hooks.server.ts` check to verify session + role, redirect non-admins
 3. **Server action/route handler** — verify `profiles.role = 'admin'` before every mutation
 
 ## Workflow

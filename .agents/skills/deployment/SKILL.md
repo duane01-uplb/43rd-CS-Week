@@ -13,14 +13,14 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 ## Before You Start
 1. Read [`agents/ARCHITECTURE.md`](../../agents/ARCHITECTURE.md) for environment setup
 2. Read [`agents/WORKFLOW.md`](../../agents/WORKFLOW.md) for before-production checklist
-3. Read `cs-week-website-plan.md` Sprint 6 tasks
+3. Read `plans/cs-week-website-plan.md` Sprint 6 tasks
 4. Verify all prior sprint DoDs are met
 
 ## Environments
 
 | Environment | Trigger | URL |
 |-------------|---------|-----|
-| Local | `bun dev` | `http://localhost:3000` |
+| Local | `npm run dev` (or `bun run dev`) | `http://localhost:3000` |
 | Staging | Push to feature branch → Vercel preview | Vercel preview URL |
 | Production | Push to `main` → Vercel auto-deploy | Production URL |
 
@@ -44,14 +44,14 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 - [ ] All sprint DoD items met
 - [ ] Staging smoke test passes
 - [ ] Environment variables verified in Vercel dashboard:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-  - `NEXT_PUBLIC_SITE_URL`
+  - `PUBLIC_SUPABASE_URL` (client-visible)
+  - `PUBLIC_SUPABASE_ANON_KEY` (client-visible)
+  - `SUPABASE_SERVICE_ROLE_KEY` (server-side only — do not expose)
+  - `PUBLIC_SITE_URL`
 - [ ] No secrets in source control (check `.gitignore`)
 - [ ] Database migrations applied to production Supabase
 - [ ] RLS policies verified on production
-- [ ] Build passes locally: `bun run build`
+- [ ] Build passes locally: `npm run build` (or `bun run build`)
 
 ### Deploy
 ```bash

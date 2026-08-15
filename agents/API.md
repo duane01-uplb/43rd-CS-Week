@@ -1,8 +1,8 @@
 # API
 
 ## Conventions
-- Prefer Next.js Server Actions for internal mutations where possible
-- Use Route Handlers (`/app/api/*`) for anything needing a plain HTTP endpoint
+ - Prefer SvelteKit form actions (`+page.server.ts` actions) for form-driven mutations when possible.
+ - Use SvelteKit endpoints (`src/routes/api/*/+server.ts`) for plain HTTP JSON endpoints or webhook handlers.
 
 ## Endpoints (draft — expand as built)
 
