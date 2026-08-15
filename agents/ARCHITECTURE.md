@@ -32,6 +32,9 @@
       /routes                  # SvelteKit file-based routing
 /supabase                      # migrations, seed data
   /web                       # Public-facing SvelteKit app (homepage, events, registration)
+
+/packages
+  /db                        # Shared Drizzle schema + connection factory, imported by both apps/web and apps/admin
 ```
 
 ### Conventions

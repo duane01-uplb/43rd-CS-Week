@@ -24,11 +24,17 @@ description: Implementing Supabase Auth flows and Row Level Security policies fo
 - `admin` — full access to `/admin/*`, event CRUD, registration management
 
 ### Enforcement Layers (defense in depth)
-1. **Supabase RLS policies** — source of truth, enforced at database level
-2. **Route-level guards** — Next.js middleware or layout-level checks, redirect unauthorized
-3. **Server-side role check** — on all admin API routes and server actions
+1. **Application-level checks** — every server-side Drizzle query must verify
+  the session and role before querying. Drizzle bypasses RLS, so these
+  checks are the source of truth for authorization in the app.
+2. **Route-level guards** — SvelteKit `hooks.server.ts` or layout-level
+  `load` functions that redirect unauthorized users before a page attempts
+  a query.
+3. **Supabase RLS policies** — retained as defense-in-depth only.
 
-Never rely on client-side checks alone.
+Use `requireSession()` / `requireAdmin()` from `src/lib/server/auth-guards.ts`
+in each app instead of writing ad-hoc checks inline — these helpers
+centralize the required enforcement logic.
 
 ## Workflow
 

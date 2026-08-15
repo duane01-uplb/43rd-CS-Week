@@ -14,6 +14,10 @@
 	Drizzle query (SvelteKit `load` functions, form actions, admin routes)
 	must verify `locals.session` and, for admin operations, `profiles.role`
 	before executing. Drizzle bypasses RLS, so this layer is not optional.
+
+Use the shared `requireSession()` / `requireAdmin()` helpers (see
+`src/lib/server/auth-guards.ts` in each app) rather than ad-hoc inline
+checks — centralizes the one place this logic must be correct.
 2. Route-level guards in SvelteKit (`hooks.server.ts`, layout `load`)
 	redirect unauthorized users before a page even attempts a query.
 3. Supabase RLS policies — retained as defense-in-depth (protects against
