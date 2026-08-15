@@ -32,9 +32,9 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env
+   cp .env .env.local # or create a local .env file from your secret store
    ```
-   Fill in your Supabase project URL and keys. SvelteKit uses `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_ANON_KEY` (see `.env.example`).
+   Fill in your Supabase project URL and keys. SvelteKit exposes public environment variables prefixed with `PUBLIC_` (e.g. `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`). Do NOT commit secrets to source control.
 
 4. **Run the development server**
    ```bash
@@ -47,7 +47,7 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
 
 ```
 apps/
-  web/              # Public-facing SvelteKit app (homepage, events, registration, auth)
+   web/              # Public-facing SvelteKit app (homepage, events, registration, auth)
     src/
       routes/       # SvelteKit file-based routing: +page.svelte, +page.server.ts
       lib/          # Utilities, Supabase client, shared components
