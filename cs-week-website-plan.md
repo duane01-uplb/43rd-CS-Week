@@ -3,13 +3,29 @@
 ## Project Context
 
 **Project:** CS Week event website
-**Stack:** Next.js (App Router) + Supabase (Auth, Postgres, Storage) + Vercel
+**Stack:** SvelteKit (apps/web + apps/admin) + Supabase (Auth, Postgres, Storage) + Vercel
 **Payments:** Not implemented — all events are free registration (see /agents/DECISIONS.md)
 **Team:** Solo developer
 **Development style:** Fast, AI-assisted ("vibe-coding") with deliberate engineering discipline
 **Design:** UI/UX work is embedded directly into implementation tasks; no separate design phase
 **Cadence:** 6 weekly sprints + Sprint 0 foundation period
 **Environment:** Local → staging → production
+
+> **Framework note:** Originally scaffolded with Next.js (`next-scaffold/`, abandoned). Current and only active frontend is SvelteKit, split into `apps/web` (public site) and `apps/admin` (admin dashboard). See `agents/DECISIONS.md` and `agents/ARCHITECTURE.md`.
+
+## Recent repository updates
+
+- `next-scaffold/` removed from the repository (archival scaffold was deleted to avoid confusion).
+- Frontend confirmed: **SvelteKit** (`apps/admin` skeleton created). See [apps/admin/README.md](apps/admin/README.md).
+- Supabase client added for admin at `apps/admin/src/lib/supabaseClient.ts`.
+- Environment handling: `.env.example` was untracked and removed from the repo; a local `.env` file was created for development. Ensure any shared examples contain no secrets.
+
+## Immediate next actions (recommended)
+- Sprint 1: Scaffold `apps/web` (public SvelteKit site) — create `package.json`, `+layout.svelte`, and Supabase client sharing pattern.
+- Implement Supabase Auth and RLS patterns (Sprint 1 / Sprint 5 hardening) following `agents/auth-and-rls` skill.
+- Sprint 2 prep: add `scripts/seed.*` or a migration seed to create 3–5 test events.
+- Sprint 3 prep: design server action / RPC for atomic registration and idempotency.
+
 
 Each sprint has:
 - One primary sprint goal
@@ -27,13 +43,15 @@ Each sprint has:
 ### Tasks
 - [x] Define backlog and core entities: events, registrations, users/profiles, roles
 - [x] Define page list and required admin actions
-- [x] Initialize Next.js repository
+- [x] Initialize repository (Next.js scaffold, later replaced by SvelteKit)
 - [x] Create/connect Supabase project
 - [x] Establish local, staging (Vercel), and production environments
 - [x] Configure Vercel deployment pipeline
 - [x] Define environment variables and secret-management approach
 - [x] Design initial database schema
 - [x] Establish Supabase migration strategy
+- [x] Scaffold `apps/admin` (SvelteKit admin skeleton)
+- [ ] Scaffold `apps/web` (SvelteKit public site) — **carried into Sprint 1**
 - [ ] Gather externally supplied branding assets
 - [x] ~~Confirm PayMongo~~ — payments descoped, no longer required
 - [x] Create basic project README covering setup and deployment
@@ -51,16 +69,17 @@ Each sprint has:
 **Goal:** Establish the site's public structure and secure authentication foundation.
 
 ### Tasks
-- [ ] Supabase Auth: participant sign-up/login/logout
+- [ ] Scaffold `apps/web` SvelteKit project (routes, lib, Supabase client)
+- [ ] Supabase Auth: participant sign-up/login/logout (SvelteKit form actions)
 - [ ] Profile/role handling
 - [ ] Admin role representation
-- [ ] Protected-route foundation
-- [ ] Base layout, navigation, footer
+- [ ] Protected-route foundation (`hooks.server.ts` session/role checks)
+- [ ] Base layout, navigation, footer (`+layout.svelte`)
 - [ ] Homepage hero
 - [ ] Flagship event highlight
 - [ ] Upcoming-events preview
 - [ ] Responsive baseline
-- [ ] Deploy to staging
+- [ ] Deploy `apps/web` to staging
 
 ### Definition of Done
 - User can sign up, log in, and log out
@@ -75,10 +94,10 @@ Each sprint has:
 **Goal:** Deliver a complete read-only event browsing experience.
 
 ### Tasks
-- [ ] Events listing page
+- [ ] Events listing page (`routes/events/+page.svelte` + `+page.server.ts` load)
 - [ ] Query events from Supabase
 - [ ] Filter by status/date
-- [ ] Event detail page
+- [ ] Event detail page (`routes/events/[id]/+page.svelte`)
 - [ ] Display description, schedule, and capacity
 - [ ] Handle loading, empty, and error states
 - [ ] Seed 3–5 realistic test events
@@ -100,7 +119,7 @@ Each sprint has:
 ### Tasks
 - [ ] Registration form
 - [ ] Client/server validation
-- [ ] Registration database write
+- [ ] Registration database write (SvelteKit form action)
 - [ ] Duplicate-registration prevention
 - [ ] Capacity check (block registration once event is full)
 - [ ] Confirmation screen
@@ -123,7 +142,7 @@ Each sprint has:
 **Goal:** Give the organizer enough tooling to operate the event.
 
 ### Tasks
-- [ ] Protected `/admin` route
+- [ ] Protected `/admin` route (`apps/admin`, `hooks.server.ts` role gate)
 - [ ] Role-based access enforcement
 - [ ] Event CRUD
 - [ ] Create/edit/close events
@@ -149,7 +168,7 @@ Each sprint has:
 **Goal:** Remove launch-blocking defects and make the application production-ready.
 
 ### Tasks
-- [ ] Mobile responsiveness pass
+- [ ] Mobile responsiveness pass (both apps)
 - [ ] Loading states
 - [ ] Empty states
 - [ ] Error states
@@ -180,7 +199,7 @@ Sprint 5 may absorb unfinished work from earlier sprints, but only explicitly id
 **Goal:** Validate the complete system in realistic conditions and launch safely.
 
 ### Tasks
-- [ ] Full manual regression test
+- [ ] Full manual regression test (both apps)
 - [ ] Registration test (success, duplicate, at-capacity)
 - [ ] Admin CRUD test
 - [ ] Expired/closed event test
