@@ -62,9 +62,8 @@ CREATE POLICY "admins can view all registrations"
 ```
 
 ### Protected Routes
-- Use Next.js middleware or layout-level session checks
-- Redirect to login if not authenticated
-- Redirect to home if authenticated but not admin (for `/admin/*`)
+- Use SvelteKit `hooks.server.ts` for global session/role checks or layout-level server `load` functions for route-scoped protection.
+- Redirect to login if not authenticated; for admin routes implement a server `load` that throws a redirect when role checks fail.
 
 ## Required RLS Policies (per AUTHORIZATION.md)
 | Table | SELECT | INSERT | UPDATE | DELETE |

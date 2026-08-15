@@ -29,9 +29,9 @@ description: Building the event browsing and registration features for the CS We
 
 ### Data Flow
 ```
-Client → Server Component → Supabase query → Render
+Client → server `load` (server-side) → Supabase query → Render
 ```
-Use server components for initial data fetch. Events are publicly readable (RLS already allows this via `0001_init.sql`).
+Use SvelteKit `+page.server.ts` or `+page.ts` `load` functions for initial data fetch. Events are publicly readable (RLS already allows this via `0001_init.sql`).
 
 ### Test Events
 Seed 3–5 realistic test events (Sprint 2 task):
@@ -51,17 +51,22 @@ User views event → Clicks "Register" → Auth check → Validate → Insert �
 2. **Capacity check:** Before inserting, verify `COUNT(registrations) < event.capacity`. Use a transaction or Supabase RPC for atomicity.
 3. **Idempotency:** Repeated submissions for the same user+event should not create duplicates (handled by unique constraint, surface gracefully).
 
-### Server Action / Route Handler
+### Form action / Endpoint
+Implement registration as a SvelteKit form action (`export const actions = { default: async (event) => { ... } }` in `+page.server.ts`) or as an endpoint (`src/routes/api/registrations/+server.ts`) for API-style calls.
+
 ```typescript
-// Pseudocode for registration
-async function registerForEvent(eventId: string) {
-  // 1. Verify user is authenticated
-  // 2. Check event exists and is open
-  // 3. Check event not at capacity
-  // 4. Check user not already registered
-  // 5. Insert registration (status: 'pending' or 'confirmed')
-  // 6. Send confirmation email
-  // 7. Return success/error
+// Pseudocode for SvelteKit form action
+export const actions = {
+   default: async ({ request, locals }) => {
+      const form = await request.formData();
+      const eventId = form.get('eventId');
+      // 1. Verify user via locals/session
+      // 2. Check event exists and is open
+      // 3. Capacity check (transaction/RPC)
+      // 4. Insert registration
+      // 5. Send confirmation email
+      // 6. return { success: true }
+   }
 }
 ```
 

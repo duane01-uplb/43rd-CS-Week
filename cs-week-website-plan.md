@@ -24,7 +24,7 @@
 - Sprint 1: Scaffold `apps/web` (public SvelteKit site) — create `package.json`, `+layout.svelte`, and Supabase client sharing pattern.
 - Implement Supabase Auth and RLS patterns (Sprint 1 / Sprint 5 hardening) following `agents/auth-and-rls` skill.
 - Sprint 2 prep: add `scripts/seed.*` or a migration seed to create 3–5 test events.
-- Sprint 3 prep: design server action / RPC for atomic registration and idempotency.
+- Sprint 3 prep: design SvelteKit form action / RPC for atomic registration and idempotency (use `+page.server.ts` actions or a `src/routes/api/*/+server.ts` RPC).
 
 
 Each sprint has:

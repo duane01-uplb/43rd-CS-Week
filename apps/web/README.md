@@ -10,8 +10,8 @@ npm install
 ```
 
 2. Set environment variables (see repo root `.env` or CI settings):
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_ANON_KEY`
 
 Run
 ```bash

@@ -31,6 +31,7 @@
         /utils                 # Shared generic helpers
       /routes                  # SvelteKit file-based routing
 /supabase                      # migrations, seed data
+  /web                       # Public-facing SvelteKit app (homepage, events, registration)
 ```
 
 ### Conventions
@@ -42,7 +43,7 @@
 
 ### Open items to verify
 - [x] Whether `apps/` will contain additional applications beyond `admin` — currently only `apps/admin` exists; additional apps can be added if the project later needs a public-facing site.
-- [x] Exact location of the Supabase client/auth setup within `lib/` — created at `apps/admin/src/lib/supabaseClient.ts` (public env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
+[x] Exact location of the Supabase client/auth setup within `lib/` — created at `apps/admin/src/lib/supabaseClient.ts` (public env vars: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
 
 ## Payments
 Not implemented. All registrations are free (see DECISIONS.md).
