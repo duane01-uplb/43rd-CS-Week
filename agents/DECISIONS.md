@@ -9,3 +9,5 @@
 
 | 2026-08-15 | Payments/PayMongo dropped from scope | Simplifies build; all events are free registration only |
 Add new rows as decisions are made — do not delete history, only append.
+
+| 2026-08-15 | Frontend framework: Svelte / SvelteKit (replaces Next.js) | The frontend was rebuilt on Svelte/SvelteKit; `next-scaffold/` is intentionally abandoned and kept for history only |
