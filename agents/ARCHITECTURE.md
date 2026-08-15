@@ -48,6 +48,19 @@
 ## Payments
 Not implemented. All registrations are free (see DECISIONS.md).
 
+## Data Access
+- ORM: Drizzle (drizzle-orm + drizzle-kit), connecting directly to the
+  Supabase Postgres pooler connection (DATABASE_URL, service-level — not
+  the public anon key).
+- Supabase is still used for Auth (sign-up/login/session) and Storage.
+  Supabase's JS client (`@supabase/supabase-js`) is retained ONLY for
+  `supabase.auth.*` calls — all data reads/writes go through Drizzle.
+- Schema defined in `schema.ts` (TypeScript), migrations generated via
+  `drizzle-kit generate` / applied via `drizzle-kit push`.
+- IMPORTANT: Drizzle connects directly to Postgres and BYPASSES Row Level
+  Security. RLS policies remain in place as defense-in-depth only.
+  Authorization is enforced in application code — see `AUTHORIZATION.md`.
+
 ## Deployment
 - Push to `main` → Vercel prod
 - Push to feature branch → Vercel preview (staging validation)

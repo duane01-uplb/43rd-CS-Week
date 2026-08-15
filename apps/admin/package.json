@@ -1,5 +1,5 @@
 {
-  "name": "csweek-web",
+  "name": "csweek-admin",
   "private": true,
   "version": "0.1.0",
   "scripts": {
@@ -10,14 +10,12 @@
   "devDependencies": {
     "svelte": "^4.0.0",
     "@sveltejs/kit": "next",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "drizzle-kit": "^0.28.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
     "drizzle-orm": "^0.36.0",
     "postgres": "^3.4.0"
-  },
-  "devDependencies": {
-    "drizzle-kit": "^0.28.0"
   }
 }

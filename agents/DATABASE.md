@@ -24,8 +24,13 @@
 - profiles 1—N registrations
 
 ## Migration Strategy
-- All schema changes via Supabase migrations (no manual dashboard edits in prod)
-- Migrations committed to `/supabase/migrations`
-- 0001_init.sql: initial schema (included a `payments` table + event fee fields)
-- 0002_remove_payments.sql: drops `payments` table and event fee fields — payments descoped (see DECISIONS.md)
- - 0003_add_dynamic_registration_fields.sql: adds `event_registration_fields` table and `registrations.responses` jsonb column (dynamic per-event fields)
+- Schema defined in `schema.ts` (Drizzle, TypeScript) — source of truth
+	for table structure.
+- Migrations generated via `drizzle-kit generate`, applied via
+	`drizzle-kit push` (or `migrate`, per team preference).
+- Prior raw SQL migrations (0001_init.sql, 0002_remove_payments.sql,
+	0003_add_dynamic_registration_fields.sql) are superseded by the Drizzle
+	baseline schema — see DECISIONS.md (2026-08-16, Drizzle transition).
+- The `handle_new_user` trigger on `auth.users` is NOT managed by Drizzle
+	(Supabase's `auth` schema is out of Drizzle's scope) — applied once
+	manually via Supabase SQL editor.
