@@ -2,7 +2,7 @@
 
 ## Conventions
 - Prefer Next.js Server Actions for internal mutations where possible
-- Use Route Handlers (`/app/api/*`) for webhooks and external integrations
+- Use Route Handlers (`/app/api/*`) for anything needing a plain HTTP endpoint
 
 ## Endpoints (draft — expand as built)
 
@@ -13,10 +13,6 @@
 ### Auth-required
 - `POST /api/registrations` — create registration
 - `GET /api/registrations/me` — participant's own registrations
-
-### Payments
-- `POST /api/payments/checkout` — create PayMongo checkout session
-- `POST /api/webhooks/paymongo` — payment status webhook (verify signature)
 
 ### Admin
 - `POST /api/admin/events` — create event

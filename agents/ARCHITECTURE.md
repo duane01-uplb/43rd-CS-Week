@@ -4,7 +4,6 @@
 - Framework: Next.js (App Router)
 - Backend/DB: Supabase (Postgres, Auth, Storage)
 - Hosting: Vercel
-- Payments: PayMongo
 
 ## Environments
 - Local (dev)
@@ -22,6 +21,9 @@
 /components        # shared UI components
 /supabase          # migrations, seed data
 ```
+
+## Payments
+Not implemented. All registrations are free (see DECISIONS.md).
 
 ## Deployment
 - Push to `main` → Vercel prod

@@ -11,11 +11,11 @@ do not duplicate information across files.
 | DATABASE.md | Schema, migrations, relationships |
 | AUTHORIZATION.md | Roles, RLS policies, protected routes |
 | API.md | Endpoints, request/response contracts |
-| PAYMENTS.md | PayMongo integration, webhook, payment states |
+| PAYMENTS.md | Out of scope — kept for history, see DECISIONS.md |
 | TESTING.md | Test strategy, manual QA checklists |
 | UI.md | Design tokens, layout conventions, component list |
 | WORKFLOW.md | Sprint cadence, Definition of Done, guardrails |
 | DECISIONS.md | Log of key decisions and why they were made |
-| features/*.md | Per-feature spec: registration, events, admin, payments |
+| features/*.md | Per-feature spec: registration, events, admin |
 
 Reference: sprint plan lives in `cs-week-website-plan.md` (project root/outputs).

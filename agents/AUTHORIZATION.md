@@ -7,7 +7,7 @@
 ## Access Rules
 - Public: homepage, events listing, event detail (read-only)
 - Authenticated only: registration submission, profile
-- Admin only: `/admin/*`, event CRUD, registration/payment visibility
+- Admin only: `/admin/*`, event CRUD, registration visibility
 
 ## Enforcement Layers
 1. Supabase RLS policies (source of truth — never rely on client-side checks alone)
@@ -17,4 +17,3 @@
 ## RLS Policy Notes (fill in as implemented)
 - events: public SELECT; INSERT/UPDATE/DELETE admin-only
 - registrations: user can SELECT/INSERT own rows; admin can SELECT all
-- payments: admin-only SELECT; INSERT restricted to server (webhook/service role)

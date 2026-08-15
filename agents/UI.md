@@ -23,7 +23,7 @@ across prompts/sessions.
 - Event detail hero
 - Registration form
 - Admin table
-- Status badges (pending/confirmed/paid/failed)
+- Status badges (pending/confirmed/cancelled)
 
 ## States to Always Handle
 Loading, empty, error — for every data-driven view.
