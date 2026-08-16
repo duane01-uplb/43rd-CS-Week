@@ -1,0 +1,1 @@
+import{N as e,f as t,u as n}from"../chunks/Bhzh19dr.js";import"../chunks/xihTtKlq.js";import"../chunks/DVDYt45u.js";var r=t("<h1>CS Week — Public Site (SvelteKit)</h1> <p>Welcome. This is a minimal scaffold for the public-facing site. Replace with real content and routes under `src/routes/`.</p>",1);function i(t){var i=r();e(2),n(t,i)}export{i as component};
