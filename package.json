@@ -3,10 +3,11 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
-  ,
+  ],
   "scripts": {
     "dev": "cd apps/web && bun run dev"
+  },
+  "devDependencies": {
+    "vercel": "^59.1.3"
   }
 }
-
