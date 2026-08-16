@@ -13,8 +13,7 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 18+
-- [Bun](https://bun.sh/)
+- [Bun](https://bun.sh/) (recommended)
 - [Supabase CLI](https://supabase.com/docs/guides/cli)
 
 ## Getting Started
@@ -25,8 +24,12 @@ The official website for the 43rd CS Week. Showcases all events (flagship + othe
    cd 43rd-CS-Week
    ```
 
-2. **Install dependencies** (run per app)
+2. **Install dependencies** (run per app or at repository root)
    ```bash
+   # install at repo root (recommended for workspaces)
+   bun install
+
+   # or per-app
    cd apps/web && bun install
    cd ../admin && bun install
    ```
