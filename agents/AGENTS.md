@@ -8,7 +8,7 @@ do not duplicate information across files.
 |---|---|
 | PROJECT.md | Goals, scope, stakeholders, timeline |
 | ARCHITECTURE.md | Stack, folder structure, environments |
-| DATABASE.md | Schema, migrations, relationships |
+| DATABASE.md | Schema, migrations (Drizzle), relationships |
 | AUTHORIZATION.md | Roles, RLS policies, protected routes |
 | API.md | Endpoints, request/response contracts |
 | PAYMENTS.md | Out of scope — kept for history, see DECISIONS.md |
@@ -20,4 +20,4 @@ do not duplicate information across files.
 
 Reference: sprint plan lives in `plans/cs-week-website-plan.md`.
 
-Note: project-specific AI skills live under `.agents/skills/` (examples: `auth-and-rls`, `event-registration-flow`, `supabase-migrations`). Use those SKILL.md documents for repeatable agent workflows and repository-specific rules.
+Note: project-specific AI skills live under `.agents/skills/` (examples: `auth-and-rls`, `event-registration-flow`, `drizzle-migrations`, `admin-dashboard`, `deployment`). Use those SKILL.md documents for repeatable agent workflows and repository-specific rules.

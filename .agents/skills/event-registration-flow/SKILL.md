@@ -29,9 +29,9 @@ description: Building the event browsing and registration features for the CS We
 
 ### Data Flow
 ```
-Client → server `load` (server-side) → Supabase query → Render
+Client → server `load` (server-side) → Drizzle query → Render
 ```
-Use SvelteKit `+page.server.ts` or `+page.ts` `load` functions for initial data fetch. Events are publicly readable (RLS already allows this via `0001_init.sql`).
+Use SvelteKit `+page.server.ts` or `+page.ts` `load` functions for initial data fetch. Events listing/detail requires no session check (public read), but still queries via Drizzle, not the Supabase client.
 
 ### Test Events
 Seed 3–5 realistic test events (Sprint 2 task):
@@ -48,7 +48,7 @@ User views event → Clicks "Register" → Auth check → Validate → Insert �
 
 ### Critical Requirements
 1. **Duplicate prevention:** `UNIQUE (event_id, user_id)` constraint in schema handles this at DB level. Also check client-side before submission.
-2. **Capacity check:** Before inserting, verify `COUNT(registrations) < event.capacity`. Use a transaction or Supabase RPC for atomicity.
+2. **Capacity check:** Before inserting, verify `COUNT(registrations) < event.capacity`. Use a Drizzle transaction (`db.transaction(...)`) for atomicity — Supabase RPC is no longer the pattern since data access moved to Drizzle.
 3. **Idempotency:** Repeated submissions for the same user+event should not create duplicates (handled by unique constraint, surface gracefully).
 
 ### Form action / Endpoint

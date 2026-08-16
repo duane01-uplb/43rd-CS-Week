@@ -24,11 +24,17 @@ description: Implementing Supabase Auth flows and Row Level Security policies fo
 - `admin` — full access to `/admin/*`, event CRUD, registration management
 
 ### Enforcement Layers (defense in depth)
-1. **Supabase RLS policies** — source of truth, enforced at database level
-2. **Route-level guards** — Next.js middleware or layout-level checks, redirect unauthorized
-3. **Server-side role check** — on all admin API routes and server actions
+1. **Application-level checks** — every server-side Drizzle query must verify
+  the session and role before querying. Drizzle bypasses RLS, so these
+  checks are the source of truth for authorization in the app.
+2. **Route-level guards** — SvelteKit `hooks.server.ts` or layout-level
+  `load` functions that redirect unauthorized users before a page attempts
+  a query.
+3. **Supabase RLS policies** — retained as defense-in-depth only.
 
-Never rely on client-side checks alone.
+Use `requireSession()` / `requireAdmin()` from `src/lib/server/auth-guards.ts`
+in each app instead of writing ad-hoc checks inline — these helpers
+centralize the required enforcement logic.
 
 ## Workflow
 
@@ -42,7 +48,7 @@ Never rely on client-side checks alone.
 4. **Logout:** `supabase.auth.signOut()`
 5. **Session handling:** Use `supabase.auth.getSession()` server-side, middleware for route protection
 
-### RLS Policy Pattern
+### RLS Policy Pattern (defense-in-depth only — not the primary check)
 ```sql
 -- Example: Users can read their own registrations
 CREATE POLICY "users can view own registrations"
@@ -61,29 +67,54 @@ CREATE POLICY "admins can view all registrations"
   );
 ```
 
+These policies stay applied (raw SQL, not Drizzle-managed — see
+`.agents/skills/drizzle-migrations/SKILL.md`), but since Drizzle's
+Postgres connection bypasses RLS, the actual enforcement for app traffic
+is the app-level check pattern below.
+
+### App-Level Check Pattern (actual enforcement)
+
+```ts
+// Example: +page.server.ts load function
+export const load = async ({ locals }) => {
+  if (!locals.session) throw redirect(303, '/login');
+  const myRegistrations = await db
+    .select()
+    .from(registrations)
+    .where(eq(registrations.userId, locals.session.user.id));
+  return { myRegistrations };
+};
+
+// Example: admin-only check
+export const load = async ({ locals }) => {
+  if (!locals.session) throw redirect(303, '/login');
+  const profile = await db.query.profiles.findFirst({
+    where: eq(profiles.id, locals.session.user.id),
+  });
+  if (profile?.role !== 'admin') throw redirect(303, '/');
+  // ... admin query
+};
+```
 ### Protected Routes
 - Use SvelteKit `hooks.server.ts` for global session/role checks or layout-level server `load` functions for route-scoped protection.
 - Redirect to login if not authenticated; for admin routes implement a server `load` that throws a redirect when role checks fail.
 
-## Required RLS Policies (per AUTHORIZATION.md)
+## Required Access Rules (per AUTHORIZATION.md — enforced in app code, mirrored in RLS as defense-in-depth)
 | Table | SELECT | INSERT | UPDATE | DELETE |
 |-------|--------|--------|--------|--------|
 | events | Public | Admin | Admin | Admin |
-| registrations | Own rows + Admin all | Own | — | — |
-| profiles | Own row | Auto (signup) | Own row | — |
+| registrations | Own rows + Admin all | Own | Admin only | — |
+| profiles | Own row + Admin all | Auto (trigger, signup) | Own row (role field must NOT be client-editable — see DECISIONS.md) | — |
 
 ## Common Mistakes
 - **Missing profile creation** on sign-up — user exists in `auth.users` but has no `profiles` row
-- **Client-only auth checks** — always enforce at RLS level first
-- **Forgetting `auth.uid()`** in RLS policies — this is how Supabase knows the current user
+- **Relying on RLS for app traffic** — Drizzle bypasses RLS; app-level session/role checks are required
+- **Forgetting to centralize checks** — write `requireSession()` / `requireAdmin()` helpers and reuse them
 - **Admin role check via client** — always verify role server-side, never trust client claims
 - **Session not refreshed** — handle token refresh for long-lived sessions
 
 ## Validation Checklist
-- [ ] Sign-up creates both `auth.users` entry and `profiles` row
-- [ ] Login/logout works, session persists across page navigation
-- [ ] Unauthorized users are redirected from protected routes
-- [ ] Non-admin users cannot access `/admin/*`
-- [ ] RLS policies prevent data access at the database level (test with Supabase SQL editor)
-- [ ] `agents/AUTHORIZATION.md` is updated with any new policies
-- [ ] Migration created for any new RLS policies (see `supabase-migrations` skill)
+- [ ] Every Drizzle query in a `load` function or form action has an explicit session check, and role check where admin-only
+- [ ] RLS policies still exist as defense-in-depth (test with Supabase SQL editor) but are not relied on as the primary check
+- [ ] `agents/AUTHORIZATION.md` is updated with any new access rules
+- [ ] Schema change (if any) made via Drizzle (see `drizzle-migrations` skill); RLS policy change (if any) applied as manual raw SQL

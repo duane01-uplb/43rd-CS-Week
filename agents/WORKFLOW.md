@@ -11,10 +11,17 @@ Full sprint breakdown: `plans/cs-week-website-plan.md`.
 - DB changes via migrations
 - No secrets committed
 - Critical flow manually tested
+ - Feature works locally and on staging
+ - Error/empty/loading states considered
+ - Authorization/security behavior checked — every server-side query has an explicit session/role check (Drizzle bypasses RLS; app code is the enforcement layer, see AUTHORIZATION.md)
+ - DB changes via Drizzle schema + `drizzle-kit generate` (see `.agents/skills/drizzle-migrations/SKILL.md`)
+ - No secrets committed (`DATABASE_URL` included)
+ - Critical flow manually tested
 
 ## Guardrails
 - Before starting a sprint: goal is achievable in one week, dependencies available
 - Before production: staging smoke test passes, env vars verified, rollback path known
+ - Before starting: confirm dependencies were installed with `bun install` at the repo root (mixed npm/Bun installs cause lockfile and resolution conflicts)
 
 ## Rule
 "Sprint 6 will absorb it" is not permission for unlimited scope creep. Security,

@@ -4,6 +4,7 @@
 - Framework: **Svelte / SvelteKit** (corrected — see note below)
 - Backend/DB: Supabase (Postgres, Auth, Storage)
 - Hosting: Vercel
+ - Package Manager: Bun (use `bun install`, `bun add`, `bun run`, and `bunx`; do NOT use `npm`/`npx`)
 
 > **Correction note:** This document originally specified Next.js (App Router). The project was scaffolded with Next.js first (`next-scaffold/`), but the frontend was rebuilt on Svelte/SvelteKit. `next-scaffold/` is abandoned — see `DECISIONS.md`. Svelte/SvelteKit is the current and only frontend framework in use.
 
@@ -32,6 +33,9 @@
       /routes                  # SvelteKit file-based routing
 /supabase                      # migrations, seed data
   /web                       # Public-facing SvelteKit app (homepage, events, registration)
+
+/packages
+  /db                        # Shared Drizzle schema + connection factory, imported by both apps/web and apps/admin
 ```
 
 ### Conventions
@@ -47,6 +51,19 @@
 
 ## Payments
 Not implemented. All registrations are free (see DECISIONS.md).
+
+## Data Access
+- ORM: Drizzle (drizzle-orm + drizzle-kit), connecting directly to the
+  Supabase Postgres pooler connection (DATABASE_URL, service-level — not
+  the public anon key).
+- Supabase is still used for Auth (sign-up/login/session) and Storage.
+  Supabase's JS client (`@supabase/supabase-js`) is retained ONLY for
+  `supabase.auth.*` calls — all data reads/writes go through Drizzle.
+- Schema defined in `schema.ts` (TypeScript), migrations generated via
+  `drizzle-kit generate` / applied via `drizzle-kit push`.
+- IMPORTANT: Drizzle connects directly to Postgres and BYPASSES Row Level
+  Security. RLS policies remain in place as defense-in-depth only.
+  Authorization is enforced in application code — see `AUTHORIZATION.md`.
 
 ## Deployment
 - Push to `main` → Vercel prod

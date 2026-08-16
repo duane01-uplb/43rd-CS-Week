@@ -32,9 +32,14 @@ src/routes/admin/
 ```
 
 ### Access Control (3 layers)
-1. **RLS policies** — admin-only INSERT/UPDATE/DELETE on events; admin SELECT all on registrations
-2. **Layout guard** — use `src/routes/admin/+layout.server.ts` or a `hooks.server.ts` check to verify session + role, redirect non-admins
-3. **Server action/route handler** — verify `profiles.role = 'admin'` before every mutation
+1. **Server action/route handler (primary enforcement)** — verify
+  `profiles.role = 'admin'` via a Drizzle query before every mutation.
+  Drizzle bypasses RLS, so this check cannot be skipped.
+2. **Layout guard** — use `src/routes/admin/+layout.server.ts` or a
+  `hooks.server.ts` check to verify session + role, redirect non-admins
+  before a page is even requested.
+3. **RLS policies** — retained as defense-in-depth only, not primary
+  enforcement.
 
 ## Workflow
 
@@ -59,13 +64,13 @@ src/routes/admin/
 - **Closing event with pending registrations:** Define behavior (confirm all? notify?)
 
 ## Common Mistakes
-- **Client-side only role check:** Always verify admin role server-side via `profiles` table
-- **Missing RLS:** Even with route guards, RLS must independently prevent non-admin mutations
+- **Client-side only role check:** Always verify admin role server-side via a Drizzle query against `profiles`
+- **Assuming RLS catches what app code misses:** Drizzle's connection bypasses RLS entirely — a missing app-level check is not caught by the database
 - **Exposing admin endpoints:** `/api/admin/*` routes must check auth + role before any operation
 - **Large CSV exports:** For many registrations, stream the CSV rather than loading all into memory
 - **Payment columns in CSV:** Do not include payment-related fields — payments are descoped
 
-## Validation Checklist
+### Validation Checklist
 - [ ] Non-admin users cannot access `/admin/*` (redirect works)
 - [ ] Non-admin users cannot call admin API endpoints (returns 403)
 - [ ] Admin can create a new event with all required fields
@@ -74,5 +79,5 @@ src/routes/admin/
 - [ ] Admin can view all registrations across events
 - [ ] Search/filter works on registration table
 - [ ] CSV export produces valid, usable data
-- [ ] RLS independently blocks non-admin mutations (test via Supabase SQL editor)
+- [ ] App-level role check exists on every admin mutation (RLS is defense-in-depth only and will not catch a missing app-level check)
 - [ ] `agents/API.md` is updated with any new endpoints

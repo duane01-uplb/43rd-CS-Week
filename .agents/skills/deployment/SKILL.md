@@ -20,7 +20,7 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 
 | Environment | Trigger | URL |
 |-------------|---------|-----|
-| Local | `npm run dev` (or `bun run dev`) | `http://localhost:3000` |
+| Local | `bun run dev` | `http://localhost:3000` |
 | Staging | Push to feature branch → Vercel preview | Vercel preview URL |
 | Production | Push to `main` → Vercel auto-deploy | Production URL |
 
@@ -44,14 +44,16 @@ description: Pre-deploy checklist and staging-to-production workflow for the CS 
 - [ ] All sprint DoD items met
 - [ ] Staging smoke test passes
 - [ ] Environment variables verified in Vercel dashboard:
-  - `PUBLIC_SUPABASE_URL` (client-visible)
-  - `PUBLIC_SUPABASE_ANON_KEY` (client-visible)
+  - `PUBLIC_SUPABASE_URL` (client-visible, Auth only)
+  - `PUBLIC_SUPABASE_ANON_KEY` (client-visible, Auth only)
   - `SUPABASE_SERVICE_ROLE_KEY` (server-side only — do not expose)
+  - `DATABASE_URL` (server-side only — Postgres pooler connection string used by Drizzle for all data queries; do not expose)
   - `PUBLIC_SITE_URL`
 - [ ] No secrets in source control (check `.gitignore`)
-- [ ] Database migrations applied to production Supabase
-- [ ] RLS policies verified on production
-- [ ] Build passes locally: `npm run build` (or `bun run build`)
+- [ ] No secrets in source control (check `.gitignore`)
+- [ ] Drizzle schema migrations applied to production database
+- [ ] RLS policies verified on production (defense-in-depth; confirm app-level checks are what's actually protecting data)
+- [ ] Build passes locally: `bun run build`
 
 ### Deploy
 ```bash
