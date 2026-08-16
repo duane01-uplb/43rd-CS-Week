@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { db } from './db';
+import { getDb } from './db';
 import { profiles } from '@csweek/db';
 import type { RequestEvent } from '@sveltejs/kit';
 
@@ -12,9 +12,9 @@ export function requireSession(event: RequestEvent) {
 
 export async function requireAdmin(event: RequestEvent) {
   const session = requireSession(event);
-  const profile = await db.query.profiles.findFirst({
-    where: eq(profiles.id, session.user.id),
-  });
+  const db = getDb();
+  const rows = await db.select().from(profiles).where(eq(profiles.id, session.user.id)).limit(1);
+  const profile = rows[0];
   if (profile?.role !== 'admin') throw error(403, 'Forbidden');
   return { session, profile };
 }

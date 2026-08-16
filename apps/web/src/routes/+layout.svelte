@@ -1,5 +1,5 @@
 <script>
-  export let data;
+  // layout does not use page data directly
 </script>
 
 <nav style="padding:1rem; border-bottom:1px solid #eee;">
