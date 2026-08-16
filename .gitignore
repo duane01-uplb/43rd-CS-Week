@@ -53,3 +53,7 @@ test-results/
 
 .vercel
 .env*
+
+# SvelteKit build output
+.svelte-kit/
+apps/*/.svelte-kit/
