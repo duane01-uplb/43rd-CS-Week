@@ -1,2 +1,2 @@
-<h1>CS Week — Public Site (SvelteKit)</h1>
-<p>Welcome. This is a minimal scaffold for the public-facing site. Replace with real content and routes under `src/routes/`.</p>
+<svelte:head><title>CS Week</title></svelte:head>
+<section><p>Computer Science Week</p><h1>Learn, compete, and connect.</h1><p>Discover the events bringing our CS community together.</p><a href="/events">Explore events</a></section>

@@ -1,4 +1,11 @@
 import { createDb } from '@csweek/db';
-import { DATABASE_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
-export const db = createDb(DATABASE_URL);
+let _db: ReturnType<typeof createDb> | null = null;
+
+export function getDb() {
+  if (_db) return _db;
+  if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set.');
+  _db = createDb(env.DATABASE_URL);
+  return _db;
+}

@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "cd apps/web && bun run dev"
+    "dev": "cd apps/web && bun run dev",
+    "build": "bun run --filter 'csweek-*' build"
   },
   "devDependencies": {
     "vercel": "^59.1.3"

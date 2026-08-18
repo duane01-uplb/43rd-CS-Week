@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/adapter-vercel": "^6.3.4",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "drizzle-kit": "^0.28.0",
@@ -18,9 +19,10 @@
     "vite": "^8.2.1"
   },
   "dependencies": {
+    "@csweek/db": "workspace:*",
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.0.0",
     "drizzle-orm": "^0.36.0",
-    "postgres": "^3.4.0",
-    "@csweek/db": "workspace:*"
+    "postgres": "^3.4.0"
   }
 }

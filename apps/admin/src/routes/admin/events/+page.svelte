@@ -1,0 +1,2 @@
+<script lang="ts">let { data } = $props();</script>
+<h2>Events</h2><p><a href="/admin/events/new">Create event</a></p><table><thead><tr><th>Event</th><th>Starts</th><th>Status</th><th></th></tr></thead><tbody>{#each data.events as event}<tr><td>{event.title}</td><td>{new Date(event.startAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}</td><td>{event.status}</td><td><a href={`/admin/events/${event.id}/edit`}>Edit</a></td></tr>{/each}</tbody></table>
