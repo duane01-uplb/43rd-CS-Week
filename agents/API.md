@@ -22,3 +22,12 @@
 - `PATCH /api/admin/events/:id` — update event
 - `GET /api/admin/registrations` — list/filter registrations
 - `GET /api/admin/registrations/export` — CSV export
+
+## Implemented route actions
+
+- `POST /login` and `POST /signup` use SvelteKit form actions with the
+  Supabase cookie-backed SSR client.
+- `POST /events/:id?/register` creates a registration after a server-side
+  session check, field validation, event-status check, duplicate check, and
+  capacity check.
+- `POST /admin/events/new` is role-gated by `requireAdmin()`.
