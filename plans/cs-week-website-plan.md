@@ -55,13 +55,13 @@ Each sprint has:
 **Goal:** Establish the site's public structure and secure authentication foundation.
 
 ### Tasks
-- [ ] Scaffold `apps/web` SvelteKit project (routes, lib, Supabase client)
-- [ ] Supabase Auth: participant sign-up/login/logout (SvelteKit form actions)
-- [ ] Profile/role handling
-- [ ] Admin role representation
-- [ ] Protected-route foundation (`hooks.server.ts` session/role checks)
-- [ ] Base layout, navigation, footer (`+layout.svelte`)
-- [ ] Homepage hero
+- [x] Scaffold `apps/web` SvelteKit project (routes, lib, Supabase client)
+- [x] Supabase Auth: participant sign-up/login/logout (SvelteKit form actions)
+- [x] Profile/role handling
+- [x] Admin role representation
+- [x] Protected-route foundation (`hooks.server.ts` session/role checks)
+- [x] Base layout, navigation, footer (`+layout.svelte`)
+- [x] Homepage hero
 - [ ] Flagship event highlight
 - [ ] Upcoming-events preview
 - [ ] Responsive baseline
@@ -80,14 +80,14 @@ Each sprint has:
 **Goal:** Deliver a complete read-only event browsing experience.
 
 ### Tasks
-- [ ] Events listing page (`routes/events/+page.svelte` + `+page.server.ts` load)
-- [ ] Query events from Supabase
-- [ ] Filter by status/date
-- [ ] Event detail page (`routes/events/[id]/+page.svelte`)
-- [ ] Display description, schedule, and capacity
-- [ ] Handle loading, empty, and error states
-- [ ] Seed 3–5 realistic test events
-- [ ] Define event timezone behavior
+- [x] Events listing page (`routes/events/+page.svelte` + `+page.server.ts` load)
+- [x] Query events from Supabase
+- [x] Filter by status/date
+- [x] Event detail page (`routes/events/[id]/+page.svelte`)
+- [x] Display description, schedule, and capacity
+- [x] Handle loading, empty, and error states
+- [x] Seed 3–5 realistic test events
+- [x] Define event timezone behavior
 
 ### Definition of Done
 - Events are loaded from the database rather than hardcoded
@@ -103,15 +103,15 @@ Each sprint has:
 **Goal:** Deliver the complete (free) registration flow end to end.
 
 ### Tasks
-- [ ] Registration form
-- [ ] Client/server validation
-- [ ] Registration database write (SvelteKit form action)
-- [ ] Duplicate-registration prevention
-- [ ] Capacity check (block registration once event is full)
-- [ ] Confirmation screen
+- [x] Registration form
+- [x] Client/server validation
+- [x] Registration database write (SvelteKit form action)
+- [x] Duplicate-registration prevention
+- [x] Capacity check (block registration once event is full)
+- [x] Confirmation screen
 - [ ] Confirmation email
 - [ ] Email delivery test
-- [ ] Define registration idempotency behavior
+- [x] Define registration idempotency behavior
 
 ### Definition of Done
 - A logged-in participant can successfully register for an event
@@ -128,13 +128,16 @@ Each sprint has:
 **Goal:** Give the organizer enough tooling to operate the event.
 
 ### Tasks
-- [ ] Protected `/admin` route (`apps/admin`, `hooks.server.ts` role gate)
-- [ ] Role-based access enforcement
-- [ ] Event CRUD
-- [ ] Create/edit/close events
-- [ ] Set capacity
-- [ ] Registration table
-- [ ] Search/filter registrations
+- [x] Protected `/admin` route (`apps/admin`, `hooks.server.ts` role gate)
+- [x] Role-based access enforcement
+- [x] Event CRUD
+- [x] Create/edit/close events
+  - [x] Create event
+  - [ ] Edit event
+  - [x] Close event
+- [x] Set capacity
+- [x] Registration table
+- [x] Search/filter registrations
 - [ ] CSV export
 
 ### Definition of Done
