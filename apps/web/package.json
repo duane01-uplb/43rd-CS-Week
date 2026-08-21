@@ -12,10 +12,10 @@
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/adapter-vercel": "^6.3.4",
     "@sveltejs/kit": "^2.70.2",
-    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "drizzle-kit": "^0.28.0",
     "svelte": "^5.56.9",
-    "vite": "^8.2.1"
+    "vite": "^5.4.0"
   },
   "dependencies": {
     "@csweek/db": "workspace:*",
