@@ -16,39 +16,46 @@
 ## Folder Structure (actual — reflects live repo)
 ```
 /apps
-  /admin                     # Admin-facing Svelte application
+  /admin                     # Admin-facing SvelteKit application
     /src
       /lib
-        /components          # Shared/reusable Svelte components
-          /registrations     # Feature-scoped component group
-          AdminShellHeader.svelte
-          AppSidebar.svelte
-          RegistrationCard.svelte
-          RegistrationDetailDialog.svelte
-          RegistrationSummaryCard.svelte
-          admin-navigation.ts
-        /domains              # Business-logic / data-model layer
-        /registration-detail  # Feature module (view + logic bundle)
-        /utils                 # Shared generic helpers
-      /routes                  # SvelteKit file-based routing
-  /web                       # Public-facing SvelteKit app (homepage, events, registration)
-
-  /supabase                  # migrations and seed data
+        /components          # Admin shell & UI components (AdminShellHeader.svelte, AppSidebar.svelte)
+        /server              # Server-side utilities (db.ts, supabase.ts, auth-guards.ts)
+        supabaseClient.ts    # Browser-side Supabase client instance
+      /routes
+        /admin               # Protected admin dashboard layout & views
+          /events            # Event list, creation (/new), and editing (/[id]/edit)
+          /registrations     # Registration table with search and filters
+        /login               # Admin login
+  /web                       # Public-facing SvelteKit application (homepage, events, registration, auth)
+    /src
+      /lib
+        /server              # Server-side utilities (db.ts, supabase.ts, auth-guards.ts)
+        supabaseClient.ts    # Browser-side Supabase client instance
+      /routes
+        /events              # Event browsing (+page) and registration details (/[id])
+        /login               # Participant login (+page)
+        /signup              # Participant signup (+page)
+        /logout              # Session teardown endpoint (+server.ts)
+        +page.svelte         # Landing homepage
 
 /packages
   /db                        # Shared Drizzle schema + connection factory, imported by both apps/web and apps/admin
+
+/supabase                    # Migrations and seed data
 ```
 
 ### Conventions
-- Global/shell components sit flat in `components/` (e.g. `AdminShellHeader.svelte`); feature-specific components are grouped into subfolders (e.g. `registrations/`).
-- Non-component logic tightly coupled to a component (e.g. `admin-navigation.ts`) stays alongside it in `components/`, rather than moving to `utils/`.
-- `domains/` holds business logic and data shape, decoupled from Supabase calls made directly in components.
-- `utils/` is for generic helpers only — feature-specific logic belongs in `domains/` or a feature folder like `registration-detail/`.
-- `routes/` follows SvelteKit conventions (`+page.svelte`, `+page.server.ts`, `+layout.svelte`, etc.).
+- Global/shell components sit in `components/` (e.g. `AdminShellHeader.svelte`, `AppSidebar.svelte`).
+- Server-only modules (database connection, server-side Supabase client, auth guard assertions) live in `$lib/server/` to ensure they are never bundled into client-side code.
+- `routes/` follows standard SvelteKit conventions (`+page.svelte`, `+page.server.ts`, `+layout.svelte`, `+server.ts`, etc.).
 
-### Open items to verify
-- [x] Whether `apps/` will contain additional applications beyond `admin` — currently only `apps/admin` exists; additional apps can be added if the project later needs a public-facing site.
-[x] Exact location of the Supabase client/auth setup within `lib/` — created at `apps/admin/src/lib/supabaseClient.ts` (public env vars: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
+### Verified Items & Setup Locations
+- [x] Multi-app workspace structure: `apps/web` (public participant site) and `apps/admin` (event & registration management).
+- [x] Supabase client and auth setup locations:
+  - Browser client: `apps/web/src/lib/supabaseClient.ts` and `apps/admin/src/lib/supabaseClient.ts` (using `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
+  - Server client & auth hooks: `$lib/server/supabase.ts`, `$lib/server/auth-guards.ts`, and `hooks.server.ts` in both apps.
+  - Server DB connection: `$lib/server/db.ts` in both apps (connecting via `@csweek/db` using `DATABASE_URL`).
 
 ## Payments
 Not implemented. All registrations are free (see DECISIONS.md).

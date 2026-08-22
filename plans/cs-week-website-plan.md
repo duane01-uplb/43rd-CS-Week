@@ -37,7 +37,7 @@ Each sprint has:
 - [x] Design initial database schema
 - [x] Establish Supabase migration strategy
 - [x] Scaffold `apps/admin` (SvelteKit admin skeleton)
-- [ ] Scaffold `apps/web` (SvelteKit public site) — **carried into Sprint 1**
+- [x] Scaffold `apps/web` (SvelteKit public site)
 - [ ] Gather externally supplied branding assets
 - [x] ~~Confirm PayMongo~~ — payments descoped, no longer required
 - [x] Create basic project README covering setup and deployment

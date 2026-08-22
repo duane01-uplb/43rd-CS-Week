@@ -6,6 +6,12 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-22 — Docs and dead-code reconciliation
+- **Vite 5 downgrade confirmed:** `bun.lock` confirms `vite@5.4.21` in both `apps/web` and `apps/admin`.
+- **TypeScript configs verified:** Both `apps/web/tsconfig.json` and `apps/admin/tsconfig.json` correctly extend `./.svelte-kit/tsconfig.json` and enable `strictNullChecks: true` for accurate Drizzle ORM schema type inference.
+- **Dead-code removal:** Deleted unused orphaned components `apps/admin/src/lib/components/RegistrationCard.svelte`, `RegistrationSummaryCard.svelte`, and `RegistrationDetailDialog.svelte` after confirming zero references outside their declarations.
+- **Architecture documentation sync:** Updated `agents/ARCHITECTURE.md` folder structure and setup references to fully document `apps/web` routes (`/`, `/events`, `/events/[id]`, `/login`, `/signup`, `/logout`) and client/server utilities (`$lib/server/` and `$lib/supabaseClient.ts`) alongside `apps/admin`.
+
 ## 2026-08-22 — Admin edit-event route
 - Added `apps/admin/src/routes/admin/events/[id]/edit/` (load +
   update action), fixing the dead link from the events list page.

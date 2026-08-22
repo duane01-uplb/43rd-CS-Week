@@ -2,9 +2,9 @@
   let { form } = $props();
 </script>
 
-<svelte:head><title>Admin log in | CS Week</title></svelte:head>
+<svelte:head><title>Admin Log In | CS Week</title></svelte:head>
 
-<h1>Admin log in</h1>
+<h1>Admin Log In</h1>
 <form method="POST">
   <label>Email <input name="email" type="email" value={form?.email ?? ''} required /></label>
   <label>Password <input name="password" type="password" required /></label>
