@@ -133,7 +133,7 @@ Each sprint has:
 - [x] Event CRUD
 - [x] Create/edit/close events
   - [x] Create event
-  - [ ] Edit event
+  - [x] Edit event
   - [x] Close event
 - [x] Set capacity
 - [x] Registration table

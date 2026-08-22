@@ -25,6 +25,19 @@ checks — centralizes the one place this logic must be correct.
 	NOT the primary enforcement mechanism for app traffic, since Drizzle
 	connects with elevated Postgres privileges.
 
-## RLS Policy Notes (fill in as implemented)
-- events: public SELECT; INSERT/UPDATE/DELETE admin-only
-- registrations: user can SELECT/INSERT own rows; admin can SELECT all
+## RLS Policy Notes
+Implemented 2026-08-21 via `supabase/migrations/20260821_enable_rls.sql`.
+RLS is enabled on all four public tables. This is defense-in-depth only —
+see Enforcement Layers above; app-level `requireSession()`/`requireAdmin()`
+checks remain the source of truth since Drizzle bypasses RLS.
+
+- **events**: public SELECT (`anon`, `authenticated`); admin-only ALL
+  (INSERT/UPDATE/DELETE) via `profiles.role = 'admin'` check
+- **registrations**: user can SELECT own rows or admin can SELECT all;
+  user can INSERT own rows only (`user_id = auth.uid()`); admin-only
+  UPDATE; no DELETE policy (deletes disallowed)
+- **profiles**: user can SELECT own row or admin can SELECT all; user
+  can UPDATE own row but `role` is locked to its current value in the
+  `WITH CHECK` clause (cannot self-promote to admin); INSERT handled by
+  `handle_new_user` trigger only, no client INSERT policy
+- **event_registration_fields**: public SELECT; admin-only ALL

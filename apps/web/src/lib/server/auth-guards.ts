@@ -2,15 +2,15 @@ import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { getDb } from './db';
 import { profiles } from '@csweek/db';
-import type { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 
-export function requireSession(event: RequestEvent) {
+export function requireSession(event: RequestEvent | ServerLoadEvent) {
   const user = event.locals.user;
   if (!user) throw redirect(303, '/login');
   return user;
 }
 
-export async function requireAdmin(event: RequestEvent) {
+export async function requireAdmin(event: RequestEvent | ServerLoadEvent) {
   const user = requireSession(event);
   const db = getDb();
   const rows = await db.select().from(profiles).where(eq(profiles.id, user.id)).limit(1);

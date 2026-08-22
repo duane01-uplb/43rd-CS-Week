@@ -16,3 +16,5 @@ Add new rows as decisions are made — do not delete history, only append.
 
 | 2026-08-16 | Migrated data layer from raw Supabase SQL migrations + supabase-js queries to Drizzle ORM (direct Postgres connection); Supabase retained for Auth/Storage only | Type-safe schema-as-code queries; existing 0001-0003 migrations rewritten as Drizzle baseline |
 | 2026-08-16 | RLS demoted to defense-in-depth; application-level session/role checks are now the enforcement source of truth | Drizzle connects via direct Postgres connection and bypasses RLS |
+| 2026-08-21 | Enabled RLS on all public tables (events, registrations, profiles, event_registration_fields) via `supabase/migrations/20260821_enable_rls.sql` | Schema snapshot showed `isRLSEnabled: false` on every table despite docs assuming policies existed; adds DB-level backstop per AUTHORIZATION.md enforcement layers. Primary enforcement remains app-level (Drizzle bypasses RLS). |
+
