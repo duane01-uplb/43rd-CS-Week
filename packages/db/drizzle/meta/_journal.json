@@ -8,6 +8,13 @@
       "when": 1786816707858,
       "tag": "0000_gigantic_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787627752139,
+      "tag": "0001_giant_wildside",
+      "breakpoints": true
     }
   ]
 }

@@ -13,11 +13,23 @@
 - id, event_id (fk), user_id (fk), status (pending | confirmed | cancelled), created_at
 
 ### event_registration_fields
-- id, event_id (fk), field_key, label, field_type (text|number|email|select|checkbox), options (jsonb, nullable), is_required, sort_order
+- id, event_id (fk), field_key, label, field_type (text|number|email|select|checkbox|file), options (jsonb, nullable), is_required, sort_order
 - Defines the custom questions an organizer needs for their event's registration form.
+- `field_key` must be unique per event (`event_field_unique`).
+- `is_required` is a flat boolean — no conditional/dependent-field support
+	(see DECISIONS.md 2026-08-25).
 
 ### registrations (updated)
 - Add: responses (jsonb) — participant's answers keyed by field_key, validated against event_registration_fields at submit time.
+- `file`-type answers store the Supabase Storage object path (string), never the raw file.
+
+## Storage
+- Bucket `registration-uploads` (private, images only, 4 MB limit) — proof-of-payment
+	uploads for Warframes ("Web Design"). Manual payments only; NOT payment processing
+	(see DECISIONS.md 2026-08-25).
+- Path convention: `{auth.uid()}/{event_id}/{timestamp}-{filename}`; enforced at the DB
+	layer via storage.objects policies (see supabase/migrations/20260825_registration_uploads_storage.sql
+	and AUTHORIZATION.md).
 
 ## Relationships
 - events 1—N registrations

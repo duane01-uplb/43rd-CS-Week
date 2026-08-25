@@ -46,6 +46,6 @@ export const eventRegistrationFields = pgTable('event_registration_fields', {
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
-  fieldTypeCheck: check('field_type_check', sql`${t.fieldType} in ('text','number','email','select','checkbox')`),
+  fieldTypeCheck: check('field_type_check', sql`${t.fieldType} in ('text','number','email','select','checkbox','file')`),
   eventFieldUnique: uniqueIndex('event_field_unique').on(t.eventId, t.fieldKey),
 }));

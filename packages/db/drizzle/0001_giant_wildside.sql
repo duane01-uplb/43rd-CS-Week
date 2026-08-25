@@ -1,0 +1,2 @@
+ALTER TABLE "event_registration_fields" DROP CONSTRAINT "field_type_check";--> statement-breakpoint
+ALTER TABLE "event_registration_fields" ADD CONSTRAINT "field_type_check" CHECK ("event_registration_fields"."field_type" in ('text','number','email','select','checkbox','file'));
