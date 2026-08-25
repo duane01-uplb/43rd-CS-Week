@@ -6,6 +6,39 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-25 — Registration fields, file upload, storage for the 3 launch events
+- **Schema:** added `file` to the `field_type_check` constraint on
+  `event_registration_fields` (`packages/db/src/schema.ts`). Generated
+  `drizzle/0001_giant_wildside.sql`; note: `drizzle-kit push` did not detect
+  the check-constraint change (drizzle-kit 0.28 limitation), so the reviewed
+  SQL was applied directly against the DB and verified via `pg_constraint`.
+  No Drizzle journal table exists (baseline was push-applied), so this stays
+  consistent with prior practice.
+- **Storage:** new private bucket `registration-uploads` (images only, 4 MB)
+  with policies in `supabase/migrations/20260825_registration_uploads_storage.sql`
+  — authenticated INSERT into own `{auth.uid()}/...` folder only; SELECT
+  admin-only; no UPDATE/DELETE (uploads immutable, timestamped paths). Applied
+  and verified. See AUTHORIZATION.md "Storage" section.
+- **Seed:** new idempotent script `packages/db/scripts/seed-registration-fields.mjs`
+  (run with bun). DB was empty, so it also created the three events
+  (Career Orientation, Warframes, Games Day — placeholder schedules/descriptions,
+  adjust via admin dashboard) plus 36 registration fields per organizer specs,
+  including the required RA 10173 consent select at sort_order 0 on all three.
+- **Conditional fields deferred:** SHS/college (Career Orientation) and
+  Warframes members 2–3 seeded `is_required=false`; no show/hide or cross-field
+  validation at launch (DECISIONS.md 2026-08-25).
+- **Web:** register action now supports `field_type = 'file'` — validates image
+  type + 4 MB size (under Vercel's ~4.5 MB request-body cap), uploads via the
+  registrant's own session AFTER duplicate/
+  capacity checks (no orphaned uploads on rejection), stores only the storage
+  path in `responses`. Form uses multipart encoding with an
+  `<input type="file" accept="image/*">` branch.
+- **Admin:** registrations table now expands to show responses; file-type
+  answers render as links through new `/admin/registrations/file` endpoint
+  (requireAdmin + path-prefix validation → 5-minute signed URL).
+- **Payments scope guard:** proof-of-payment upload is manual-payment evidence
+  only; does NOT reverse the payments-descoped decision (DECISIONS.md).
+
 ## 2026-08-22 — Docs and dead-code reconciliation
 - **Vite 5 downgrade confirmed:** `bun.lock` confirms `vite@5.4.21` in both `apps/web` and `apps/admin`.
 - **TypeScript configs verified:** Both `apps/web/tsconfig.json` and `apps/admin/tsconfig.json` correctly extend `./.svelte-kit/tsconfig.json` and enable `strictNullChecks: true` for accurate Drizzle ORM schema type inference.

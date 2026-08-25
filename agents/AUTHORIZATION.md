@@ -41,3 +41,20 @@ checks remain the source of truth since Drizzle bypasses RLS.
   `WITH CHECK` clause (cannot self-promote to admin); INSERT handled by
   `handle_new_user` trigger only, no client INSERT policy
 - **event_registration_fields**: public SELECT; admin-only ALL
+
+## Storage (registration-uploads bucket)
+Implemented 2026-08-25 via `supabase/migrations/20260825_registration_uploads_storage.sql`.
+Private bucket holding proof-of-payment images for Warframes ("Web Design").
+Defense-in-depth only — the registration action enforces image type/size and
+path layout at the application level; the policies backstop direct client use.
+
+- **INSERT** (`authenticated`): only into the caller's own top-level folder —
+  `(storage.foldername(name))[1] = auth.uid()`; matches the app's
+  `{auth.uid()}/{event_id}/{timestamp}-{filename}` path convention
+- **SELECT** (`authenticated`): admins only (`profiles.role = 'admin'`); regular
+  participants cannot read files back, not even their own
+- **UPDATE / DELETE**: no policies — uploads are immutable once submitted
+  (paths are timestamped, so retries create new objects, never upserts)
+- Admin dashboard serves file responses through `/admin/registrations/file`,
+  which requires `requireAdmin()`, validates the path prefix, and redirects to
+  a short-lived (5 min) signed URL minted with the signed-in admin's session
