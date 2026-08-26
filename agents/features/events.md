@@ -1,14 +1,13 @@
 # Feature: Events
 
 ## Summary
-Public listing and detail pages for all CS Week events, including the flagship event.
+Public listing and detail pages for all CS Week events.
 
 ## Requirements
 - List all events (filterable by status/date)
 - Event detail: description, schedule, fee/free status, capacity
-- Flagship event highlighted on homepage
 
-## Sprint 1 Event Roster (flagship + others)
+## Sprint 1 Event Roster
 - Code Wars
 - Career Orientation
 - Job Fair

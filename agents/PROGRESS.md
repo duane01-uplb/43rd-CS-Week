@@ -6,6 +6,23 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-26 — Homepage upcoming-events preview + responsive baseline (Sprint 1)
+- **Scope change:** dropped flagship/featured event concept entirely (removed
+  from `agents/features/events.md` and sprint plan). Only upcoming-events
+  preview was in scope.
+- **New server load:** `apps/web/src/routes/+page.server.ts` queries up to 3
+  open events with `start_at >= now()`, sorted ascending. No session check —
+  public read, same as `/events`.
+- **Homepage UI:** `apps/web/src/routes/+page.svelte` now shows an "Upcoming
+  Events" section below the hero with event title, formatted start date/time
+  (en-PH / Asia/Manila), description, and link to `/events/{id}`. Empty state
+  shows "No events open yet — check back soon."
+- **Responsive baseline (homepage only):** CSS uses `clamp()` for heading
+  sizing, flexbox column layout for event cards, and a `@media (max-width:
+  480px)` breakpoint for tighter padding. No framework or design system added.
+- **Sprint 1 checkboxes:** "Upcoming-events preview" and "Responsive baseline"
+  checked off; "Flagship event highlight" removed (dropped, not deferred).
+
 ## 2026-08-26 — CSV export for registrations (Sprint 4 complete)
 - **Export endpoint:** new `apps/admin/src/routes/admin/registrations/export/+server.ts`
   serves a CSV download at GET `/admin/registrations/export`. Admin-only

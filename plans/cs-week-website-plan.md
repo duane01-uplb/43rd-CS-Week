@@ -62,9 +62,8 @@ Each sprint has:
 - [x] Protected-route foundation (`hooks.server.ts` session/role checks)
 - [x] Base layout, navigation, footer (`+layout.svelte`)
 - [x] Homepage hero
-- [ ] Flagship event highlight
-- [ ] Upcoming-events preview
-- [ ] Responsive baseline
+- [x] Upcoming-events preview
+- [x] Responsive baseline (homepage only)
 - [ ] Deploy `apps/web` to staging
 
 ### Definition of Done
