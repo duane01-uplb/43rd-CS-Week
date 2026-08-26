@@ -138,7 +138,7 @@ Each sprint has:
 - [x] Set capacity
 - [x] Registration table
 - [x] Search/filter registrations
-- [ ] CSV export
+  - [x] CSV export
 
 ### Definition of Done
 - Non-admin users cannot access admin functionality

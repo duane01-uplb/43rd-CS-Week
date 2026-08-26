@@ -31,6 +31,7 @@
 		<option>cancelled</option>
 	</select>
 	<button>Filter</button>
+	<a href="/admin/registrations/export?q={data.q}&status={data.status}">Export CSV</a>
 </form>
 <table>
 	<thead>

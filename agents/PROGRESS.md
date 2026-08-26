@@ -6,6 +6,16 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-26 — CSV export for registrations (Sprint 4 complete)
+- **Export endpoint:** new `apps/admin/src/routes/admin/registrations/export/+server.ts`
+  serves a CSV download at GET `/admin/registrations/export`. Admin-only
+  (`requireAdmin`). Respects the same `q` and `status` query params as the
+  registrations page, so the export matches what's currently filtered. Dynamic
+  registration fields are flattened into additional columns.
+- **UI:** added "Export CSV" link to the filter form on the registrations page,
+  passing current filter state via query params.
+- **Sprint 4 definition of done:** CSV export produces usable data — done.
+
 ## 2026-08-25 — Registration fields, file upload, storage for the 3 launch events
 - **Schema:** added `file` to the `field_type_check` constraint on
   `event_registration_fields` (`packages/db/src/schema.ts`). Generated

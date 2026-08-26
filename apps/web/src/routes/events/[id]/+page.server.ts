@@ -74,7 +74,10 @@ export const actions: Actions = {
       }
     }
     try { await db.insert(registrations).values({ eventId: target.id, userId: user.id, status: 'confirmed', responses }); }
-    catch { return fail(409, { error: 'We could not complete your registration. It may already exist.' }); }
+    catch (e) {
+      console.error('Registration insert failed:', e);
+      return fail(409, { error: 'We could not complete your registration. It may already exist.' });
+    }
     return { success: true };
   }
 };

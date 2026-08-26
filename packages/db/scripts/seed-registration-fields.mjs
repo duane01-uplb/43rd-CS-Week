@@ -25,7 +25,11 @@ import { readFileSync } from 'node:fs';
 // Minimal .env loader (repo-root .env holds DATABASE_URL / DIRECT_URL).
 for (const line of readFileSync(new URL('../../../.env', import.meta.url), 'utf8').split(/\r?\n/)) {
 	const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-	if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2];
+	if (m && process.env[m[1]] === undefined) {
+		let v = m[2].trim();
+		if (v.length >= 2 && ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))) v = v.slice(1, -1);
+		process.env[m[1]] = v;
+	}
 }
 
 const CONSENT_LABEL =
