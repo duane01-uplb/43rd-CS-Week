@@ -36,9 +36,17 @@
 <header class="site-nav" class:isHome class:scrolled>
 	<div class="nav-row shell">
 		<a href="/" class="brand" aria-label="CASC4D3 — 43rd Computer Science Week Home">
-			<span class="brand-mark" aria-hidden="true"></span>
+			<span class="brand-mark-group">
+				<span class="brand-mark brand-mark-soc" aria-hidden="true">
+					<img src="/uplb-comsci-soc-logo.png" alt="" class="brand-logo-img" />
+				</span>
+				<span class="brand-divider" aria-hidden="true">│</span>
+				<span class="brand-mark brand-mark-emblem" aria-hidden="true">
+					<img src="/casc4d3-emblem.png" alt="" class="brand-emblem-img" />
+				</span>
+			</span>
 			<span class="brand-text">
-				<span class="brand-kicker">43RD CS WEEK</span>
+				<span class="brand-kicker">43RD COMPUTER SCIENCE WEEK</span>
 				<span class="brand-name">CASC4D3</span>
 			</span>
 		</a>
@@ -87,7 +95,15 @@
 	<div class="shell footer-row">
 		<div class="footer-brand">
 			<div class="brand">
-				<span class="brand-mark" aria-hidden="true"></span>
+				<span class="brand-mark-group">
+					<span class="brand-mark brand-mark-soc" aria-hidden="true">
+						<img src="/uplb-comsci-soc-logo.png" alt="" class="brand-logo-img" />
+					</span>
+					<span class="brand-divider" aria-hidden="true">│</span>
+					<span class="brand-mark brand-mark-emblem" aria-hidden="true">
+						<img src="/casc4d3-emblem.png" alt="" class="brand-emblem-img" />
+					</span>
+				</span>
 				<span class="brand-text">
 					<span class="brand-kicker">43RD COMPUTER SCIENCE WEEK</span>
 					<span class="brand-name">CASC4D3</span>
@@ -471,19 +487,48 @@
 	.brand {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.85rem;
 		text-decoration: none;
 	}
 	.brand:hover {
 		text-decoration: none;
 	}
+	.brand-mark-group {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-shrink: 0;
+	}
 	.brand-mark {
-		width: 32px;
-		height: 32px;
+		width: 36px;
+		height: 36px;
 		flex-shrink: 0;
 		border-radius: 50%;
 		background: radial-gradient(circle at 32% 30%, var(--rose-600), var(--rose-800) 72%);
 		box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(166, 58, 92, 0.35);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2.5px;
+		overflow: hidden;
+	}
+	.brand-mark-emblem {
+		background: radial-gradient(circle at 35% 30%, #ffffff 0%, #fbf1f4 60%, #f6e3e9 100%);
+		box-shadow: inset 0 0 0 1.5px rgba(194, 80, 114, 0.45), 0 2px 8px rgba(166, 58, 92, 0.25);
+		padding: 3.5px;
+	}
+	.brand-logo-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 50%;
+		display: block;
+	}
+	.brand-emblem-img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		display: block;
 	}
 	.brand-text {
 		display: flex;

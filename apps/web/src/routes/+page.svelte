@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EventCard from '$lib/components/EventCard.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import { onDestroy } from 'svelte';
 
 	let { data } = $props();
 
@@ -10,6 +11,40 @@
 	let cursorX = $state(50);
 	let cursorY = $state(50);
 	let hasMouse = $state(false);
+	// Tiles stay raised while the cursor moves, then settle back to rest
+	// 2 seconds after movement stops.
+	let gridLit = $state(false);
+	let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+	// 3D rising grid: every square touched by the cursor light lifts toward
+	// the viewer as an extruded prism; lift depth falls off with distance.
+	const CELL = 48;
+	const LIGHT_RADIUS = 170;
+	let viewportW = $state(typeof window !== 'undefined' ? window.innerWidth : 1440);
+	let viewportH = $state(typeof window !== 'undefined' ? window.innerHeight : 900);
+	let cols = $derived(Math.max(1, Math.floor(viewportW / CELL)));
+	let rows = $derived(Math.max(1, Math.floor(viewportH / CELL)));
+	let cells = $derived(Array.from({ length: cols * rows }, (_, i) => i));
+	let lightPath = $derived.by(() => {
+		const lifts = new Map<number, number>();
+		if (!hasMouse || !gridLit) return lifts;
+		const cx = (cursorX / 100) * viewportW;
+		const cy = (cursorY / 100) * viewportH;
+		const cellW = viewportW / cols;
+		const cellH = viewportH / rows;
+		for (let r = 0; r < rows; r++) {
+			for (let c = 0; c < cols; c++) {
+				const dx = (c + 0.5) * cellW - cx;
+				const dy = (r + 0.5) * cellH - cy;
+				const dist = Math.hypot(dx, dy);
+				if (dist <= LIGHT_RADIUS) {
+					const t = 1 - dist / LIGHT_RADIUS;
+					lifts.set(r * cols + c, Math.round(16 + t * 72));
+				}
+			}
+		}
+		return lifts;
+	});
 
 	function handleMouseMove(e: MouseEvent) {
 		if (typeof window !== 'undefined') {
@@ -19,14 +54,30 @@
 			cursorX = (e.clientX / innerWidth) * 100;
 			cursorY = (e.clientY / innerHeight) * 100;
 			hasMouse = true;
+			gridLit = true;
+			if (idleTimer) clearTimeout(idleTimer);
+			idleTimer = setTimeout(() => {
+				gridLit = false;
+			}, 2000);
+		}
+	}
+
+	onDestroy(() => {
+		if (idleTimer) clearTimeout(idleTimer);
+	});
+
+	function handleResize() {
+		if (typeof window !== 'undefined') {
+			viewportW = window.innerWidth;
+			viewportH = window.innerHeight;
 		}
 	}
 </script>
 
-<svelte:window onmousemove={handleMouseMove} />
+<svelte:window onmousemove={handleMouseMove} onresize={handleResize} />
 
 <svelte:head>
-	<title>CASC4D3 — The 43rd Computer Science Week | UPLB</title>
+	<title>CASC4D3</title>
 </svelte:head>
 
 <!-- ============================== CINEMATIC HERO ============================== -->
@@ -36,8 +87,12 @@
 		<div class="ambient-glow"></div>
 		<div class="sakura-bloom-glow"></div>
 		<div class="cursor-aura" class:active={hasMouse}></div>
-		<div class="ambient-grid"></div>
-		<div class="grid-interactive-light" class:active={hasMouse}></div>
+		<div class="grid-3d" style={`--cols: ${cols}; --rows: ${rows};`} aria-hidden="true">
+			{#each cells as i}
+				{@const lift = lightPath.get(i) ?? 0}
+				<div class="grid-cell" class:active={lift > 0} style={`--lift: ${lift}px`}></div>
+			{/each}
+		</div>
 
 		<!-- Decorative Sakura Branch Silhouettes -->
 		<svg class="sakura-branches" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -146,16 +201,16 @@
 		<div class="hero-content">
 			<div class="hero-badge">
 				<span class="hero-badge-glow" aria-hidden="true"></span>
-				<span class="hero-badge-text">43RD COMPUTER SCIENCE WEEK · UPLB</span>
+				<span class="hero-badge-text">43RD COMPUTER SCIENCE WEEK</span>
 			</div>
 
 			<h1 class="hero-title">
 				CASC4D3
-				<span class="hero-subtitle-line">The 43rd Computer Science Week</span>
+				<span class="hero-subtitle-line">Towards a Resilient Human-Centered Computing</span>
 			</h1>
 
 			<p class="hero-description">
-				The flagship annual convergence of computing culture, technical workshops, and friendly contests. Free registration for all university students, alumni, and tech enthusiasts.
+				test test test test test test test test test test test test test test test test test test test
 			</p>
 
 			<div class="hero-action-row">
@@ -166,8 +221,8 @@
 						<path d="m12 5 7 7-7 7" />
 					</svg>
 				</Button>
-				<Button variant="ghost-dark" size="lg" href="#tracks">
-					<span>Explore Tracks & Schedule</span>
+				<Button variant="ghost-dark" size="lg" href="#event">
+					<span>Explore Schedule</span>
 				</Button>
 			</div>
 		</div>
@@ -175,23 +230,23 @@
 		<!-- Bottom Metadata & Stat Bar -->
 		<div class="hero-stat-bar">
 			<div class="stat-item">
-				<span class="stat-val">100% Free</span>
-				<span class="stat-lbl">No registration fees</span>
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">PST (UTC+8)</span>
-				<span class="stat-lbl">Asia/Manila timezone</span>
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">Anonymous Flow</span>
-				<span class="stat-lbl">No account creation needed</span>
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">{data.openCount > 0 ? `${data.openCount} Open` : 'Coming Soon'}</span>
-				<span class="stat-lbl">Event tracks available</span>
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
 			</div>
 		</div>
 	</div>
@@ -202,9 +257,9 @@
 			<span class="edge-dot-mark" aria-hidden="true"></span>
 			<span class="edge-label">01 INTRO</span>
 		</a>
-		<a href="#tracks" class="edge-dot">
+		<a href="#event" class="edge-dot">
 			<span class="edge-dot-mark" aria-hidden="true"></span>
-			<span class="edge-label">02 TRACKS</span>
+			<span class="edge-label">02 EVENTS</span>
 		</a>
 		<a href="#experience" class="edge-dot">
 			<span class="edge-dot-mark" aria-hidden="true"></span>
@@ -237,13 +292,13 @@
 	</div>
 </section>
 
-<!-- ====================== SECTION 2: FEATURED / UPCOMING TRACKS ====================== -->
-<section class="section-tracks" id="tracks">
+<!-- ====================== SECTION 2: FEATURED / UPCOMING event ====================== -->
+<section class="section-event" id="event">
 	<div class="shell">
 		<div class="section-head section-head-row">
 			<div>
 				<p class="eyebrow">Schedule & Registration</p>
-				<h2>Open Event Tracks</h2>
+				<h2>Open Events</h2>
 				<p class="lede">Active registration streams. Slots are reserved instantly upon form submission.</p>
 			</div>
 			<a href="/events" class="arrow-link">
@@ -362,7 +417,7 @@
 			<h2>Be part of the 43rd Computer Science Week.</h2>
 			<p class="cta-summary">
 				{#if data.openCount > 0}
-					{data.openCount} {data.openCount === 1 ? 'event track is' : 'event tracks are'} accepting registrations right now. Claim your spot.
+					{data.openCount} {data.openCount === 1 ? 'event track is' : 'event event are'} accepting registrations right now. Claim your spot.
 				{:else}
 					The full event roster is ready. Discover all upcoming sessions and be first to register.
 				{/if}
@@ -378,16 +433,20 @@
 	/* ============================== CINEMATIC HERO ============================== */
 	.hero-cinematic {
 		position: relative;
-		min-height: 94vh;
+		min-height: 100vh;
+		min-height: 100dvh;
+		height: 100vh;
+		height: 100dvh;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: space-between;
 		align-items: center;
 		background: linear-gradient(175deg, #1f1823 0%, #2b1f2e 40%, #341e2b 75%, #231a26 100%);
 		color: #ffffff;
 		overflow: hidden;
 		padding-top: 5rem;
-		padding-bottom: 3.5rem;
+		padding-bottom: 1.75rem;
+		box-sizing: border-box;
 	}
 
 	/* Atmospheric Backdrop */
@@ -419,35 +478,51 @@
 		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
 		filter: blur(50px);
 	}
-	.ambient-grid {
+	/* 3D Rising Grid: each square is its own tile; only the tile under the
+		cursor lifts toward the viewer (perspective + translateZ + glow). */
+	.grid-3d {
 		position: absolute;
 		inset: 0;
-		background-image:
-			linear-gradient(rgba(246, 227, 233, 0.03) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(246, 227, 233, 0.03) 1px, transparent 1px);
-		background-size: 48px 48px;
-		background-position: center center;
-		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
-		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+		display: grid;
+		grid-template-columns: repeat(var(--cols), 1fr);
+		grid-template-rows: repeat(var(--rows), 1fr);
+		perspective: 700px;
+		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
+		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
 	}
-
-	/* Interactive Grid Spotlight Illuminated by Cursor */
-	.grid-interactive-light {
+	.grid-cell {
+		position: relative;
+		border-right: 1px solid rgba(246, 227, 233, 0.05);
+		border-bottom: 1px solid rgba(246, 227, 233, 0.05);
+		background: rgba(246, 227, 233, 0.015);
+		transition:
+			transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+			background 0.2s ease,
+			border-color 0.2s ease,
+			filter 0.3s ease;
+	}
+	/* Extruded prism side (visible under the lifting front face) */
+	.grid-cell::after {
+		content: '';
 		position: absolute;
 		inset: 0;
-		background-image:
-			linear-gradient(rgba(246, 227, 233, 0.32) 1.5px, transparent 1.5px),
-			linear-gradient(90deg, rgba(246, 227, 233, 0.32) 1.5px, transparent 1.5px);
-		background-size: 48px 48px;
-		background-position: center center;
-		mask-image: radial-gradient(340px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 45%, transparent 75%);
-		-webkit-mask-image: radial-gradient(340px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 45%, transparent 75%);
+		border-radius: 2px;
+		background: linear-gradient(120deg, rgba(90, 20, 44, 0.4) 0%, rgba(166, 58, 92, 0.2) 55%, rgba(246, 227, 233, 0.04) 100%);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 		opacity: 0;
-		transition: opacity 0.25s ease;
 		pointer-events: none;
+		transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 	}
-	.grid-interactive-light.active {
+	.grid-cell.active {
+		z-index: 2;
+		border-color: rgba(246, 227, 233, 0.28);
+		background: radial-gradient(circle at center, rgba(194, 80, 114, 0.18) 0%, rgba(246, 227, 233, 0.05) 70%);
+		transform: translateZ(var(--lift, 0px));
+		filter: brightness(1.18);
+	}
+	.grid-cell.active::after {
 		opacity: 1;
+		transform: translate(7px, 11px) translateZ(calc(var(--lift, 0px) * -0.85));
 	}
 
 	/* Cursor Radial Light Aura */
@@ -569,17 +644,17 @@
 		position: relative;
 		z-index: 2;
 		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
+		justify-content: space-between;
 		align-items: center;
 		text-align: center;
-		margin-top: auto;
-		margin-bottom: auto;
-		padding-top: 2rem;
+		box-sizing: border-box;
 	}
 	.hero-content {
 		max-width: 44rem;
-		margin: 0 auto;
+		margin: auto auto;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -594,7 +669,7 @@
 		background: rgba(166, 58, 92, 0.18);
 		border: 1px solid rgba(194, 80, 114, 0.45);
 		backdrop-filter: blur(8px);
-		margin-bottom: 1.5rem;
+		margin-bottom: 1.25rem;
 	}
 	.hero-badge-glow {
 		width: 7px;
@@ -612,31 +687,31 @@
 
 	.hero-title {
 		font-family: var(--font-display);
-		font-size: clamp(3.2rem, 8.5vw, 5.8rem);
+		font-size: clamp(3rem, 7.5vw, 5.4rem);
 		font-weight: 700;
 		line-height: 0.98;
 		letter-spacing: 0.04em;
-		margin: 0 0 0.65rem;
+		margin: 0 0 0.5rem;
 		color: #ffffff;
 		text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 	}
 	.hero-subtitle-line {
 		display: block;
 		font-family: var(--font-body);
-		font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+		font-size: clamp(1rem, 2.2vw, 1.35rem);
 		font-weight: 500;
 		letter-spacing: 0.08em;
 		color: var(--rose-100);
-		margin-top: 0.45rem;
+		margin-top: 0.35rem;
 		text-transform: uppercase;
 	}
 
 	.hero-description {
-		font-size: clamp(1rem, 1.8vw, 1.15rem);
-		line-height: 1.65;
+		font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+		line-height: 1.6;
 		color: rgba(255, 255, 255, 0.82);
 		max-width: 36rem;
-		margin: 0.75rem 0 2.25rem;
+		margin: 0.65rem 0 1.85rem;
 	}
 
 	.hero-action-row {
@@ -644,7 +719,7 @@
 		flex-wrap: wrap;
 		justify-content: center;
 		gap: 1rem;
-		margin-bottom: 3rem;
+		margin-bottom: 1rem;
 	}
 
 	/* Bottom Stat Bar */
@@ -753,8 +828,8 @@
 		margin: 0;
 	}
 
-	/* ============================== SECTION 2: TRACKS ============================== */
-	.section-tracks {
+	/* ============================== SECTION 2: event ============================== */
+	.section-event {
 		padding: clamp(5rem, 9vw, 7.5rem) 0;
 		background: var(--paper);
 	}
@@ -952,6 +1027,12 @@
 		}
 		.hero-focal-stage {
 			transform: none !important;
+		}
+		.grid-cell,
+		.grid-cell.active,
+		.grid-cell::after {
+			transform: none !important;
+			transition: none !important;
 		}
 	}
 </style>
