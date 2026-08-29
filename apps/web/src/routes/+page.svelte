@@ -1,22 +1,24 @@
 <script lang="ts">
+	import EventCard from '$lib/components/EventCard.svelte';
+	import Button from '$lib/components/Button.svelte';
+
 	let { data } = $props();
 
-	const format = (date: Date) =>
-		new Intl.DateTimeFormat('en-PH', {
-			dateStyle: 'medium',
-			timeStyle: 'short',
-			timeZone: 'Asia/Manila'
-		}).format(new Date(date));
-
-	// Mouse parallax tracking for the central computational artifact
+	// Mouse parallax & interactive grid spotlight tracking
 	let mouseX = $state(0);
 	let mouseY = $state(0);
+	let cursorX = $state(50);
+	let cursorY = $state(50);
+	let hasMouse = $state(false);
 
 	function handleMouseMove(e: MouseEvent) {
 		if (typeof window !== 'undefined') {
 			const { innerWidth, innerHeight } = window;
 			mouseX = (e.clientX / innerWidth - 0.5) * 20; // range: -10 to +10
 			mouseY = (e.clientY / innerHeight - 0.5) * 20; // range: -10 to +10
+			cursorX = (e.clientX / innerWidth) * 100;
+			cursorY = (e.clientY / innerHeight) * 100;
+			hasMouse = true;
 		}
 	}
 </script>
@@ -29,10 +31,46 @@
 
 <!-- ============================== CINEMATIC HERO ============================== -->
 <section class="hero-cinematic" aria-label="Hero Introduction">
-	<!-- Atmospheric Deep Background with Grid & Ambient Light -->
-	<div class="hero-backdrop" aria-hidden="true">
+	<!-- Atmospheric Sakura Blossom Background with Interactive Lit Grid & Drifting Petals -->
+	<div class="hero-backdrop" style={`--cursor-x: ${cursorX}%; --cursor-y: ${cursorY}%;`} aria-hidden="true">
 		<div class="ambient-glow"></div>
+		<div class="sakura-bloom-glow"></div>
+		<div class="cursor-aura" class:active={hasMouse}></div>
 		<div class="ambient-grid"></div>
+		<div class="grid-interactive-light" class:active={hasMouse}></div>
+
+		<!-- Decorative Sakura Branch Silhouettes -->
+		<svg class="sakura-branches" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+			<path d="M-50 -20 C180 60, 320 180, 480 120 C560 90, 640 160, 720 110" stroke="#7a1f3d" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" fill="none" />
+			<path d="M1490 -30 C1280 80, 1150 200, 980 150 C900 125, 840 210, 760 170" stroke="#7a1f3d" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round" fill="none" />
+			<!-- Soft Blossom Clusters -->
+			<circle cx="320" cy="180" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
+			<circle cx="480" cy="120" r="18" fill="#f6e3e9" fill-opacity="0.25" filter="blur(3px)" />
+			<circle cx="640" cy="160" r="12" fill="#c25072" fill-opacity="0.18" filter="blur(2px)" />
+			<circle cx="1150" cy="200" r="16" fill="#f6e3e9" fill-opacity="0.22" filter="blur(2px)" />
+			<circle cx="980" cy="150" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
+		</svg>
+
+		<!-- Drifting Sakura Petals -->
+		<div class="sakura-petals-container">
+			{#each Array(14) as _, i}
+				<div class={`sakura-petal petal-${i + 1}`}>
+					<svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M15 2 C22 2, 28 10, 27 18 C26 24, 19 28, 15 28 C11 28, 4 24, 3 18 C2 10, 8 2, 15 2 Z"
+							fill="url(#petalGrad)"
+						/>
+						<defs>
+							<linearGradient id="petalGrad" x1="0" y1="0" x2="1" y2="1">
+								<stop offset="0%" stop-color="#fbf1f4" />
+								<stop offset="60%" stop-color="#f6e3e9" />
+								<stop offset="100%" stop-color="#c25072" />
+							</linearGradient>
+						</defs>
+					</svg>
+				</div>
+			{/each}
+		</div>
 	</div>
 
 	<!-- Central Dominant Computational Visual Focus -->
@@ -121,14 +159,16 @@
 			</p>
 
 			<div class="hero-action-row">
-				<a href="/events" class="btn btn-primary btn-lg">
+				<Button variant="primary" size="lg" href="/events">
 					<span>Register for Events</span>
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<path d="M5 12h14" />
 						<path d="m12 5 7 7-7 7" />
 					</svg>
-				</a>
-				<a href="#tracks" class="btn btn-ghost-dark btn-lg">Explore Tracks & Schedule</a>
+				</Button>
+				<Button variant="ghost-dark" size="lg" href="#tracks">
+					<span>Explore Tracks & Schedule</span>
+				</Button>
 			</div>
 		</div>
 
@@ -220,57 +260,13 @@
 				<h3>No events currently accepting registrations</h3>
 				<p>Organizers are preparing the next batch of sessions and challenges. Check back soon.</p>
 				<div style="margin-top: 1.25rem;">
-					<a href="/events" class="btn btn-ghost btn-sm">Browse full event catalog</a>
+					<Button variant="ghost" size="sm" href="/events">Browse full event catalog</Button>
 				</div>
 			</div>
 		{:else}
 			<div class="track-grid">
 				{#each data.upcoming as event (event.id)}
-					<article class="track-card">
-						<div class="track-header">
-							<span class="badge badge-open">
-								<span class="badge-dot" aria-hidden="true"></span>
-								Registration Open
-							</span>
-							<time datetime={new Date(event.startAt).toISOString()} class="track-time">
-								{format(event.startAt)}
-							</time>
-						</div>
-
-						<h3 class="track-title">
-							<a href={`/events/${event.id}`}>{event.title}</a>
-						</h3>
-
-						<p class="track-desc">
-							{event.description ?? 'Session mechanics, participant guidelines, and schedule details inside.'}
-						</p>
-
-						<div class="track-footer">
-							<div class="track-capacity">
-								{#if event.capacity !== null}
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-										<circle cx="9" cy="7" r="4" />
-									</svg>
-									<span>{event.capacity} total slots</span>
-								{:else}
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<circle cx="12" cy="12" r="10" />
-										<path d="m9 12 2 2 4-4" />
-									</svg>
-									<span>Open Capacity</span>
-								{/if}
-							</div>
-
-							<a href={`/events/${event.id}`} class="btn btn-primary btn-sm">
-								<span>Register</span>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-									<path d="M5 12h14" />
-									<path d="m12 5 7 7-7 7" />
-								</svg>
-							</a>
-						</div>
-					</article>
+					<EventCard {event} variant="track" />
 				{/each}
 			</div>
 		{/if}
@@ -372,7 +368,7 @@
 				{/if}
 			</p>
 			<div class="cta-buttons">
-				<a href="/events" class="btn btn-white btn-lg">Explore Full Schedule</a>
+				<Button variant="white" size="lg" href="/events">Explore Full Schedule</Button>
 			</div>
 		</div>
 	</div>
@@ -387,7 +383,7 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		background: #231c27; /* Deep atmospheric dark plum */
+		background: linear-gradient(175deg, #1f1823 0%, #2b1f2e 40%, #341e2b 75%, #231a26 100%);
 		color: #ffffff;
 		overflow: hidden;
 		padding-top: 5rem;
@@ -406,22 +402,130 @@
 		top: 15%;
 		left: 50%;
 		transform: translateX(-50%);
-		width: 750px;
-		height: 750px;
+		width: 800px;
+		height: 800px;
 		border-radius: 50%;
-		background: radial-gradient(circle, rgba(166, 58, 92, 0.28) 0%, rgba(122, 31, 61, 0.12) 45%, rgba(35, 28, 39, 0) 75%);
+		background: radial-gradient(circle, rgba(194, 80, 114, 0.24) 0%, rgba(122, 31, 61, 0.12) 45%, rgba(35, 28, 39, 0) 75%);
 		filter: blur(40px);
+	}
+	.sakura-bloom-glow {
+		position: absolute;
+		top: 5%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 1000px;
+		height: 600px;
+		border-radius: 50%;
+		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
+		filter: blur(50px);
 	}
 	.ambient-grid {
 		position: absolute;
 		inset: 0;
 		background-image:
-			linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-		background-size: 50px 50px;
+			linear-gradient(rgba(246, 227, 233, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(246, 227, 233, 0.03) 1px, transparent 1px);
+		background-size: 48px 48px;
 		background-position: center center;
-		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.8) 0%, transparent 80%);
-		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.8) 0%, transparent 80%);
+		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+	}
+
+	/* Interactive Grid Spotlight Illuminated by Cursor */
+	.grid-interactive-light {
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(246, 227, 233, 0.32) 1.5px, transparent 1.5px),
+			linear-gradient(90deg, rgba(246, 227, 233, 0.32) 1.5px, transparent 1.5px);
+		background-size: 48px 48px;
+		background-position: center center;
+		mask-image: radial-gradient(340px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 45%, transparent 75%);
+		-webkit-mask-image: radial-gradient(340px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 45%, transparent 75%);
+		opacity: 0;
+		transition: opacity 0.25s ease;
+		pointer-events: none;
+	}
+	.grid-interactive-light.active {
+		opacity: 1;
+	}
+
+	/* Cursor Radial Light Aura */
+	.cursor-aura {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(420px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(194, 80, 114, 0.22) 0%, rgba(122, 31, 61, 0.09) 45%, transparent 75%);
+		opacity: 0;
+		transition: opacity 0.25s ease;
+		pointer-events: none;
+	}
+	.cursor-aura.active {
+		opacity: 1;
+	}
+
+	.sakura-branches {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	/* Drifting Sakura Petals */
+	.sakura-petals-container {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+	}
+	.sakura-petal {
+		position: absolute;
+		top: -30px;
+		opacity: 0.7;
+		filter: drop-shadow(0 2px 6px rgba(194, 80, 114, 0.3));
+		animation: petalFall linear infinite;
+	}
+	.sakura-petal svg {
+		width: 100%;
+		height: 100%;
+		animation: petalSway ease-in-out infinite alternate;
+	}
+
+	.petal-1 { left: 8%; width: 18px; height: 18px; animation-duration: 11s; animation-delay: 0s; }
+	.petal-2 { left: 16%; width: 22px; height: 22px; animation-duration: 14s; animation-delay: 2.5s; opacity: 0.85; }
+	.petal-3 { left: 25%; width: 15px; height: 15px; animation-duration: 10s; animation-delay: 5s; opacity: 0.6; }
+	.petal-4 { left: 34%; width: 20px; height: 20px; animation-duration: 13s; animation-delay: 1.2s; }
+	.petal-5 { left: 42%; width: 16px; height: 16px; animation-duration: 12s; animation-delay: 7s; }
+	.petal-6 { left: 52%; width: 24px; height: 24px; animation-duration: 15s; animation-delay: 3s; opacity: 0.9; }
+	.petal-7 { left: 60%; width: 14px; height: 14px; animation-duration: 9.5s; animation-delay: 4.5s; opacity: 0.55; }
+	.petal-8 { left: 68%; width: 19px; height: 19px; animation-duration: 12.5s; animation-delay: 6s; }
+	.petal-9 { left: 76%; width: 22px; height: 22px; animation-duration: 14s; animation-delay: 1.8s; opacity: 0.8; }
+	.petal-10 { left: 85%; width: 16px; height: 16px; animation-duration: 11.5s; animation-delay: 8s; }
+	.petal-11 { left: 92%; width: 20px; height: 20px; animation-duration: 13.5s; animation-delay: 4s; opacity: 0.75; }
+	.petal-12 { left: 12%; width: 14px; height: 14px; animation-duration: 10.5s; animation-delay: 9s; opacity: 0.5; }
+	.petal-13 { left: 48%; width: 18px; height: 18px; animation-duration: 12s; animation-delay: 9.5s; opacity: 0.7; }
+	.petal-14 { left: 80%; width: 15px; height: 15px; animation-duration: 11s; animation-delay: 10.5s; opacity: 0.65; }
+
+	@keyframes petalFall {
+		0% {
+			transform: translateY(-20px) rotate(0deg);
+		}
+		100% {
+			transform: translateY(105vh) rotate(360deg);
+		}
+	}
+
+	@keyframes petalSway {
+		0% {
+			transform: translateX(-18px) rotateX(0deg) rotateY(0deg);
+		}
+		50% {
+			transform: translateX(18px) rotateX(45deg) rotateY(60deg);
+		}
+		100% {
+			transform: translateX(-18px) rotateX(0deg) rotateY(0deg);
+		}
 	}
 
 	/* Central Dominant Computational Visual Focus */
@@ -659,71 +763,6 @@
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 		gap: 1.75rem;
 	}
-	.track-card {
-		display: flex;
-		flex-direction: column;
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-		padding: 2rem 1.85rem;
-		transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-	}
-	.track-card:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--shadow-hover);
-		border-color: var(--rose-100);
-	}
-	.track-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-		margin-bottom: 1.25rem;
-	}
-	.track-time {
-		font-size: 0.8rem;
-		color: var(--plum-soft);
-		font-weight: 500;
-	}
-	.track-title {
-		font-size: 1.35rem;
-		line-height: 1.3;
-		margin: 0 0 0.75rem;
-	}
-	.track-title a {
-		color: var(--plum);
-	}
-	.track-title a:hover {
-		color: var(--rose-700);
-		text-decoration: none;
-	}
-	.track-desc {
-		margin: 0 0 1.75rem;
-		color: var(--plum-soft);
-		font-size: 0.94rem;
-		line-height: 1.6;
-		flex: 1;
-	}
-	.track-footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		border-top: 1px solid var(--line);
-		padding-top: 1.15rem;
-	}
-	.track-capacity {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-size: 0.82rem;
-		color: var(--plum-soft);
-		font-weight: 500;
-	}
-	.track-capacity svg {
-		color: var(--rose-600);
-	}
 
 	/* ============================== SECTION 3: PILLARS ============================== */
 	.section-experience {
@@ -896,24 +935,23 @@
 	}
 
 	@media (max-width: 520px) {
-		.hero-action-row .btn {
+		.hero-action-row :global(.btn) {
 			width: 100%;
 		}
 		.hero-stat-bar .stat-item {
 			width: 100%;
 		}
-		.track-header {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.35rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sakura-petal,
+		.sakura-petal svg,
+		.spin-slow,
+		.pulse-core {
+			animation: none !important;
 		}
-		.track-footer {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.85rem;
-		}
-		.track-footer .btn {
-			width: 100%;
+		.hero-focal-stage {
+			transform: none !important;
 		}
 	}
 </style>

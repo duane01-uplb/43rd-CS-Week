@@ -6,6 +6,12 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-29 — Public CASC4D3 redesign & design system component build-out
+- **Cinematic Event Hero:** Built an immersive full-bleed dark hero on `apps/web/src/routes/+page.svelte` featuring an ambient luminous backdrop, interactive parallax tracking, central multi-tiered computational artifact SVG with concentric logic circuits and nodal termini, monumental Shippori Mincho display typography, floating glass stat strip, and minimal edge navigation indicator.
+- **Component Library (`apps/web/src/lib/components/`):** Installed `bits-ui` and implemented reusable token-driven Svelte 5 components: `Badge.svelte`, `Button.svelte`, and `EventCard.svelte`.
+- **Pages Polished:** Fully integrated component library into `+layout.svelte` (scroll-sensing navigation header), `+page.svelte` (home narrative), `events/+page.svelte` (discovery hub with filter controls), and `events/[id]/+page.svelte` (2-column event detail with dynamic registration form and image upload handling).
+- **Zero Errors:** Verified via `bunx svelte-check` across all public web routes and components.
+
 ## 2026-08-29 — Split design docs: DESIGN_TOKENS.md + UI.md handoff brief
 - **NEW `agents/DESIGN_TOKENS.md`:** single source of truth for everything
   visual (palette incl. status colors, typography + scale, radii/elevation,

@@ -1,12 +1,8 @@
 <script lang="ts">
-	let { data } = $props();
+	import EventCard from '$lib/components/EventCard.svelte';
+	import Button from '$lib/components/Button.svelte';
 
-	const formatDateTime = (date: Date) =>
-		new Intl.DateTimeFormat('en-PH', {
-			dateStyle: 'medium',
-			timeStyle: 'short',
-			timeZone: 'Asia/Manila'
-		}).format(new Date(date));
+	let { data } = $props();
 
 	const isFiltered = $derived(data.status !== 'all' || data.upcoming);
 </script>
@@ -56,9 +52,9 @@
 			</div>
 
 			<div class="filter-actions">
-				<button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
+				<Button type="submit" variant="primary" size="sm">Apply filters</Button>
 				{#if isFiltered}
-					<a href="/events?status=all" class="btn btn-ghost btn-sm">Reset</a>
+					<Button variant="ghost" size="sm" href="/events?status=all">Reset</Button>
 				{/if}
 			</div>
 		</form>
@@ -79,7 +75,7 @@
 				<h3>No events match your selected filters</h3>
 				<p>Try switching to "All statuses" or unchecking "Upcoming only" to see the full schedule.</p>
 				<div style="margin-top: 1.5rem;">
-					<a href="/events?status=all" class="btn btn-primary btn-sm">View all events</a>
+					<Button variant="primary" size="sm" href="/events?status=all">View all events</Button>
 				</div>
 			</div>
 		{:else}
@@ -93,82 +89,7 @@
 
 			<div class="events-grid">
 				{#each data.events as event (event.id)}
-					<article class="event-card-rich">
-						<div class="card-header">
-							<div class="card-status">
-								{#if event.status === 'open'}
-									<span class="badge badge-open">
-										<span class="badge-dot" aria-hidden="true"></span>
-										Open for registration
-									</span>
-								{:else if event.status === 'closed'}
-									<span class="badge badge-closed">
-										<span class="badge-dot" aria-hidden="true"></span>
-										Registration closed
-									</span>
-								{:else}
-									<span class="badge badge-draft">
-										<span class="badge-dot" aria-hidden="true"></span>
-										Draft / Announced
-									</span>
-								{/if}
-							</div>
-							<time datetime={new Date(event.startAt).toISOString()} class="card-date">
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-									<rect x="3" y="4" width="18" height="18" rx="2" />
-									<path d="M3 10h18" />
-									<path d="M8 2v4M16 2v4" />
-								</svg>
-								{formatDateTime(event.startAt)}
-							</time>
-						</div>
-
-						<h2 class="card-title">
-							<a href={`/events/${event.id}`}>{event.title}</a>
-						</h2>
-
-						<p class="card-description">
-							{event.description ?? 'Event information, timeline, and participant requirements.'}
-						</p>
-
-						<div class="card-meta">
-							<div class="meta-item">
-								<span class="meta-label">Capacity</span>
-								<span class="meta-value">
-									{#if event.capacity !== null}
-										{event.capacity} participants max
-									{:else}
-										Open / Unlimited
-									{/if}
-								</span>
-							</div>
-
-							<div class="meta-item">
-								<span class="meta-label">Entry Fee</span>
-								<span class="meta-value fee-free">100% Free</span>
-							</div>
-						</div>
-
-						<div class="card-footer">
-							{#if event.status === 'open'}
-								<a href={`/events/${event.id}`} class="btn btn-primary btn-full">
-									<span>Register for event</span>
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<path d="M5 12h14" />
-										<path d="m12 5 7 7-7 7" />
-									</svg>
-								</a>
-							{:else}
-								<a href={`/events/${event.id}`} class="btn btn-ghost btn-full">
-									<span>View event details</span>
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<path d="M5 12h14" />
-										<path d="m12 5 7 7-7 7" />
-									</svg>
-								</a>
-							{/if}
-						</div>
-					</article>
+					<EventCard {event} variant="grid" />
 				{/each}
 			</div>
 		{/if}
@@ -288,98 +209,7 @@
 	.events-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.event-card-rich {
-		display: flex;
-		flex-direction: column;
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-		padding: 1.75rem;
-		transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-	}
-	.event-card-rich:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--shadow-hover);
-		border-color: var(--rose-100);
-	}
-
-	.card-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-		flex-wrap: wrap;
-	}
-	.card-date {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		font-size: 0.8rem;
-		color: var(--plum-soft);
-		font-weight: 500;
-	}
-	.card-date svg {
-		color: var(--rose-600);
-	}
-
-	.card-title {
-		font-size: 1.35rem;
-		line-height: 1.3;
-		margin: 0 0 0.75rem;
-	}
-	.card-title a {
-		color: var(--plum);
-	}
-	.card-title a:hover {
-		color: var(--rose-700);
-		text-decoration: none;
-	}
-
-	.card-description {
-		margin: 0 0 1.5rem;
-		color: var(--plum-soft);
-		font-size: 0.94rem;
-		line-height: 1.6;
-		flex: 1;
-	}
-
-	.card-meta {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem;
-		padding: 0.85rem 1rem;
-		background: var(--rose-050);
-		border-radius: var(--radius-sm);
-		margin-bottom: 1.5rem;
-	}
-	.meta-item {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-	.meta-label {
-		font-size: 0.72rem;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		color: var(--plum-soft);
-		font-weight: 600;
-	}
-	.meta-value {
-		font-size: 0.88rem;
-		font-weight: 600;
-		color: var(--plum);
-	}
-	.fee-free {
-		color: var(--ok);
-	}
-
-	.card-footer {
-		margin-top: auto;
+		gap: 1.75rem;
 	}
 
 	.empty-icon {
@@ -416,11 +246,6 @@
 	@media (max-width: 520px) {
 		.events-grid {
 			grid-template-columns: 1fr;
-		}
-		.card-header {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.5rem;
 		}
 	}
 </style>

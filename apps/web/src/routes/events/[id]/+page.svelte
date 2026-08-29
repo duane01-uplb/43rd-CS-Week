@@ -1,4 +1,7 @@
 <script lang="ts">
+	import Badge from '$lib/components/Badge.svelte';
+	import Button from '$lib/components/Button.svelte';
+
 	let { data, form } = $props();
 
 	const formatDateTime = (date: Date) =>
@@ -38,20 +41,11 @@
 				<div class="header-badges">
 					<span class="eyebrow-pill">43RD CS WEEK</span>
 					{#if data.event.status === 'open'}
-						<span class="badge badge-open">
-							<span class="badge-dot" aria-hidden="true"></span>
-							Open for registration
-						</span>
+						<Badge variant="open">Open for registration</Badge>
 					{:else if data.event.status === 'closed'}
-						<span class="badge badge-closed">
-							<span class="badge-dot" aria-hidden="true"></span>
-							Registration closed
-						</span>
+						<Badge variant="closed">Registration closed</Badge>
 					{:else}
-						<span class="badge badge-draft">
-							<span class="badge-dot" aria-hidden="true"></span>
-							Draft / Announced
-						</span>
+						<Badge variant="draft">Draft / Announced</Badge>
 					{/if}
 				</div>
 
@@ -160,7 +154,7 @@
 							<p>We look forward to seeing you at the event. Keep an eye out for updates and announcements from the organizers.</p>
 						</div>
 						<div class="success-actions">
-							<a href="/events" class="btn btn-primary btn-full">Browse other events</a>
+							<Button variant="primary" size="md" fullWidth href="/events">Browse other events</Button>
 						</div>
 					</div>
 				{:else if data.event.status !== 'open'}
@@ -179,7 +173,9 @@
 								This event has been announced but is not yet open for registration. Check back soon!
 							{/if}
 						</p>
-						<a href="/events" class="btn btn-ghost btn-full" style="margin-top: 1.25rem;">View available events</a>
+						<div style="margin-top: 1.25rem;">
+							<Button variant="ghost" size="md" fullWidth href="/events">View available events</Button>
+						</div>
 					</div>
 				{:else}
 					<div class="form-header">
@@ -281,7 +277,7 @@
 						{/each}
 
 						<div class="form-submit">
-							<button type="submit" class="btn btn-primary btn-lg btn-full" disabled={isSubmitting}>
+							<Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
 								{#if isSubmitting}
 									<span>Submitting registration...</span>
 								{:else}
@@ -291,7 +287,7 @@
 										<path d="m12 5 7 7-7 7" />
 									</svg>
 								{/if}
-							</button>
+							</Button>
 						</div>
 
 						<p class="privacy-note">
