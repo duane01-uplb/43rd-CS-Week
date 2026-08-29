@@ -6,6 +6,43 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-29 — Upstash Redis: read-through caching + registration rate limiting
+- **New `packages/cache` (`@csweek/cache`):** shared serverless-Redis helper on
+  top of `@upstash/redis` — `getJson` read-through TTL cache (fail-open to the
+  fetcher), fixed-window `rateLimit`, `bust` key deletion, and a `cacheKeys`
+  registry both apps share for invalidation. Wired in each app via
+  `lib/server/cache.ts` using `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`.
+- **Web (TTL 30s):** cached homepage load (`web:home`), `/events` listing
+  (`web:events:*`, keyed by filter combo), and event detail (`web:event:{id}`).
+  The capacity check in the register action stays on live Postgres (no
+  oversell).
+- **Web rate limiting:** registration action now checks counters BEFORE any
+  DB work — 10 attempts/event/IP/15min (`rl:register:event:{e}:{ip}`) and
+  50/IP/hour (`rl:register:global:{ip}`); exceeded → HTTP 429 via `fail()`.
+- **Admin:** overview counts cached `admin:overview` (TTL 15s); event
+  create/edit bust admin overview + all web listing/home/event-detail keys;
+  a new registration busts `admin:overview` so the dashboard catches up.
+- **Fails open:** missing Redis env or Upstash outage degrades to direct DB
+  reads and allow-through rate limits (logged), never blocking pages/signups.
+- **Docs:** ARCHITECTURE (stack + new "Caching & Rate Limiting" section,
+  folder tree, client locations), web & admin README env lists, DECISIONS row.
+
+## 2026-08-29 — Brand mark lock-up: UPLB ComSci Soc logo + CASC4D3 emblem
+- **Header/footer lock-up:** `apps/web/src/routes/+layout.svelte` brand replaced
+  the single rose-gradient mark with a two-mark group: UPLB Computer Science
+  Society circular logo (rose-ringed) + CASC4D3 emblem (light disc), separated
+  by a `│` divider, both header and footer. Kicker updated to "43RD COMPUTER
+  SCIENCE WEEK".
+- **Assets:** new `apps/web/static/casc4d3-emblem.png` (rose emblem) and
+  `apps/web/static/uplb-comsci-soc-logo.png` (society logo), served from the
+  SvelteKit static dir.
+- **Hero copy (WIP):** `+page.svelte` tagline now "Towards a Resilient
+  Human-Centered Computing"; nav/edge/CTA labels use "events"; hero full-viewport
+  (100dvh) with stat bar pinned to bottom.
+- **UNCOMMITTED / NOT FINISHED:** hero stat bar values and description are
+  still `placeholder` / `test` text — final copy pending before this work is
+  complete.
+
 ## 2026-08-29 — Public CASC4D3 redesign & design system component build-out
 - **Cinematic Event Hero:** Built an immersive full-bleed dark hero on `apps/web/src/routes/+page.svelte` featuring an ambient luminous backdrop, interactive parallax tracking, central multi-tiered computational artifact SVG with concentric logic circuits and nodal termini, monumental Shippori Mincho display typography, floating glass stat strip, and minimal edge navigation indicator.
 - **Component Library (`apps/web/src/lib/components/`):** Installed `bits-ui` and implemented reusable token-driven Svelte 5 components: `Badge.svelte`, `Button.svelte`, and `EventCard.svelte`.

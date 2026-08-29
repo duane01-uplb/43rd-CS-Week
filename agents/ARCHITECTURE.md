@@ -3,6 +3,7 @@
 ## Stack
 - Framework: **Svelte / SvelteKit** (corrected — see note below)
 - Backend/DB: Supabase (Postgres, Auth, Storage)
+- Cache/Rate-limit: **Upstash Redis** (serverless REST — see "Caching & Rate Limiting" below)
 - Hosting: Vercel
  - Package Manager: Bun (use `bun install`, `bun add`, `bun run`, and `bunx`; do NOT use `npm`/`npx`)
 
@@ -37,6 +38,7 @@
 
 /packages
   /db                        # Shared Drizzle schema + connection factory, imported by both apps/web and apps/admin
+  /cache                     # Shared Upstash Redis cache helper (read-through cache, rate limiter, cache-key registry), imported by both apps
 
 /supabase                    # Migrations and seed data
 ```
@@ -53,6 +55,7 @@
   - Admin server client & auth guards: `$lib/server/supabase.ts`, `$lib/server/auth-guards.ts`, and `hooks.server.ts` in `apps/admin`.
   - Web server client: `apps/web/src/lib/server/supabase.ts` (service-role only, for registration file uploads — the public site has no accounts).
   - Server DB connection: `$lib/server/db.ts` in both apps (connecting via `@csweek/db` using `DATABASE_URL`).
+  - Server cache client: `$lib/server/cache.ts` in both apps (connecting via `@csweek/cache` using `UPSTASH_REDIS_REST_URL`/`TOKEN`).
 
 ## Payments
 Not implemented. All registrations are free (see DECISIONS.md).
@@ -71,6 +74,26 @@ Not implemented. All registrations are free (see DECISIONS.md).
 - IMPORTANT: Drizzle connects directly to Postgres and BYPASSES Row Level
   Security. RLS policies remain in place as defense-in-depth only.
   Authorization is enforced in application code — see `AUTHORIZATION.md`.
+
+## Caching & Rate Limiting (Upstash Redis)
+- Both apps wrap the same Upstash Redis instance via `@csweek/cache`
+  (`packages/cache/`), created from `UPSTASH_REDIS_REST_URL` +
+  `UPSTASH_REDIS_REST_TOKEN` in each app's `lib/server/cache.ts`.
+- **Read-through TTL cache:** homepage (`web:home`), `/events` listings
+  (`web:events:*`), event detail (`web:event:{id}`) — TTL 30s; admin overview
+  counts (`admin:overview`) — TTL 15s. Only public/display reads are cached;
+  the capacity check inside the registration action still hits Postgres so it
+  never oversells.
+- **Cache invalidation (best-effort):** successful anonymous registration
+  busts `admin:overview`; admin event create/edit busts `admin:overview`,
+  `web:home`, all `web:events:*` variants, and `web:event:{id}`.
+- **Rate limiting:** the anonymous registration action enforces fixed-window
+  counters before any DB work — 10 attempts per event per IP per 15 min
+  (`rl:register:event:{eventId}:{ip}`) and 50 per IP per hour
+  (`rl:register:global:{ip}`), returning HTTP 429.
+- **Fails open:** if Redis env is missing or Upstash is unreachable, loads
+  hit the DB directly and rate limits allow through (logged). An infra outage
+  must never block registration or page loads.
 
 ## Deployment
 - Push to `main` → Vercel prod

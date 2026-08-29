@@ -19,6 +19,7 @@
     "vite": "^5.4.0"
   },
   "dependencies": {
+    "@csweek/cache": "workspace:*",
     "@csweek/db": "workspace:*",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.0.0",

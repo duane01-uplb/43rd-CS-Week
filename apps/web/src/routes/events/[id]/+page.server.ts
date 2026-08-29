@@ -1,6 +1,8 @@
 import { and, count, eq } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
 import { ANONYMOUS_USER_ID, eventRegistrationFields, events, registrations } from '@csweek/db';
+import { cacheKeys } from '@csweek/cache';
+import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
 import { createServiceRoleClient } from '$lib/server/supabase';
 import type { Actions, PageServerLoad } from './$types';
@@ -9,22 +11,46 @@ const UPLOAD_BUCKET = 'registration-uploads';
 // 4 MB — must stay under Vercel serverless' ~4.5 MB request-body cap.
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
+// Fixed-window rate limits for the anonymous registration action. The public
+// site has no sessions, so per-IP counters are the abuse guard for the one
+// write path that touches the service-role key. Checked before any DB work.
+const RATE_LIMIT = {
+	// 10 attempts per event, per IP, per 15 minutes.
+	perEventPerIp: { limit: 10, windowSeconds: 15 * 60 },
+	// 50 attempts per IP across all events, per hour.
+	globalPerIp: { limit: 50, windowSeconds: 60 * 60 }
+};
+
 function sanitizeFileName(name: string) {
 	const cleaned = name.replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '');
 	return cleaned.slice(-80) || 'upload';
 }
 
-export const load: PageServerLoad = async ({ params }) => {
-  const db = getDb();
-  const event = await db.query.events.findFirst({ where: eq(events.id, params.id) });
-  if (!event) throw error(404, 'Event not found');
-  return { event, fields: await db.select().from(eventRegistrationFields).where(eq(eventRegistrationFields.eventId, event.id)).orderBy(eventRegistrationFields.sortOrder) };
-};
+export const load: PageServerLoad = async ({ params }) =>
+	cache.getJson(cacheKeys.webEvent(params.id), 30, async () => {
+		const db = getDb();
+		const event = await db.query.events.findFirst({ where: eq(events.id, params.id) });
+		if (!event) throw error(404, 'Event not found');
+		const fields = await db
+			.select()
+			.from(eventRegistrationFields)
+			.where(eq(eventRegistrationFields.eventId, event.id))
+			.orderBy(eventRegistrationFields.sortOrder);
+		return { event, fields };
+	});
 
 export const actions: Actions = {
   register: async (event) => {
+    const ip = event.getClientAddress();
+    const eventId = event.params.id;
+    const [perEvent, global] = await Promise.all([
+      cache.rateLimit(cacheKeys.rlRegisterEvent(eventId, ip), RATE_LIMIT.perEventPerIp.limit, RATE_LIMIT.perEventPerIp.windowSeconds),
+      cache.rateLimit(cacheKeys.rlRegisterGlobal(ip), RATE_LIMIT.globalPerIp.limit, RATE_LIMIT.globalPerIp.windowSeconds)
+    ]);
+    if (!perEvent.ok || !global.ok) return fail(429, { error: 'Too many registration attempts from this device. Please wait a few minutes and try again.' });
+
     const db = getDb();
-    const target = await db.query.events.findFirst({ where: eq(events.id, event.params.id) });
+    const target = await db.query.events.findFirst({ where: eq(events.id, eventId) });
     if (!target || target.status !== 'open') return fail(400, { error: 'This event is not open for registration.' });
     const fields = await db.select().from(eventRegistrationFields).where(eq(eventRegistrationFields.eventId, target.id));
     const form = await event.request.formData();
@@ -75,6 +101,8 @@ export const actions: Actions = {
       console.error('Registration insert failed:', e);
       return fail(409, { error: 'We could not complete your registration. It may already exist.' });
     }
+    // A confirmed registration changes dashboard counts immediately.
+    await cache.bust(cacheKeys.adminOverview);
     return { success: true };
   }
 };
