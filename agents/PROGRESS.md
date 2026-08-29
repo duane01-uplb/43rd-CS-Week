@@ -6,6 +6,41 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-28 — Admin console visual redesign (frontend)
+- **Admin design system:** sakura theme via a dusky-rose palette on warm
+  paper + Shippori Mincho (display) / IBM Plex Sans (body), defined as CSS
+  tokens in `apps/admin/src/routes/+layout.svelte`. No "flowery" decoration —
+  the Japanese influence is carried by color + type only.
+- **Shell/layout:** new sticky sidebar (`AppSidebar.svelte`) with active
+  rose-stem indicator + collapese-to-topbar at <720px; top bar with
+  signed-in avatar in `admin/+layout.svelte`. Removed the now-dead
+  `AdminShellHeader.svelte`.
+- **Pages styled:** Overview (stat cards + task tiles, enriched server
+  load with open/pending/confirmed counts), Events list (badges, capacity,
+  empty state), create/edit event forms, Registrations (filter bar, empty
+  states, response drilldown), login card.
+- Shared utilities (`.btn*`, `.field`, `.badge*`, `.status-msg`,
+  `.eyebrow`) and focus/reduced-motion respected globally.
+- Design tokens documented in `agents/UI.md`.
+
+## 2026-08-28 — Admin/registration performance investigation + fixes
+- **Auth cold path removed:** both `hooks.server.ts` (web + admin) now skip
+  `supabase.auth.getUser()` when no `sb-*-auth-token` cookie is present,
+  short-circuiting `event.locals.user = null` for anonymous visitors. This
+  removes an outbound auth-server round-trip from every public page load
+  (the main cause of slow TTFB). Logged-in users still get a full verify.
+- **Connection tuning:** `createDb` in `packages/db/src/index.ts` now passes
+  `{ prepare: false, max: 1 }` to the `postgres()` client — required for
+  Drizzle against Supabase's transaction pooler (port 6543) and to keep
+  per-serverless-instance connection counts low.
+- **Index migration (`drizzle/0002_pretty_krista_starr.sql`):**
+  `events_status_start_at_idx (status, start_at)` and
+  `registrations_status_created_at_idx (status, created_at)` — generated,
+  reviewed, NOT yet applied to the live DB (needs a proper DIRECT connection
+  to run `drizzle-kit push`).
+- **Doc:** DATABASE.md indexes section updated.
+
+
 ## 2026-08-26 — Homepage upcoming-events preview + responsive baseline (Sprint 1)
 - **Scope change:** dropped flagship/featured event concept entirely (removed
   from `agents/features/events.md` and sprint plan). Only upcoming-events
