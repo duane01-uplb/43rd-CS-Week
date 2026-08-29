@@ -3,6 +3,7 @@ import postgres from 'postgres';
 import * as schema from './schema';
 
 export * from './schema';
+export { ANONYMOUS_USER_ID } from './anonymous';
 
 export function createDb(databaseUrl: string) {
   // Options tuned for Supabase's transaction pooler on serverless (Vercel):

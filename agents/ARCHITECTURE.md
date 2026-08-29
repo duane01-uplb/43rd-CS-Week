@@ -27,16 +27,12 @@
           /events            # Event list, creation (/new), and editing (/[id]/edit)
           /registrations     # Registration table with search and filters
         /login               # Admin login
-  /web                       # Public-facing SvelteKit application (homepage, events, registration, auth)
+  /web                       # Public-facing SvelteKit application (homepage, events, registration — no accounts)
     /src
       /lib
-        /server              # Server-side utilities (db.ts, supabase.ts, auth-guards.ts)
-        supabaseClient.ts    # Browser-side Supabase client instance
+        /server              # Server-side utilities (db.ts, supabase.ts)
       /routes
         /events              # Event browsing (+page) and registration details (/[id])
-        /login               # Participant login (+page)
-        /signup              # Participant signup (+page)
-        /logout              # Session teardown endpoint (+server.ts)
         +page.svelte         # Landing homepage
 
 /packages
@@ -53,8 +49,9 @@
 ### Verified Items & Setup Locations
 - [x] Multi-app workspace structure: `apps/web` (public participant site) and `apps/admin` (event & registration management).
 - [x] Supabase client and auth setup locations:
-  - Browser client: `apps/web/src/lib/supabaseClient.ts` and `apps/admin/src/lib/supabaseClient.ts` (using `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
-  - Server client & auth hooks: `$lib/server/supabase.ts`, `$lib/server/auth-guards.ts`, and `hooks.server.ts` in both apps.
+  - Admin browser client: `apps/admin/src/lib/supabaseClient.ts` (using `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
+  - Admin server client & auth guards: `$lib/server/supabase.ts`, `$lib/server/auth-guards.ts`, and `hooks.server.ts` in `apps/admin`.
+  - Web server client: `apps/web/src/lib/server/supabase.ts` (service-role only, for registration file uploads — the public site has no accounts).
   - Server DB connection: `$lib/server/db.ts` in both apps (connecting via `@csweek/db` using `DATABASE_URL`).
 
 ## Payments
@@ -64,9 +61,11 @@ Not implemented. All registrations are free (see DECISIONS.md).
 - ORM: Drizzle (drizzle-orm + drizzle-kit), connecting directly to the
   Supabase Postgres pooler connection (DATABASE_URL, service-level — not
   the public anon key).
-- Supabase is still used for Auth (sign-up/login/session) and Storage.
+- Supabase is still used for Auth (admin login only) and Storage.
   Supabase's JS client (`@supabase/supabase-js`) is retained ONLY for
-  `supabase.auth.*` calls — all data reads/writes go through Drizzle.
+  `supabase.auth.*` calls (admin app) and server-side registration uploads
+  (web app, via the service-role key) — all data reads/writes go through
+  Drizzle.
 - Schema defined in `schema.ts` (TypeScript), migrations generated via
   `drizzle-kit generate` / applied via `drizzle-kit push`.
 - IMPORTANT: Drizzle connects directly to Postgres and BYPASSES Row Level

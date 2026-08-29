@@ -51,6 +51,10 @@ coverage/
 .playwright/
 test-results/
 
+# python bytecode
+__pycache__/
+*.pyc
+
 .vercel
 .env*
 

@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS "event_user_unique";--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "event_user_unique" ON "registrations" USING btree ("event_id","user_id") WHERE "registrations"."user_id" <> 'd686bd46-1f26-4672-a4b1-997a460a1562';--> statement-breakpoint
+INSERT INTO "profiles" ("id", "full_name", "role", "created_at") VALUES ('d686bd46-1f26-4672-a4b1-997a460a1562', 'Anonymous', 'participant', now()) ON CONFLICT ("id") DO NOTHING;

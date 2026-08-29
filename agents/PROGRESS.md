@@ -6,6 +6,47 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-29 — Split design docs: DESIGN_TOKENS.md + UI.md handoff brief
+- **NEW `agents/DESIGN_TOKENS.md`:** single source of truth for everything
+  visual (palette incl. status colors, typography + scale, radii/elevation,
+  motion, layout/breakpoints, shared utility classes, component anatomy,
+  brand mark, required states). Tokens are duplicated in each app's root
+  layout `:root` and must stay in sync (noted in the doc).
+- **`agents/UI.md` rewritten as a handoff brief** for another model building
+  the UI: what we're building (web + admin), infra to match (Bun, SvelteKit/
+  Svelte 5 runes, Drizzle, Supabase, Vercel), route inventory + auth per app,
+  anonymous-registration data rules, pointer to DESIGN_TOKENS.md, component
+  inventory, conventions (runes, CSS-variable-only, a11y, en-PH dates), and
+  a verify checklist.
+- **`agents/AGENTS.md`** index row updated: UI.md owns the handoff brief,
+  DESIGN_TOKENS.md owns the design system.
+
+## 2026-08-29 — Removed participant auth from the public web app (anonymous registration)
+- **Scope change:** participant sign-up/login/logout dropped from `apps/web`
+  (DECISIONS.md 2026-08-29). Auth now exists only in `apps/admin`. Public
+  registration is anonymous.
+- **Web:** deleted `apps/web/src/routes/{login,signup,logout}/`, plus the web
+  `hooks.server.ts`, `lib/server/auth-guards.ts`, `lib/supabaseClient.ts`, and
+  `+layout.server.ts` (no more session plumbing/cookies). Header, mobile menu,
+  and footer no longer show sign-in/sign-up/log-out controls; homepage
+  "How it works" step 2 rewritten to "Tell us about you" (no account mention).
+- **Registration:** `events/[id]/+page.server.ts` `register` action no longer
+  requires a session — no redirect-to-login, no per-user duplicate check (none
+  is possible anonymously). Inserts pin `user_id` to the new shared
+  `ANONYMOUS_USER_ID` and upload file answers server-side via
+  `SUPABASE_SERVICE_ROLE_KEY` at `{ANONYMOUS_USER_ID}/{event_id}/{ts}-{rand}-{name}`
+  (same `{uuid}/` prefix the admin file endpoint validates).
+- **DB (migration `drizzle/0003_milky_living_tribunal.sql`, applied + verified):**
+  `event_user_unique` is now a partial unique index on `(event_id, user_id)`
+  `WHERE user_id <> ANONYMOUS_USER_ID`, and a fixed "Anonymous" profile row
+  (`d686bd46-…1562`) was seeded so the FK holds. Constant lives in
+  `packages/db/src/anonymous.ts`, re-exported from `@csweek/db`.
+- **Env:** web app now needs `SUPABASE_SERVICE_ROLE_KEY` (private, server-only)
+  in addition to `PUBLIC_SUPABASE_URL` + `DATABASE_URL`; `PUBLIC_SUPABASE_ANON_KEY`
+  is no longer used by the public app.
+- **Docs:** ARCHITECTURE/API/PROJECT/TESTING/DATABASE/AUTHORIZATION updated;
+  `apps/web/README.md` env list corrected.
+
 ## 2026-08-28 — Admin console visual redesign (frontend)
 - **Admin design system:** sakura theme via a dusky-rose palette on warm
   paper + Shippori Mincho (display) / IBM Plex Sans (body), defined as CSS

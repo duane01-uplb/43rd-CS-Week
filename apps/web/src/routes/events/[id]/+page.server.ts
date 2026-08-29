@@ -1,9 +1,8 @@
 import { and, count, eq } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
-import { eventRegistrationFields, events, registrations } from '@csweek/db';
+import { ANONYMOUS_USER_ID, eventRegistrationFields, events, registrations } from '@csweek/db';
 import { getDb } from '$lib/server/db';
-import { requireSession } from '$lib/server/auth-guards';
-import { createSupabaseServerClient } from '$lib/server/supabase';
+import { createServiceRoleClient } from '$lib/server/supabase';
 import type { Actions, PageServerLoad } from './$types';
 
 const UPLOAD_BUCKET = 'registration-uploads';
@@ -24,7 +23,6 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   register: async (event) => {
-    const user = requireSession(event);
     const db = getDb();
     const target = await db.query.events.findFirst({ where: eq(events.id, event.params.id) });
     if (!target || target.status !== 'open') return fail(400, { error: 'This event is not open for registration.' });
@@ -33,8 +31,8 @@ export const actions: Actions = {
     const responses: Record<string, string | boolean> = {};
     const pendingUploads: { fieldKey: string; file: File }[] = [];
     // Pass 1: validate all answers first — uploads happen only after the
-    // duplicate/capacity checks below, so failed registrations do not
-    // leave orphaned files in storage.
+    // capacity check below, so failed registrations do not leave orphaned
+    // files in storage.
     for (const field of fields) {
       if (field.fieldType === 'file') {
         const upload = form.get(field.fieldKey);
@@ -51,20 +49,19 @@ export const actions: Actions = {
       if (field.isRequired && (value === null || value === '' || value === false)) return fail(400, { error: `${field.label} is required.` });
       if (value !== null && !(value instanceof File)) responses[field.fieldKey] = value;
     }
-    const existing = await db.select({ id: registrations.id }).from(registrations).where(and(eq(registrations.eventId, target.id), eq(registrations.userId, user.id))).limit(1);
-    if (existing.length) return fail(409, { error: 'You are already registered for this event.' });
     if (target.capacity !== null) {
       const [{ total }] = await db.select({ total: count() }).from(registrations).where(and(eq(registrations.eventId, target.id), eq(registrations.status, 'confirmed')));
       if (total >= target.capacity) return fail(409, { error: 'This event is at capacity.' });
     }
-    // Pass 2: push uploads to Supabase Storage using the registrant's own
-    // session (the "users insert own uploads" policy pins writes to their
-    // auth.uid() folder). Only the resulting storage path is stored in
-    // responses — never the raw file.
+    // Pass 2: push uploads to Supabase Storage with the service-role client
+    // (the public site has no user sessions). Only the resulting storage path
+    // is stored in responses — never the raw file. The top-level folder is
+    // the anonymous identity so the admin file endpoint's {uuid}/ prefix
+    // guard keeps working unchanged.
     if (pendingUploads.length) {
-      const supabase = createSupabaseServerClient(event);
+      const supabase = createServiceRoleClient();
       for (const { fieldKey, file } of pendingUploads) {
-        const path = `${user.id}/${target.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
+        const path = `${ANONYMOUS_USER_ID}/${target.id}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizeFileName(file.name)}`;
         const { error: uploadError } = await supabase.storage.from(UPLOAD_BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' });
         if (uploadError) {
           console.error(`Storage upload failed for ${path}:`, uploadError.message);
@@ -73,7 +70,7 @@ export const actions: Actions = {
         responses[fieldKey] = path;
       }
     }
-    try { await db.insert(registrations).values({ eventId: target.id, userId: user.id, status: 'confirmed', responses }); }
+    try { await db.insert(registrations).values({ eventId: target.id, userId: ANONYMOUS_USER_ID, status: 'confirmed', responses }); }
     catch (e) {
       console.error('Registration insert failed:', e);
       return fail(409, { error: 'We could not complete your registration. It may already exist.' });

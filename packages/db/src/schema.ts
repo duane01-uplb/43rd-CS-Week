@@ -1,5 +1,6 @@
 import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import { ANONYMOUS_USER_ID } from './anonymous';
 
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey(),
@@ -35,7 +36,9 @@ export const registrations = pgTable('registrations', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   statusCheck: check('status_check', sql`${t.status} in ('pending','confirmed','cancelled')`),
-  eventUserUnique: uniqueIndex('event_user_unique').on(t.eventId, t.userId),
+  // Per-user duplicate protection — the anonymous identity is excluded so
+  // account-free registrations are never all treated as one submitter.
+  eventUserUnique: uniqueIndex('event_user_unique').on(t.eventId, t.userId).where(sql`${t.userId} <> ${ANONYMOUS_USER_ID}`),
   // Admin list/export: filter by status + order by created_at
   statusCreatedIdx: index('registrations_status_created_at_idx').on(t.status, t.createdAt),
 }));

@@ -13,7 +13,8 @@ do not duplicate information across files.
 | API.md | Endpoints, request/response contracts |
 | PAYMENTS.md | Out of scope — kept for history, see DECISIONS.md |
 | TESTING.md | Test strategy, manual QA checklists |
-| UI.md | Design tokens, layout conventions, component list |
+| DESIGN_TOKENS.md | Design system: palette, typography, shape, motion, component anatomy | 
+| UI.md | Handoff brief for building the UI (what/where/how, infra match) |
 | WORKFLOW.md | Sprint cadence, Definition of Done, guardrails |
 | DECISIONS.md | Log of key decisions and why they were made |
 | PROGRESS.md | Append-only log of completed work, newest first (companion to DECISIONS.md) |
