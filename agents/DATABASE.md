@@ -35,6 +35,18 @@
 - events 1—N registrations
 - profiles 1—N registrations
 
+## Indexes (added 2026-08-28, migration `0002_*`)
+- `events_status_start_at_idx (status, start_at)` — public "open &
+	upcoming" homepage/events query: `WHERE status='open' AND
+	start_at>=now() ORDER BY start_at`.
+- `registrations_status_created_at_idx (status, created_at)` — admin
+	registration list/export: filter by status, order by created_at.
+- FK lookup keys (`events.id`, `profiles.id`, `registrations.event_id` /
+	`user_id`) are already served by PKs and the
+	`(event_id, user_id)` unique index's leftmost prefix.
+- Note: the admin `ilike profiles.full_name` search is not index-assisted
+	(leading wildcard); revisit with `pg_trgm` only if registrations grow.
+
 ## Migration Strategy
 - Schema defined in `schema.ts` (Drizzle, TypeScript) — source of truth
 	for table structure.
