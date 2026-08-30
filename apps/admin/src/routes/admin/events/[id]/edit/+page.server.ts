@@ -1,6 +1,8 @@
 import { count, eq } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { events, registrations } from '@csweek/db';
+import { cacheKeys } from '@csweek/cache';
+import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
 import { requireAdmin } from '$lib/server/auth-guards';
 import type { Actions, PageServerLoad } from './$types';
@@ -57,6 +59,14 @@ export const actions: Actions = {
         status
       })
       .where(eq(events.id, target.id));
+
+    // Reflect the change on public listings/homepage and the dashboard.
+    await cache.bust(
+      cacheKeys.adminOverview,
+      cacheKeys.webHome,
+      ...cacheKeys.webEventsVariants,
+      cacheKeys.webEvent(target.id)
+    );
 
     throw redirect(303, '/admin/events');
   }

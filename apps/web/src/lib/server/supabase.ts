@@ -1,12 +1,12 @@
-import { createServerClient } from '@supabase/ssr';
-import { env } from '$env/dynamic/public';
-import type { RequestEvent } from '@sveltejs/kit';
+import { createClient } from '@supabase/supabase-js';
+import { env } from '$env/dynamic/private';
 
-export function createSupabaseServerClient(event: RequestEvent) {
-  return createServerClient(env.PUBLIC_SUPABASE_URL ?? '', env.PUBLIC_SUPABASE_ANON_KEY ?? '', {
-    cookies: {
-      getAll: () => event.cookies.getAll(),
-      setAll: (cookies) => cookies.forEach(({ name, value, options }) => event.cookies.set(name, value, { ...options, path: '/' }))
-    }
+// Server-only client for anonymous registration file uploads. The public
+// web app has no user sessions, so uploads are written with the service-role
+// key rather than an end-user session. Never expose SUPABASE_SERVICE_ROLE_KEY
+// to the client.
+export function createServiceRoleClient() {
+  return createClient(env.PUBLIC_SUPABASE_URL ?? '', env.SUPABASE_SERVICE_ROLE_KEY ?? '', {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
   });
 }

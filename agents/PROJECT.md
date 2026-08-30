@@ -7,8 +7,9 @@ and lets participants register. All events are free registration only
 
 ## Scope
 - Public site: homepage, events listing, event detail
-- Auth: participant sign-up/login
-- Registration: free registration only (payments descoped — see DECISIONS.md)
+- Registration: free, anonymous — no participant accounts (payments
+  descoped — see DECISIONS.md)
+- Auth: admin-only sign-in for the dashboard
 - Admin dashboard: event CRUD, registration management
 
 ## Out of Scope (unless revisited)

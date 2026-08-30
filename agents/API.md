@@ -3,19 +3,14 @@
 ## Conventions
  - Prefer SvelteKit form actions (`+page.server.ts` actions) for form-driven mutations when possible.
  - Use SvelteKit endpoints (`src/routes/api/*/+server.ts`) for plain HTTP JSON endpoints or webhook handlers.
- - Prefer SvelteKit form actions (`+page.server.ts` actions) for form-driven mutations when possible.
- - Use SvelteKit endpoints (`src/routes/api/*/+server.ts`) for plain HTTP JSON endpoints or webhook handlers.
- - All data reads/writes (events, registrations, profiles) go through Drizzle. Every action/endpoint handler must check `locals.session` (and role, for admin endpoints) before querying — Drizzle bypasses RLS, so this check is not optional. See `agents/AUTHORIZATION.md`.
+ - All data reads/writes (events, registrations, profiles) go through Drizzle. Every admin action/endpoint handler must check the session/role (via `requireSession()` / `requireAdmin()`) before querying — Drizzle bypasses RLS, so this check is not optional. See `agents/AUTHORIZATION.md`. Public registration is anonymous and needs no session check.
 
 ## Endpoints (draft — expand as built)
 
 ### Public
 - `GET /api/events` — list events
 - `GET /api/events/:id` — event detail
-
-### Auth-required
-- `POST /api/registrations` — create registration
-- `GET /api/registrations/me` — participant's own registrations
+- `POST /api/registrations` — create registration (anonymous; no account required)
 
 ### Admin
 - `POST /api/admin/events` — create event
@@ -25,9 +20,10 @@
 
 ## Implemented route actions
 
-- `POST /login` and `POST /signup` use SvelteKit form actions with the
-  Supabase cookie-backed SSR client.
-- `POST /events/:id?/register` creates a registration after a server-side
-  session check, field validation, event-status check, duplicate check, and
-  capacity check.
+- `POST /events/:id?/register` creates a registration without a session:
+  field/event-status/capacity validation, then an insert pinned to the
+  single anonymous identity (`ANONYMOUS_USER_ID`). File answers are
+  uploaded to Supabase Storage with the service-role client.
+- `POST /admin/login` is the admin-only sign-in via the cookie-backed SSR
+  Supabase client.
 - `POST /admin/events/new` is role-gated by `requireAdmin()`.

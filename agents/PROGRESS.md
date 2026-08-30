@@ -6,6 +6,142 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-29 — Upstash Redis: read-through caching + registration rate limiting
+- **New `packages/cache` (`@csweek/cache`):** shared serverless-Redis helper on
+  top of `@upstash/redis` — `getJson` read-through TTL cache (fail-open to the
+  fetcher), fixed-window `rateLimit`, `bust` key deletion, and a `cacheKeys`
+  registry both apps share for invalidation. Wired in each app via
+  `lib/server/cache.ts` using `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`.
+- **Web (TTL 30s):** cached homepage load (`web:home`), `/events` listing
+  (`web:events:*`, keyed by filter combo), and event detail (`web:event:{id}`).
+  The capacity check in the register action stays on live Postgres (no
+  oversell).
+- **Web rate limiting:** registration action now checks counters BEFORE any
+  DB work — 10 attempts/event/IP/15min (`rl:register:event:{e}:{ip}`) and
+  50/IP/hour (`rl:register:global:{ip}`); exceeded → HTTP 429 via `fail()`.
+- **Admin:** overview counts cached `admin:overview` (TTL 15s); event
+  create/edit bust admin overview + all web listing/home/event-detail keys;
+  a new registration busts `admin:overview` so the dashboard catches up.
+- **Fails open:** missing Redis env or Upstash outage degrades to direct DB
+  reads and allow-through rate limits (logged), never blocking pages/signups.
+- **Docs:** ARCHITECTURE (stack + new "Caching & Rate Limiting" section,
+  folder tree, client locations), web & admin README env lists, DECISIONS row.
+
+## 2026-08-29 — Brand mark lock-up: UPLB ComSci Soc logo + CASC4D3 emblem
+- **Header/footer lock-up:** `apps/web/src/routes/+layout.svelte` brand replaced
+  the single rose-gradient mark with a two-mark group: UPLB Computer Science
+  Society circular logo (rose-ringed) + CASC4D3 emblem (light disc), separated
+  by a `│` divider, both header and footer. Kicker updated to "43RD COMPUTER
+  SCIENCE WEEK".
+- **Assets:** new `apps/web/static/casc4d3-emblem.png` (rose emblem) and
+  `apps/web/static/uplb-comsci-soc-logo.png` (society logo), served from the
+  SvelteKit static dir.
+- **Hero copy (WIP):** `+page.svelte` tagline now "Towards a Resilient
+  Human-Centered Computing"; nav/edge/CTA labels use "events"; hero full-viewport
+  (100dvh) with stat bar pinned to bottom.
+- **UNCOMMITTED / NOT FINISHED:** hero stat bar values and description are
+  still `placeholder` / `test` text — final copy pending before this work is
+  complete.
+
+## 2026-08-29 — Public CASC4D3 redesign & design system component build-out
+- **Cinematic Event Hero:** Built an immersive full-bleed dark hero on `apps/web/src/routes/+page.svelte` featuring an ambient luminous backdrop, interactive parallax tracking, central multi-tiered computational artifact SVG with concentric logic circuits and nodal termini, monumental Shippori Mincho display typography, floating glass stat strip, and minimal edge navigation indicator.
+- **Component Library (`apps/web/src/lib/components/`):** Installed `bits-ui` and implemented reusable token-driven Svelte 5 components: `Badge.svelte`, `Button.svelte`, and `EventCard.svelte`.
+- **Pages Polished:** Fully integrated component library into `+layout.svelte` (scroll-sensing navigation header), `+page.svelte` (home narrative), `events/+page.svelte` (discovery hub with filter controls), and `events/[id]/+page.svelte` (2-column event detail with dynamic registration form and image upload handling).
+- **Zero Errors:** Verified via `bunx svelte-check` across all public web routes and components.
+
+## 2026-08-29 — Split design docs: DESIGN_TOKENS.md + UI.md handoff brief
+- **NEW `agents/DESIGN_TOKENS.md`:** single source of truth for everything
+  visual (palette incl. status colors, typography + scale, radii/elevation,
+  motion, layout/breakpoints, shared utility classes, component anatomy,
+  brand mark, required states). Tokens are duplicated in each app's root
+  layout `:root` and must stay in sync (noted in the doc).
+- **`agents/UI.md` rewritten as a handoff brief** for another model building
+  the UI: what we're building (web + admin), infra to match (Bun, SvelteKit/
+  Svelte 5 runes, Drizzle, Supabase, Vercel), route inventory + auth per app,
+  anonymous-registration data rules, pointer to DESIGN_TOKENS.md, component
+  inventory, conventions (runes, CSS-variable-only, a11y, en-PH dates), and
+  a verify checklist.
+- **`agents/AGENTS.md`** index row updated: UI.md owns the handoff brief,
+  DESIGN_TOKENS.md owns the design system.
+
+## 2026-08-29 — Removed participant auth from the public web app (anonymous registration)
+- **Scope change:** participant sign-up/login/logout dropped from `apps/web`
+  (DECISIONS.md 2026-08-29). Auth now exists only in `apps/admin`. Public
+  registration is anonymous.
+- **Web:** deleted `apps/web/src/routes/{login,signup,logout}/`, plus the web
+  `hooks.server.ts`, `lib/server/auth-guards.ts`, `lib/supabaseClient.ts`, and
+  `+layout.server.ts` (no more session plumbing/cookies). Header, mobile menu,
+  and footer no longer show sign-in/sign-up/log-out controls; homepage
+  "How it works" step 2 rewritten to "Tell us about you" (no account mention).
+- **Registration:** `events/[id]/+page.server.ts` `register` action no longer
+  requires a session — no redirect-to-login, no per-user duplicate check (none
+  is possible anonymously). Inserts pin `user_id` to the new shared
+  `ANONYMOUS_USER_ID` and upload file answers server-side via
+  `SUPABASE_SERVICE_ROLE_KEY` at `{ANONYMOUS_USER_ID}/{event_id}/{ts}-{rand}-{name}`
+  (same `{uuid}/` prefix the admin file endpoint validates).
+- **DB (migration `drizzle/0003_milky_living_tribunal.sql`, applied + verified):**
+  `event_user_unique` is now a partial unique index on `(event_id, user_id)`
+  `WHERE user_id <> ANONYMOUS_USER_ID`, and a fixed "Anonymous" profile row
+  (`d686bd46-…1562`) was seeded so the FK holds. Constant lives in
+  `packages/db/src/anonymous.ts`, re-exported from `@csweek/db`.
+- **Env:** web app now needs `SUPABASE_SERVICE_ROLE_KEY` (private, server-only)
+  in addition to `PUBLIC_SUPABASE_URL` + `DATABASE_URL`; `PUBLIC_SUPABASE_ANON_KEY`
+  is no longer used by the public app.
+- **Docs:** ARCHITECTURE/API/PROJECT/TESTING/DATABASE/AUTHORIZATION updated;
+  `apps/web/README.md` env list corrected.
+
+## 2026-08-28 — Admin console visual redesign (frontend)
+- **Admin design system:** sakura theme via a dusky-rose palette on warm
+  paper + Shippori Mincho (display) / IBM Plex Sans (body), defined as CSS
+  tokens in `apps/admin/src/routes/+layout.svelte`. No "flowery" decoration —
+  the Japanese influence is carried by color + type only.
+- **Shell/layout:** new sticky sidebar (`AppSidebar.svelte`) with active
+  rose-stem indicator + collapese-to-topbar at <720px; top bar with
+  signed-in avatar in `admin/+layout.svelte`. Removed the now-dead
+  `AdminShellHeader.svelte`.
+- **Pages styled:** Overview (stat cards + task tiles, enriched server
+  load with open/pending/confirmed counts), Events list (badges, capacity,
+  empty state), create/edit event forms, Registrations (filter bar, empty
+  states, response drilldown), login card.
+- Shared utilities (`.btn*`, `.field`, `.badge*`, `.status-msg`,
+  `.eyebrow`) and focus/reduced-motion respected globally.
+- Design tokens documented in `agents/UI.md`.
+
+## 2026-08-28 — Admin/registration performance investigation + fixes
+- **Auth cold path removed:** both `hooks.server.ts` (web + admin) now skip
+  `supabase.auth.getUser()` when no `sb-*-auth-token` cookie is present,
+  short-circuiting `event.locals.user = null` for anonymous visitors. This
+  removes an outbound auth-server round-trip from every public page load
+  (the main cause of slow TTFB). Logged-in users still get a full verify.
+- **Connection tuning:** `createDb` in `packages/db/src/index.ts` now passes
+  `{ prepare: false, max: 1 }` to the `postgres()` client — required for
+  Drizzle against Supabase's transaction pooler (port 6543) and to keep
+  per-serverless-instance connection counts low.
+- **Index migration (`drizzle/0002_pretty_krista_starr.sql`):**
+  `events_status_start_at_idx (status, start_at)` and
+  `registrations_status_created_at_idx (status, created_at)` — generated,
+  reviewed, NOT yet applied to the live DB (needs a proper DIRECT connection
+  to run `drizzle-kit push`).
+- **Doc:** DATABASE.md indexes section updated.
+
+
+## 2026-08-26 — Homepage upcoming-events preview + responsive baseline (Sprint 1)
+- **Scope change:** dropped flagship/featured event concept entirely (removed
+  from `agents/features/events.md` and sprint plan). Only upcoming-events
+  preview was in scope.
+- **New server load:** `apps/web/src/routes/+page.server.ts` queries up to 3
+  open events with `start_at >= now()`, sorted ascending. No session check —
+  public read, same as `/events`.
+- **Homepage UI:** `apps/web/src/routes/+page.svelte` now shows an "Upcoming
+  Events" section below the hero with event title, formatted start date/time
+  (en-PH / Asia/Manila), description, and link to `/events/{id}`. Empty state
+  shows "No events open yet — check back soon."
+- **Responsive baseline (homepage only):** CSS uses `clamp()` for heading
+  sizing, flexbox column layout for event cards, and a `@media (max-width:
+  480px)` breakpoint for tighter padding. No framework or design system added.
+- **Sprint 1 checkboxes:** "Upcoming-events preview" and "Responsive baseline"
+  checked off; "Flagship event highlight" removed (dropped, not deferred).
+
 ## 2026-08-26 — CSV export for registrations (Sprint 4 complete)
 - **Export endpoint:** new `apps/admin/src/routes/admin/registrations/export/+server.ts`
   serves a CSV download at GET `/admin/registrations/export`. Admin-only

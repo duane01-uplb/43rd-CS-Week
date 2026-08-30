@@ -1,2 +1,1038 @@
-<svelte:head><title>CS Week</title></svelte:head>
-<section><p>Computer Science Week</p><h1>Learn, compete, and connect.</h1><p>Discover the events bringing our CS community together.</p><a href="/events">Explore events</a></section>
+<script lang="ts">
+	import EventCard from '$lib/components/EventCard.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import { onDestroy } from 'svelte';
+
+	let { data } = $props();
+
+	// Mouse parallax & interactive grid spotlight tracking
+	let mouseX = $state(0);
+	let mouseY = $state(0);
+	let cursorX = $state(50);
+	let cursorY = $state(50);
+	let hasMouse = $state(false);
+	// Tiles stay raised while the cursor moves, then settle back to rest
+	// 2 seconds after movement stops.
+	let gridLit = $state(false);
+	let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+	// 3D rising grid: every square touched by the cursor light lifts toward
+	// the viewer as an extruded prism; lift depth falls off with distance.
+	const CELL = 48;
+	const LIGHT_RADIUS = 170;
+	let viewportW = $state(typeof window !== 'undefined' ? window.innerWidth : 1440);
+	let viewportH = $state(typeof window !== 'undefined' ? window.innerHeight : 900);
+	let cols = $derived(Math.max(1, Math.floor(viewportW / CELL)));
+	let rows = $derived(Math.max(1, Math.floor(viewportH / CELL)));
+	let cells = $derived(Array.from({ length: cols * rows }, (_, i) => i));
+	let lightPath = $derived.by(() => {
+		const lifts = new Map<number, number>();
+		if (!hasMouse || !gridLit) return lifts;
+		const cx = (cursorX / 100) * viewportW;
+		const cy = (cursorY / 100) * viewportH;
+		const cellW = viewportW / cols;
+		const cellH = viewportH / rows;
+		for (let r = 0; r < rows; r++) {
+			for (let c = 0; c < cols; c++) {
+				const dx = (c + 0.5) * cellW - cx;
+				const dy = (r + 0.5) * cellH - cy;
+				const dist = Math.hypot(dx, dy);
+				if (dist <= LIGHT_RADIUS) {
+					const t = 1 - dist / LIGHT_RADIUS;
+					lifts.set(r * cols + c, Math.round(16 + t * 72));
+				}
+			}
+		}
+		return lifts;
+	});
+
+	function handleMouseMove(e: MouseEvent) {
+		if (typeof window !== 'undefined') {
+			const { innerWidth, innerHeight } = window;
+			mouseX = (e.clientX / innerWidth - 0.5) * 20; // range: -10 to +10
+			mouseY = (e.clientY / innerHeight - 0.5) * 20; // range: -10 to +10
+			cursorX = (e.clientX / innerWidth) * 100;
+			cursorY = (e.clientY / innerHeight) * 100;
+			hasMouse = true;
+			gridLit = true;
+			if (idleTimer) clearTimeout(idleTimer);
+			idleTimer = setTimeout(() => {
+				gridLit = false;
+			}, 2000);
+		}
+	}
+
+	onDestroy(() => {
+		if (idleTimer) clearTimeout(idleTimer);
+	});
+
+	function handleResize() {
+		if (typeof window !== 'undefined') {
+			viewportW = window.innerWidth;
+			viewportH = window.innerHeight;
+		}
+	}
+</script>
+
+<svelte:window onmousemove={handleMouseMove} onresize={handleResize} />
+
+<svelte:head>
+	<title>CASC4D3</title>
+</svelte:head>
+
+<!-- ============================== CINEMATIC HERO ============================== -->
+<section class="hero-cinematic" aria-label="Hero Introduction">
+	<!-- Atmospheric Sakura Blossom Background with Interactive Lit Grid & Drifting Petals -->
+	<div class="hero-backdrop" style={`--cursor-x: ${cursorX}%; --cursor-y: ${cursorY}%;`} aria-hidden="true">
+		<div class="ambient-glow"></div>
+		<div class="sakura-bloom-glow"></div>
+		<div class="cursor-aura" class:active={hasMouse}></div>
+		<div class="grid-3d" style={`--cols: ${cols}; --rows: ${rows};`} aria-hidden="true">
+			{#each cells as i}
+				{@const lift = lightPath.get(i) ?? 0}
+				<div class="grid-cell" class:active={lift > 0} style={`--lift: ${lift}px`}></div>
+			{/each}
+		</div>
+
+		<!-- Decorative Sakura Branch Silhouettes -->
+		<svg class="sakura-branches" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+			<path d="M-50 -20 C180 60, 320 180, 480 120 C560 90, 640 160, 720 110" stroke="#7a1f3d" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" fill="none" />
+			<path d="M1490 -30 C1280 80, 1150 200, 980 150 C900 125, 840 210, 760 170" stroke="#7a1f3d" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round" fill="none" />
+			<!-- Soft Blossom Clusters -->
+			<circle cx="320" cy="180" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
+			<circle cx="480" cy="120" r="18" fill="#f6e3e9" fill-opacity="0.25" filter="blur(3px)" />
+			<circle cx="640" cy="160" r="12" fill="#c25072" fill-opacity="0.18" filter="blur(2px)" />
+			<circle cx="1150" cy="200" r="16" fill="#f6e3e9" fill-opacity="0.22" filter="blur(2px)" />
+			<circle cx="980" cy="150" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
+		</svg>
+
+		<!-- Drifting Sakura Petals -->
+		<div class="sakura-petals-container">
+			{#each Array(14) as _, i}
+				<div class={`sakura-petal petal-${i + 1}`}>
+					<svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M15 2 C22 2, 28 10, 27 18 C26 24, 19 28, 15 28 C11 28, 4 24, 3 18 C2 10, 8 2, 15 2 Z"
+							fill="url(#petalGrad)"
+						/>
+						<defs>
+							<linearGradient id="petalGrad" x1="0" y1="0" x2="1" y2="1">
+								<stop offset="0%" stop-color="#fbf1f4" />
+								<stop offset="60%" stop-color="#f6e3e9" />
+								<stop offset="100%" stop-color="#c25072" />
+							</linearGradient>
+						</defs>
+					</svg>
+				</div>
+			{/each}
+		</div>
+	</div>
+
+	<!-- Central Dominant Computational Visual Focus -->
+	<div
+		class="hero-focal-stage"
+		style={`transform: translate3d(${mouseX * 0.75}px, ${mouseY * 0.75}px, 0);`}
+		aria-hidden="true"
+	>
+		<svg
+			class="hero-artifact"
+			viewBox="0 0 540 540"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<defs>
+				<radialGradient id="artifactCoreGrad" cx="35%" cy="30%" r="80%">
+					<stop offset="0%" stop-color="#c25072" />
+					<stop offset="65%" stop-color="#a63a5c" />
+					<stop offset="100%" stop-color="#7a1f3d" />
+				</radialGradient>
+				<radialGradient id="artifactGlowGrad" cx="50%" cy="50%" r="50%">
+					<stop offset="0%" stop-color="#c25072" stop-opacity="0.35" />
+					<stop offset="50%" stop-color="#a63a5c" stop-opacity="0.12" />
+					<stop offset="100%" stop-color="#2b2430" stop-opacity="0" />
+				</radialGradient>
+				<linearGradient id="orbitalStrokeGrad" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#c25072" stop-opacity="0.8" />
+					<stop offset="50%" stop-color="#a63a5c" stop-opacity="0.4" />
+					<stop offset="100%" stop-color="#f6e3e9" stop-opacity="0.1" />
+				</linearGradient>
+			</defs>
+
+			<!-- Outer Ambient Radiation -->
+			<circle cx="270" cy="270" r="230" fill="url(#artifactGlowGrad)" />
+			<circle cx="270" cy="270" r="215" stroke="#c25072" stroke-opacity="0.2" stroke-width="1.2" stroke-dasharray="3 9" />
+			<circle cx="270" cy="270" r="185" stroke="url(#orbitalStrokeGrad)" stroke-width="1.5" />
+			<circle cx="270" cy="270" r="145" stroke="#a63a5c" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="5 10" class="spin-slow" />
+			<circle cx="270" cy="270" r="105" stroke="#c25072" stroke-opacity="0.6" stroke-width="1.5" />
+
+			<!-- Computational Bus Lines & Logic Nodes -->
+			<g stroke="#c25072" stroke-opacity="0.7" stroke-width="1.8" stroke-linecap="round">
+				<path d="M270 270 h120 v68" />
+				<path d="M270 270 h-130 v-80" />
+				<path d="M270 270 v140" />
+				<path d="M270 200 v-70" />
+				<path d="M270 270 v-120 h-60" />
+				<path d="M270 270 l90 -90 h45" />
+				<path d="M270 270 l-85 85 h-45" />
+			</g>
+
+			<!-- Circuit Terminus Nodes -->
+			<g fill="#2b2430" stroke="#f6e3e9" stroke-width="2">
+				<circle cx="390" cy="270" r="6" />
+				<circle cx="390" cy="338" r="5" />
+				<circle cx="140" cy="270" r="6" />
+				<circle cx="140" cy="190" r="5" />
+				<circle cx="270" cy="410" r="6" />
+				<circle cx="270" cy="130" r="6" />
+				<circle cx="210" cy="150" r="5" />
+				<circle cx="405" cy="180" r="5.5" />
+				<circle cx="140" cy="355" r="5.5" />
+			</g>
+
+			<!-- Concentric Central Core Node -->
+			<circle cx="270" cy="270" r="42" fill="url(#artifactCoreGrad)" class="pulse-core" />
+			<circle cx="270" cy="270" r="34" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5" />
+			<circle cx="258" cy="258" r="10" fill="#ffffff" fill-opacity="0.85" />
+		</svg>
+	</div>
+
+	<!-- Central Hero Overlay Content -->
+	<div class="hero-inner shell">
+		<div class="hero-content">
+			<div class="hero-badge">
+				<span class="hero-badge-glow" aria-hidden="true"></span>
+				<span class="hero-badge-text">43RD COMPUTER SCIENCE WEEK</span>
+			</div>
+
+			<h1 class="hero-title">
+				CASC4D3
+				<span class="hero-subtitle-line">Towards a Resilient Human-Centered Computing</span>
+			</h1>
+
+			<p class="hero-description">
+				test test test test test test test test test test test test test test test test test test test
+			</p>
+
+			<div class="hero-action-row">
+				<Button variant="primary" size="lg" href="/events">
+					<span>Register for Events</span>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M5 12h14" />
+						<path d="m12 5 7 7-7 7" />
+					</svg>
+				</Button>
+				<Button variant="ghost-dark" size="lg" href="#event">
+					<span>Explore Schedule</span>
+				</Button>
+			</div>
+		</div>
+
+		<!-- Bottom Metadata & Stat Bar -->
+		<div class="hero-stat-bar">
+			<div class="stat-item">
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
+			</div>
+			<div class="stat-divider" aria-hidden="true"></div>
+			<div class="stat-item">
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
+			</div>
+			<div class="stat-divider" aria-hidden="true"></div>
+			<div class="stat-item">
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
+			</div>
+			<div class="stat-divider" aria-hidden="true"></div>
+			<div class="stat-item">
+				<span class="stat-val">placeholder</span>
+				<span class="stat-lbl">placeholder</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Minimal Right-Edge Section Index Indicator -->
+	<aside class="hero-edge-nav" aria-label="Page section navigation">
+		<a href="#intro" class="edge-dot">
+			<span class="edge-dot-mark" aria-hidden="true"></span>
+			<span class="edge-label">01 INTRO</span>
+		</a>
+		<a href="#event" class="edge-dot">
+			<span class="edge-dot-mark" aria-hidden="true"></span>
+			<span class="edge-label">02 EVENTS</span>
+		</a>
+		<a href="#experience" class="edge-dot">
+			<span class="edge-dot-mark" aria-hidden="true"></span>
+			<span class="edge-label">03 ABOUT</span>
+		</a>
+		<a href="#how-it-works" class="edge-dot">
+			<span class="edge-dot-mark" aria-hidden="true"></span>
+			<span class="edge-label">04 GUIDE</span>
+		</a>
+	</aside>
+</section>
+
+<!-- ====================== SECTION 1: IDENTITY & OVERVIEW ====================== -->
+<section class="section-intro" id="intro">
+	<div class="shell">
+		<div class="intro-grid">
+			<div class="intro-heading-col">
+				<p class="eyebrow">The 43rd Celebration</p>
+				<h2>Where computing curiosity cascades into impact.</h2>
+			</div>
+			<div class="intro-body-col">
+				<p class="intro-lead">
+					CASC4D3 honors the legacy of Computer Science at UPLB by creating an open arena for everyone — from first-year explorers to senior systems architects.
+				</p>
+				<p class="intro-sub">
+					No paywalls. No gatekeeping. Just pure passion for algorithms, interfaces, design challenges, and community.
+				</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- ====================== SECTION 2: FEATURED / UPCOMING event ====================== -->
+<section class="section-event" id="event">
+	<div class="shell">
+		<div class="section-head section-head-row">
+			<div>
+				<p class="eyebrow">Schedule & Registration</p>
+				<h2>Open Events</h2>
+				<p class="lede">Active registration streams. Slots are reserved instantly upon form submission.</p>
+			</div>
+			<a href="/events" class="arrow-link">
+				<span>View complete event schedule</span>
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M5 12h14" />
+					<path d="m12 5 7 7-7 7" />
+				</svg>
+			</a>
+		</div>
+
+		{#if data.upcoming.length === 0}
+			<div class="empty-card">
+				<h3>No events currently accepting registrations</h3>
+				<p>Organizers are preparing the next batch of sessions and challenges. Check back soon.</p>
+				<div style="margin-top: 1.25rem;">
+					<Button variant="ghost" size="sm" href="/events">Browse full event catalog</Button>
+				</div>
+			</div>
+		{:else}
+			<div class="track-grid">
+				{#each data.upcoming as event (event.id)}
+					<EventCard {event} variant="track" />
+				{/each}
+			</div>
+		{/if}
+	</div>
+</section>
+
+<!-- ====================== SECTION 3: THREE EXPERIENCE PILLARS ====================== -->
+<section class="section-experience" id="experience">
+	<div class="shell">
+		<div class="section-head">
+			<p class="eyebrow">Pillars of CASC4D3</p>
+			<h2>Curated for every aspect of computing.</h2>
+			<p class="lede">A balanced blend of academic insights, technical rigor, and spirited friendly competition.</p>
+		</div>
+
+		<div class="pillars-grid">
+			<article class="pillar-card">
+				<span class="pillar-icon" aria-hidden="true">
+					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="4" width="18" height="18" rx="2" />
+						<path d="M3 10h18" />
+						<path d="M8 2v4M16 2v4" />
+						<path d="m9 16 2 2 4-4" />
+					</svg>
+				</span>
+				<h3>Career & Tech Orientation</h3>
+				<p>Engage with industry alumni and experienced practitioners to navigate software engineering, AI, and academic research pathways.</p>
+			</article>
+
+			<article class="pillar-card">
+				<span class="pillar-icon" aria-hidden="true">
+					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="12 2 2 7 12 12 22 7 12 2" />
+						<polyline points="2 17 12 22 22 17" />
+						<polyline points="2 12 12 17 22 12" />
+					</svg>
+				</span>
+				<h3>Warframes Design & Code</h3>
+				<p>Put your team's design intuition and web development prowess to the test in high-energy creative challenges.</p>
+			</article>
+
+			<article class="pillar-card">
+				<span class="pillar-icon" aria-hidden="true">
+					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="6" y1="12" x2="10" y2="12" />
+						<line x1="8" y1="10" x2="8" y2="14" />
+						<line x1="15" y1="13" x2="15.01" y2="13" />
+						<line x1="18" y1="11" x2="18.01" y2="11" />
+						<rect x="2" y="6" width="20" height="12" rx="2" />
+					</svg>
+				</span>
+				<h3>Games Day Showdown</h3>
+				<p>Unwind and compete in multiplayer tournaments. Celebrate camaraderie with fellow computing peers across batches.</p>
+			</article>
+		</div>
+	</div>
+</section>
+
+<!-- ====================== SECTION 4: HOW IT WORKS ====================== -->
+<section class="section-howto" id="how-it-works">
+	<div class="shell">
+		<div class="section-head">
+			<p class="eyebrow">Registration Flow</p>
+			<h2>Fast, frictionless, account-free.</h2>
+			<p class="lede">We eliminated sign-up hurdles so your entry is confirmed in less than a minute.</p>
+		</div>
+
+		<ol class="steps-flow">
+			<li class="step-card">
+				<span class="step-counter" aria-hidden="true">01</span>
+				<h3>Choose Your Event</h3>
+				<p>Browse the roster of live events, check the schedule, and select the session you want to join.</p>
+			</li>
+			<li class="step-card">
+				<span class="step-counter" aria-hidden="true">02</span>
+				<h3>Submit Responses</h3>
+				<p>Answer the specific organizer questions directly in the form — no username or password required.</p>
+			</li>
+			<li class="step-card">
+				<span class="step-counter" aria-hidden="true">03</span>
+				<h3>Instant Reservation</h3>
+				<p>Your spot is immediately locked in. Free admission with no checkout steps or payment gates.</p>
+			</li>
+		</ol>
+	</div>
+</section>
+
+<!-- ====================== SECTION 5: CINEMATIC CLOSING CTA ====================== -->
+<section class="section-cta" id="register">
+	<div class="shell">
+		<div class="cta-master-card">
+			<p class="cta-kicker">GET INVOLVED IN CASC4D3</p>
+			<h2>Be part of the 43rd Computer Science Week.</h2>
+			<p class="cta-summary">
+				{#if data.openCount > 0}
+					{data.openCount} {data.openCount === 1 ? 'event track is' : 'event event are'} accepting registrations right now. Claim your spot.
+				{:else}
+					The full event roster is ready. Discover all upcoming sessions and be first to register.
+				{/if}
+			</p>
+			<div class="cta-buttons">
+				<Button variant="white" size="lg" href="/events">Explore Full Schedule</Button>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	/* ============================== CINEMATIC HERO ============================== */
+	.hero-cinematic {
+		position: relative;
+		min-height: 100vh;
+		min-height: 100dvh;
+		height: 100vh;
+		height: 100dvh;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		background: linear-gradient(175deg, #1f1823 0%, #2b1f2e 40%, #341e2b 75%, #231a26 100%);
+		color: #ffffff;
+		overflow: hidden;
+		padding-top: 5rem;
+		padding-bottom: 1.75rem;
+		box-sizing: border-box;
+	}
+
+	/* Atmospheric Backdrop */
+	.hero-backdrop {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		overflow: hidden;
+	}
+	.ambient-glow {
+		position: absolute;
+		top: 15%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 800px;
+		height: 800px;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(194, 80, 114, 0.24) 0%, rgba(122, 31, 61, 0.12) 45%, rgba(35, 28, 39, 0) 75%);
+		filter: blur(40px);
+	}
+	.sakura-bloom-glow {
+		position: absolute;
+		top: 5%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 1000px;
+		height: 600px;
+		border-radius: 50%;
+		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
+		filter: blur(50px);
+	}
+	/* 3D Rising Grid: each square is its own tile; only the tile under the
+		cursor lifts toward the viewer (perspective + translateZ + glow). */
+	.grid-3d {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		grid-template-columns: repeat(var(--cols), 1fr);
+		grid-template-rows: repeat(var(--rows), 1fr);
+		perspective: 700px;
+		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
+		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
+	}
+	.grid-cell {
+		position: relative;
+		border-right: 1px solid rgba(246, 227, 233, 0.05);
+		border-bottom: 1px solid rgba(246, 227, 233, 0.05);
+		background: rgba(246, 227, 233, 0.015);
+		transition:
+			transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+			background 0.2s ease,
+			border-color 0.2s ease,
+			filter 0.3s ease;
+	}
+	/* Extruded prism side (visible under the lifting front face) */
+	.grid-cell::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 2px;
+		background: linear-gradient(120deg, rgba(90, 20, 44, 0.4) 0%, rgba(166, 58, 92, 0.2) 55%, rgba(246, 227, 233, 0.04) 100%);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.grid-cell.active {
+		z-index: 2;
+		border-color: rgba(246, 227, 233, 0.28);
+		background: radial-gradient(circle at center, rgba(194, 80, 114, 0.18) 0%, rgba(246, 227, 233, 0.05) 70%);
+		transform: translateZ(var(--lift, 0px));
+		filter: brightness(1.18);
+	}
+	.grid-cell.active::after {
+		opacity: 1;
+		transform: translate(7px, 11px) translateZ(calc(var(--lift, 0px) * -0.85));
+	}
+
+	/* Cursor Radial Light Aura */
+	.cursor-aura {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(420px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(194, 80, 114, 0.22) 0%, rgba(122, 31, 61, 0.09) 45%, transparent 75%);
+		opacity: 0;
+		transition: opacity 0.25s ease;
+		pointer-events: none;
+	}
+	.cursor-aura.active {
+		opacity: 1;
+	}
+
+	.sakura-branches {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	/* Drifting Sakura Petals */
+	.sakura-petals-container {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+	}
+	.sakura-petal {
+		position: absolute;
+		top: -30px;
+		opacity: 0.7;
+		filter: drop-shadow(0 2px 6px rgba(194, 80, 114, 0.3));
+		animation: petalFall linear infinite;
+	}
+	.sakura-petal svg {
+		width: 100%;
+		height: 100%;
+		animation: petalSway ease-in-out infinite alternate;
+	}
+
+	.petal-1 { left: 8%; width: 18px; height: 18px; animation-duration: 11s; animation-delay: 0s; }
+	.petal-2 { left: 16%; width: 22px; height: 22px; animation-duration: 14s; animation-delay: 2.5s; opacity: 0.85; }
+	.petal-3 { left: 25%; width: 15px; height: 15px; animation-duration: 10s; animation-delay: 5s; opacity: 0.6; }
+	.petal-4 { left: 34%; width: 20px; height: 20px; animation-duration: 13s; animation-delay: 1.2s; }
+	.petal-5 { left: 42%; width: 16px; height: 16px; animation-duration: 12s; animation-delay: 7s; }
+	.petal-6 { left: 52%; width: 24px; height: 24px; animation-duration: 15s; animation-delay: 3s; opacity: 0.9; }
+	.petal-7 { left: 60%; width: 14px; height: 14px; animation-duration: 9.5s; animation-delay: 4.5s; opacity: 0.55; }
+	.petal-8 { left: 68%; width: 19px; height: 19px; animation-duration: 12.5s; animation-delay: 6s; }
+	.petal-9 { left: 76%; width: 22px; height: 22px; animation-duration: 14s; animation-delay: 1.8s; opacity: 0.8; }
+	.petal-10 { left: 85%; width: 16px; height: 16px; animation-duration: 11.5s; animation-delay: 8s; }
+	.petal-11 { left: 92%; width: 20px; height: 20px; animation-duration: 13.5s; animation-delay: 4s; opacity: 0.75; }
+	.petal-12 { left: 12%; width: 14px; height: 14px; animation-duration: 10.5s; animation-delay: 9s; opacity: 0.5; }
+	.petal-13 { left: 48%; width: 18px; height: 18px; animation-duration: 12s; animation-delay: 9.5s; opacity: 0.7; }
+	.petal-14 { left: 80%; width: 15px; height: 15px; animation-duration: 11s; animation-delay: 10.5s; opacity: 0.65; }
+
+	@keyframes petalFall {
+		0% {
+			transform: translateY(-20px) rotate(0deg);
+		}
+		100% {
+			transform: translateY(105vh) rotate(360deg);
+		}
+	}
+
+	@keyframes petalSway {
+		0% {
+			transform: translateX(-18px) rotateX(0deg) rotateY(0deg);
+		}
+		50% {
+			transform: translateX(18px) rotateX(45deg) rotateY(60deg);
+		}
+		100% {
+			transform: translateX(-18px) rotateX(0deg) rotateY(0deg);
+		}
+	}
+
+	/* Central Dominant Computational Visual Focus */
+	.hero-focal-stage {
+		position: absolute;
+		top: 44%;
+		left: 50%;
+		margin-top: -270px;
+		margin-left: -270px;
+		width: 540px;
+		height: 540px;
+		pointer-events: none;
+		z-index: 1;
+		transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.hero-artifact {
+		width: 100%;
+		height: 100%;
+		filter: drop-shadow(0 15px 45px rgba(194, 80, 114, 0.25));
+	}
+
+	@keyframes spinSlow {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+	@keyframes pulseCore {
+		0%, 100% { transform: scale(1); opacity: 1; }
+		50% { transform: scale(1.06); opacity: 0.92; }
+	}
+	.spin-slow {
+		transform-origin: 270px 270px;
+		animation: spinSlow 36s linear infinite;
+	}
+	.pulse-core {
+		transform-origin: 270px 270px;
+		animation: pulseCore 4s ease-in-out infinite;
+	}
+
+	/* Central Hero Content */
+	.hero-inner {
+		position: relative;
+		z-index: 2;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		text-align: center;
+		box-sizing: border-box;
+	}
+	.hero-content {
+		max-width: 44rem;
+		margin: auto auto;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.hero-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		padding: 0.35rem 0.95rem;
+		border-radius: 999px;
+		background: rgba(166, 58, 92, 0.18);
+		border: 1px solid rgba(194, 80, 114, 0.45);
+		backdrop-filter: blur(8px);
+		margin-bottom: 1.25rem;
+	}
+	.hero-badge-glow {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: var(--rose-600);
+		box-shadow: 0 0 10px var(--rose-600);
+	}
+	.hero-badge-text {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.18em;
+		color: var(--rose-100);
+	}
+
+	.hero-title {
+		font-family: var(--font-display);
+		font-size: clamp(3rem, 7.5vw, 5.4rem);
+		font-weight: 700;
+		line-height: 0.98;
+		letter-spacing: 0.04em;
+		margin: 0 0 0.5rem;
+		color: #ffffff;
+		text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+	}
+	.hero-subtitle-line {
+		display: block;
+		font-family: var(--font-body);
+		font-size: clamp(1rem, 2.2vw, 1.35rem);
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		color: var(--rose-100);
+		margin-top: 0.35rem;
+		text-transform: uppercase;
+	}
+
+	.hero-description {
+		font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+		line-height: 1.6;
+		color: rgba(255, 255, 255, 0.82);
+		max-width: 36rem;
+		margin: 0.65rem 0 1.85rem;
+	}
+
+	.hero-action-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	/* Bottom Stat Bar */
+	.hero-stat-bar {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.75rem;
+		flex-wrap: wrap;
+		padding: 1.15rem 2rem;
+		border-radius: 999px;
+		background: rgba(43, 36, 48, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		backdrop-filter: blur(14px);
+		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+	}
+	.stat-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.15rem;
+	}
+	.stat-val {
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: #ffffff;
+		line-height: 1.2;
+	}
+	.stat-lbl {
+		font-size: 0.74rem;
+		color: rgba(255, 255, 255, 0.65);
+		letter-spacing: 0.02em;
+	}
+	.stat-divider {
+		width: 1px;
+		height: 24px;
+		background: rgba(255, 255, 255, 0.14);
+	}
+
+	/* Right Edge Minimal Section Indicator */
+	.hero-edge-nav {
+		position: absolute;
+		right: 1.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		z-index: 5;
+	}
+	.edge-dot {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		text-decoration: none;
+		opacity: 0.65;
+		transition: opacity 0.15s ease, transform 0.15s ease;
+	}
+	.edge-dot:hover {
+		opacity: 1;
+		transform: translateX(-3px);
+		text-decoration: none;
+	}
+	.edge-dot-mark {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--rose-600);
+	}
+	.edge-label {
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		color: var(--rose-100);
+	}
+
+	/* ============================== SECTION 1: INTRO ============================== */
+	.section-intro {
+		background: var(--paper);
+		padding: clamp(5rem, 9vw, 7.5rem) 0;
+		border-bottom: 1px solid var(--line);
+	}
+	.intro-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+		gap: clamp(2.5rem, 6vw, 4.5rem);
+		align-items: center;
+	}
+	.intro-heading-col h2 {
+		font-size: clamp(2.1rem, 4.5vw, 3rem);
+		line-height: 1.15;
+		margin: 0;
+	}
+	.intro-lead {
+		font-size: 1.18rem;
+		line-height: 1.65;
+		color: var(--plum);
+		font-weight: 500;
+		margin: 0 0 1.25rem;
+	}
+	.intro-sub {
+		font-size: 1rem;
+		line-height: 1.7;
+		color: var(--plum-soft);
+		margin: 0;
+	}
+
+	/* ============================== SECTION 2: event ============================== */
+	.section-event {
+		padding: clamp(5rem, 9vw, 7.5rem) 0;
+		background: var(--paper);
+	}
+	.track-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 1.75rem;
+	}
+
+	/* ============================== SECTION 3: PILLARS ============================== */
+	.section-experience {
+		background: var(--rose-050);
+		border-block: 1px solid var(--line);
+		padding: clamp(5rem, 9vw, 7.5rem) 0;
+	}
+	.pillars-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 1.75rem;
+	}
+	.pillar-card {
+		background: var(--card);
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
+		padding: 2.25rem 2rem;
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+	}
+	.pillar-card:hover {
+		transform: translateY(-3px);
+		box-shadow: var(--shadow-hover);
+	}
+	.pillar-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 52px;
+		height: 52px;
+		border-radius: 14px;
+		background: var(--rose-100);
+		color: var(--rose-700);
+		margin-bottom: 1.5rem;
+	}
+	.pillar-card h3 {
+		font-size: 1.25rem;
+		margin: 0 0 0.6rem;
+		color: var(--plum);
+	}
+	.pillar-card p {
+		margin: 0;
+		color: var(--plum-soft);
+		font-size: 0.95rem;
+		line-height: 1.65;
+	}
+
+	/* ============================== SECTION 4: HOW IT WORKS ============================== */
+	.section-howto {
+		padding: clamp(5rem, 9vw, 7.5rem) 0;
+		background: var(--paper);
+	}
+	.steps-flow {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 1.75rem;
+		padding: 0;
+		margin: 0;
+	}
+	.step-card {
+		background: var(--card);
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
+		padding: 2.25rem 2rem;
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+	}
+	.step-card:hover {
+		transform: translateY(-3px);
+		box-shadow: var(--shadow-hover);
+	}
+	.step-counter {
+		display: block;
+		font-family: var(--font-display);
+		font-size: 2.8rem;
+		font-weight: 700;
+		line-height: 1;
+		color: var(--rose-100);
+		margin-bottom: 1.25rem;
+		transition: color 0.15s ease;
+	}
+	.step-card:hover .step-counter {
+		color: var(--rose-600);
+	}
+	.step-card h3 {
+		font-size: 1.2rem;
+		margin: 0 0 0.5rem;
+		color: var(--plum);
+	}
+	.step-card p {
+		margin: 0;
+		color: var(--plum-soft);
+		font-size: 0.95rem;
+		line-height: 1.65;
+	}
+
+	/* ============================== SECTION 5: CTA ============================== */
+	.section-cta {
+		padding: clamp(4rem, 8vw, 6.5rem) 0;
+		background: var(--paper);
+	}
+	.cta-master-card {
+		background: linear-gradient(135deg, var(--rose-900), var(--rose-800));
+		border-radius: 20px;
+		text-align: center;
+		padding: clamp(3.5rem, 8vw, 5.5rem) clamp(1.5rem, 6vw, 4rem);
+		box-shadow: 0 24px 60px rgba(122, 31, 61, 0.28);
+	}
+	.cta-kicker {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.22em;
+		color: rgba(255, 255, 255, 0.75);
+		margin: 0 0 1rem;
+	}
+	.cta-master-card h2 {
+		color: #ffffff;
+		font-size: clamp(2.1rem, 5vw, 3.2rem);
+		margin: 0 0 1rem;
+		line-height: 1.15;
+	}
+	.cta-summary {
+		color: rgba(255, 255, 255, 0.88);
+		max-width: 44ch;
+		margin: 0 auto 2.25rem;
+		font-size: 1.1rem;
+		line-height: 1.65;
+	}
+	.cta-buttons {
+		display: flex;
+		justify-content: center;
+	}
+
+	/* ============================== RESPONSIVE BREAKPOINTS ============================== */
+	@media (max-width: 900px) {
+		.hero-cinematic {
+			min-height: auto;
+			padding-top: 6rem;
+			padding-bottom: 4.5rem;
+		}
+		.hero-focal-stage {
+			width: 400px;
+			height: 400px;
+			margin-top: -200px;
+			margin-left: -200px;
+			opacity: 0.55;
+		}
+		.hero-edge-nav {
+			display: none;
+		}
+		.intro-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.hero-stat-bar {
+			border-radius: var(--radius);
+			gap: 1.25rem;
+			padding: 1.25rem;
+		}
+		.stat-divider {
+			display: none;
+		}
+		.stat-item {
+			width: calc(50% - 0.75rem);
+		}
+	}
+
+	@media (max-width: 520px) {
+		.hero-action-row :global(.btn) {
+			width: 100%;
+		}
+		.hero-stat-bar .stat-item {
+			width: 100%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sakura-petal,
+		.sakura-petal svg,
+		.spin-slow,
+		.pulse-core {
+			animation: none !important;
+		}
+		.hero-focal-stage {
+			transform: none !important;
+		}
+		.grid-cell,
+		.grid-cell.active,
+		.grid-cell::after {
+			transform: none !important;
+			transition: none !important;
+		}
+	}
+</style>
