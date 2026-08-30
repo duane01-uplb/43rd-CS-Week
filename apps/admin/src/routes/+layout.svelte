@@ -5,7 +5,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link
-		href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
 		rel="stylesheet"
 	/>
 </svelte:head>
@@ -34,7 +34,7 @@
 		--ok: #3e7a5c; /* confirmed / open-positive */
 		--warn: #b7791f;
 		--danger: #b13a3a;
-		--font-display: 'Shippori Mincho', 'Georgia', serif;
+		--font-display: 'Space Mono', 'Courier New', monospace;
 		--font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
 		--radius: 10px;
 		--shadow: 0 1px 2px rgba(43, 36, 48, 0.05), 0 8px 24px rgba(43, 36, 48, 0.06);
@@ -77,15 +77,15 @@
 		font-family: var(--font-display);
 		color: var(--plum);
 		margin: 0 0 0.4em;
-		font-weight: 600;
-		letter-spacing: 0.01em;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 	}
 
 	/* ---------- shared page-header pattern ---------- */
 	:global(.eyebrow) {
 		margin: 0 0 0.15rem;
 		font-size: 0.72rem;
-		font-weight: 600;
+		font-weight: 700;
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
 		color: var(--rose-700);

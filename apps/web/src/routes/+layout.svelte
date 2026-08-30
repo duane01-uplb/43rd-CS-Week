@@ -28,7 +28,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link
-		href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap"
 		rel="stylesheet"
 	/>
 </svelte:head>
@@ -152,7 +152,7 @@
 		--ok: #3e7a5c; /* Confirmed / open */
 		--warn: #b7791f; /* Pending / draft */
 		--danger: #b13a3a; /* Cancelled / error */
-		--font-display: 'Shippori Mincho', 'Georgia', serif;
+		--font-display: 'Space Mono', 'Courier New', monospace;
 		--font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
 		--radius: 12px;
 		--radius-sm: 8px;
@@ -195,8 +195,8 @@
 		font-family: var(--font-display);
 		color: var(--plum);
 		margin: 0 0 0.4em;
-		font-weight: 600;
-		letter-spacing: 0.005em;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 	}
 
 	:global(a) {
@@ -311,7 +311,7 @@
 	}
 	:global(.head) {
 		font-family: var(--font-display);
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--plum);
 	}
 	:global(.lede) {

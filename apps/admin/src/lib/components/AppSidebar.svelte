@@ -91,7 +91,7 @@
 	}
 	.brand-title {
 		font-family: var(--font-display);
-		font-weight: 600;
+		font-weight: 700;
 		font-size: 1.05rem;
 		color: var(--plum);
 	}
