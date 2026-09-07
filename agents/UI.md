@@ -103,7 +103,7 @@ Read it before writing any CSS. Highlights to keep straight:
 - Palette: rose ramp (`--rose-050…900`) for brand/interaction; `--plum` ink;
   warm `--paper` bg; `--card` white; hairline `--line`; semantic `--ok`
   (confirmed/open), `--warn` (pending/draft), `--danger` (cancelled).
-- Type: **Shippori Mincho** (display, restraint: titles/stat values/brand) +
+- Type: **Space Mono** (display/techno, restraint: titles/stat values/brand) +
   **IBM Plex Sans** (body/UI). Loaded from Google Fonts in each root layout.
 - Shape: card radius 12px web / 10px admin, controls 8px, pills 999px;
   focus ring `0 0 0 3px rgba(194,80,114,.3)` on EVERY focusable element.

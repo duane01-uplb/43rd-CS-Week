@@ -6,6 +6,40 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-08-30 — Cinematic hero: sakura wind breeze
+- **Web hero** (`apps/web/src/routes/+page.svelte`): added a **sakura wind
+  breeze** layer behind the drifting petals.
+  - `.sakura-wind`: 5 translucent rose-tinted `wind-streak` gust lines that
+    sweep horizontally across the hero via a shared `windSweep` keyframe
+    (fade in → drift across → out), each with a different stagger/timing.
+  - 8 fine `wind-part-frail` glowing particles carried along the same wind
+    path for a sense of air current.
+  - Retuned petals: `petalFall` now drifts diagonally downwind (bleeding
+    `~34vw` across) with a fade in/out, and `petalSway` tumbles/rotates in 3D
+    so petals feel wind-tossed rather than falling straight down.
+  - `prefers-reduced-motion` disables wind streaks + particles and hides the
+    wind layer, alongside existing petal handling.
+
+## 2026-08-30 — Display font swapped to Space Mono
+- **Display typeface:** replaced Shippori Mincho with **Space Mono** (Colophon
+  Foundry's free, OFL monospaced neo-grotesque) as `--font-display` in both
+  apps — a free stand-in with the techno/"computer" feel of the commercial
+  "Computer Says No" face, kept lightweight since it loads from Google Fonts.
+  Body/UI stays IBM Plex Sans.
+- **Web** (`apps/web/src/routes/+layout.svelte`): Google Fonts `<link>` now
+  loads `Space+Mono:wght@400;700`; `--font-display: 'Space Mono','Courier
+  New',monospace`; global heading weight 600→700 and letter-spacing bumped to
+  `0.02em` for mono legibility; `.head` weight 600→700.
+- **Admin** (`apps/admin/src/routes/+layout.svelte`): same `<link>`/token
+  changes; `h1,h2,h3` weight 600→700 + `0.02em`; `.eyebrow` weight 600→700.
+- **Display consumers** now 700 (none load a 600 weight since Space Mono only
+  ships 400/700): `.empty-title` (registrations + events), `.action-title`
+  (admin overview), `AppSidebar .brand-title`.
+- **Docs:** `DESIGN_TOKENS.md` (§2 Typography, scale weights, §8 wordmark) and
+  `UI.md` (§5 type) updated to Space Mono. `PRD.md` left as historical.
+- Note: `bun run build` compiles both apps cleanly; the Vercel-adapter symlink
+  `EPERM` on Windows is the known, harmless pre-existing issue (see `UI.md`).
+
 ## 2026-08-29 — Upstash Redis: read-through caching + registration rate limiting
 - **New `packages/cache` (`@csweek/cache`):** shared serverless-Redis helper on
   top of `@upstash/redis` — `getJson` read-through TTL cache (fail-open to the
