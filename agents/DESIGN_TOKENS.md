@@ -62,9 +62,13 @@ Badge tint backgrounds (hardcoded, appear in admin shell CSS):
 
 ## 2. Typography
 
-- **Display:** Shippori Mincho — `--font-display: 'Shippori Mincho','Georgia',serif`.
-  Used with restraint: page titles, headings (`h1`–`h3`), stat values,
-  brand wordmark. Weights loaded: 500, 600, 700.
+- **Display:** Space Mono — `--font-display: 'Space Mono','Courier New',monospace`.
+  A monospaced neo-grotesque by Colophon Foundry (same foundry as the
+  Commercial "Computer Says No"). Used with restraint: page titles, headings
+  (`h1`–`h3`), stat values, brand wordmark. Weights loaded: 400, 700. Because
+  it is monospaced, display text needs slightly wider letter-spacing
+  (`0.02em`+ on headings, `0.16em+` on `.eyebrow`) to keep it legible and
+  avoid a cramped, dense look at large sizes.
 - **Body/UI:** IBM Plex Sans — `--font-body: 'IBM Plex Sans',system-ui,
   -apple-system,sans-serif`. Weights: 400, 500, 600 (web also loads 700).
 - Loaded via Google Fonts `<link>` in each app's root layout.
@@ -77,7 +81,7 @@ Badge tint backgrounds (hardcoded, appear in admin shell CSS):
 | `h1` | hero `clamp(2.3rem,6vw,3.9rem)` | `clamp(1.5rem,3vw,2rem)` |
 | `h2` | section-head `clamp(1.7rem,3.6vw,2.4rem)` | ~1.15–1.4rem |
 | `h3` | 1.1–1.2rem | 1.15rem |
-| `h1,h2,h3` | weight 600, display face, `--plum` | same |
+| `h1,h2,h3` | weight 700, display face, `--plum` | same |
 | `.eyebrow` | 0.74rem / 700 / +0.18em caps | 0.72rem / 600 / +0.16em caps, `--rose-700` |
 | small/meta | 0.78–0.9rem, `--plum-soft` | 0.72–0.92rem |
 
@@ -167,7 +171,7 @@ Rose gradient circle, used in both apps:
   var(--rose-800) 72%)` + inset white ring.
 - Admin (`34px`): `linear-gradient(135deg, var(--rose-600), var(--rose-900))`
   + `::after` ring at `inset 7px`, `rgba(255,255,255,.6)`.
-- Wordmark: Shippori Mincho 700. Web name "CS Week"; admin brand kicker
+- Wordmark: Space Mono 700. Web name "CS Week"; admin brand kicker
   uppercase "COMPUTER SCIENCE WEEK" + title "Admin Console".
 
 ## 9. States to always handle

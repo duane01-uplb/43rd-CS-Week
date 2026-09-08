@@ -293,7 +293,7 @@
 	}
 	.empty-title {
 		font-family: var(--font-display);
-		font-weight: 600;
+		font-weight: 700;
 		font-size: 1.2rem;
 		margin: 0 0 0.3rem;
 	}
