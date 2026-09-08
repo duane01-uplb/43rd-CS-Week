@@ -41,10 +41,19 @@ const CONSENT_OPTIONS = [
 
 const EVENTS = [
 	{
+		title: 'Job Fair',
+		candidates: ['job fair'],
+		description:
+			'Interact with future software engineers, web developers, network administrators, systems analysts, and others. Promotes job opportunities and company culture to a highly engaged audience and discusses their future career opportunities. Collect students’ resumes that can be used as future references to expand the database of prospective employees.',
+		startAt: '2027-02-18T10:00:00+08:00',
+		endAt: '2027-02-18T17:00:00+08:00',
+		fields: []
+	},
+	{
 		title: 'Career Orientation',
 		candidates: ['career orientation'],
 		description:
-			'Career Orientation talks to help you plan your path — open to junior high school, senior high school, and college students.',
+			'An opportunity for participants to gain valuable insights into the world of Computer Science and explore career opportunities. Expert guest speakers will share their knowledge and experiences, highlighting the realities and advantages of pursuing a career in Computer Science, with a particular focus on the current Computer Science Week theme.',
 		startAt: '2027-02-19T13:00:00+08:00',
 		endAt: '2027-02-19T15:00:00+08:00',
 		fields: [
@@ -86,10 +95,28 @@ const EVENTS = [
 		]
 	},
 	{
+		title: 'Jeopardy',
+		candidates: ['jeopardy'],
+		description:
+			'A quiz-style game show where students participate, compete, and put their knowledge to the test across different categories on various themes and cultures. Students will be presented an answer and they must respond with a question related to the current theme.',
+		startAt: '2027-02-19T15:00:00+08:00',
+		endAt: '2027-02-19T17:00:00+08:00',
+		fields: []
+	},
+	{
+		title: 'Code Wars',
+		candidates: ['code wars'],
+		description:
+			'Code Wars is an open programming competition where coders of all levels come together to battle it out through problem-solving and creativity. This event is open to all who are passionate about programming and eager to compete, collaborate, and learn.',
+		startAt: '2027-02-21T09:00:00+08:00',
+		endAt: '2027-02-21T17:00:00+08:00',
+		fields: []
+	},
+	{
 		title: 'Warframes',
 		candidates: ['warframes', 'web design'],
 		description:
-			'Warframes team tournament (registration form labeled "Web Design"). Teams of 1–3; registration fee paid manually via bank/GCash — upload your QR/transaction screenshot as proof of payment.',
+			'An event where participants can showcase their creative prowess and technical acumen in wireframe design. This competition serves as a platform for talented individuals and teams to demonstrate their ability to craft visually captivating, user-friendly, and innovative wireframes using Figma, based on a provided case study.',
 		startAt: '2027-02-20T09:00:00+08:00',
 		endAt: '2027-02-20T17:00:00+08:00',
 		fields: [
@@ -118,7 +145,7 @@ const EVENTS = [
 		title: 'Games Day',
 		candidates: ['games day'],
 		description:
-			'Games Day 5v5 team tournament. Teams of 5 plus one optional reserve player. Register your whole team with one submission.',
+			'An annual video game tournament organized by the UPLB Computer Science Society during their Computer Science Week. This year, the event exclusively features Valorant, where teams from all around the Philippines compete for a cash prize and the prestigious title of Games Day Champion.',
 		startAt: '2027-02-20T09:00:00+08:00',
 		endAt: '2027-02-20T17:00:00+08:00',
 		fields: [
@@ -150,7 +177,8 @@ for (const def of EVENTS) {
 	let eventId;
 	if (existing.length === 1) {
 		eventId = existing[0].id;
-		console.log(`= event exists: ${def.title} (${eventId})`);
+		await sql`update events set description = ${def.description} where id = ${eventId}`;
+		console.log(`= event exists (description updated): ${def.title} (${eventId})`);
 	} else if (existing.length === 0) {
 		const [row] = await sql`
 			insert into events (title, description, start_at, end_at, capacity, status)

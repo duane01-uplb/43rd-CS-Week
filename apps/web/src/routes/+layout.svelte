@@ -112,6 +112,17 @@
 			<p class="footer-tag">
 				The official annual gathering of students, educators, developers, and tech creators at the University of the Philippines Los Baños. Every event is 100% free to attend.
 			</p>
+			<div class="footer-socials">
+				<a href="https://www.facebook.com/uplbcossph" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+					<i class="fa-brands fa-facebook"></i>
+				</a>
+				<a href="https://www.instagram.com/uplbcossph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+					<i class="fa-brands fa-instagram"></i>
+				</a>
+				<a href="https://www.tiktok.com/@uplbcossph?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+					<i class="fa-brands fa-tiktok"></i>
+				</a>
+			</div>
 		</div>
 		<nav class="footer-links" aria-label="Footer navigation">
 			<div class="footer-col">
@@ -128,7 +139,7 @@
 		</nav>
 	</div>
 	<div class="shell footer-bottom">
-		<p class="footer-legal">© 2026 CASC4D3 · 43rd CS Week Organizers · UPLB</p>
+		<p class="footer-legal">© 2026 UPLB Computer Science Society. All rights reserved.</p>
 	</div>
 </footer>
 
@@ -348,6 +359,33 @@
 		font-size: 0.92rem;
 		font-weight: 600;
 		color: var(--plum);
+	}
+	.footer-tag {
+		font-size: 0.95rem;
+		line-height: 1.6;
+		color: var(--plum-soft);
+		max-width: 400px;
+	}
+
+	.footer-socials {
+		display: flex;
+		gap: 1.5rem;
+		margin-top: 0.5rem;
+	}
+
+	.footer-socials a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--plum);
+		font-size: 1.5rem;
+		opacity: 0.8;
+		transition: opacity 0.2s ease, color 0.2s ease;
+	}
+
+	.footer-socials a:hover {
+		opacity: 1;
+		color: var(--rose-700);
 	}
 	:global(.field input:not([type='checkbox']):not([type='radio'])),
 	:global(.field select),

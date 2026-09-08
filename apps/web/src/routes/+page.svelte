@@ -286,7 +286,7 @@
 			</h1>
 
 			<p class="hero-description">
-				test test test test test test test test test test test test test test test test test test test
+				The Annual Flagship Event of UPLB Computer Science Society
 			</p>
 
 			<div class="hero-action-row">
@@ -445,7 +445,7 @@
 					</svg>
 				</span>
 				<h3>Career & Tech Orientation</h3>
-				<p>Engage with industry alumni and experienced practitioners to navigate software engineering, AI, and academic research pathways.</p>
+				<p>An opportunity for participants to gain valuable insights into the world of Computer Science and explore career opportunities. Expert guest speakers will share their knowledge and experiences, highlighting the realities and advantages of pursuing a career in Computer Science, with a particular focus on the current Computer Science Week theme.</p>
 			</article>
 
 			<article class="pillar-card">
@@ -457,7 +457,7 @@
 					</svg>
 				</span>
 				<h3>Warframes Design & Code</h3>
-				<p>Put your team's design intuition and web development prowess to the test in high-energy creative challenges.</p>
+				<p>An event where participants can showcase their creative prowess and technical acumen in wireframe design. This competition serves as a platform for talented individuals and teams to demonstrate their ability to craft visually captivating, user-friendly, and innovative wireframes using Figma, based on a provided case study.</p>
 			</article>
 
 			<article class="pillar-card">
@@ -471,7 +471,7 @@
 					</svg>
 				</span>
 				<h3>Games Day Showdown</h3>
-				<p>Unwind and compete in multiplayer tournaments. Celebrate camaraderie with fellow computing peers across batches.</p>
+				<p>An annual video game tournament organized by the UPLB Computer Science Society during their Computer Science Week. This year, the event exclusively features Valorant, where teams from all around the Philippines compete for a cash prize and the prestigious title of Games Day Champion.</p>
 			</article>
 		</div>
 	</div>
