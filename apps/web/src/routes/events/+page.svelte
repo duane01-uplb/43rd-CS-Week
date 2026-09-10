@@ -1,9 +1,11 @@
 <script lang="ts">
 	import EventCard from '$lib/components/EventCard.svelte';
+	import CalendarView from '$lib/components/CalendarView.svelte';
 	import Button from '$lib/components/Button.svelte';
 
 	let { data } = $props();
 
+	let activeView = $state<'calendar' | 'grid'>('calendar');
 	const isFiltered = $derived(data.status !== 'all' || data.upcoming);
 </script>
 
@@ -11,7 +13,7 @@
 	<title>Event Schedule & Registration | CASC4D3</title>
 	<meta
 		name="description"
-		content="Explore all talks, workshops, and contests happening during the 43rd Computer Science Week. Free registration for all participants."
+		content="Explore all talks, workshops, and contests happening during the 43rd Computer Science Week (Feb 2–7, 2026). Free registration for all participants."
 	/>
 </svelte:head>
 
@@ -19,48 +21,83 @@
 	<!-- Page Header -->
 	<header class="events-header">
 		<p class="eyebrow">Event Schedule & Registration</p>
-		<h1>Events Roster</h1>
+		<h1>Events Roster & Schedule</h1>
 		<p class="lede">
-			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week. All events are 100% free with no account required.
+			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week (Feb 2 – 7, 2026). All events are 100% free with no account required.
 		</p>
 	</header>
 
-	<!-- Filter Controls -->
-	<section class="filter-section" aria-label="Event filters">
-		<form method="GET" class="filter-card">
-			<div class="filter-controls">
-				<div class="filter-field">
-					<label for="status-select">Registration Status</label>
-					<div class="select-wrap">
-						<select id="status-select" name="status" value={data.status}>
-							<option value="open">Open for registration</option>
-							<option value="all">All statuses</option>
-						</select>
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="select-arrow" aria-hidden="true">
-							<path d="m6 9 6 6 6-6" />
-						</svg>
+	<!-- View Switcher & Filter Controls -->
+	<section class="filter-section" aria-label="Event filters and view selection">
+		<div class="view-switch-row">
+			<div class="view-switcher" role="tablist" aria-label="Schedule layout">
+				<button
+					type="button"
+					role="tab"
+					aria-selected={activeView === 'calendar'}
+					class="view-btn"
+					class:active={activeView === 'calendar'}
+					onclick={() => (activeView = 'calendar')}
+				>
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect x="3" y="4" width="18" height="18" rx="2" />
+						<path d="M16 2v4M8 2v4M3 10h18" />
+					</svg>
+					<span>Calendar (Feb 2–7)</span>
+				</button>
+				<button
+					type="button"
+					role="tab"
+					aria-selected={activeView === 'grid'}
+					class="view-btn"
+					class:active={activeView === 'grid'}
+					onclick={() => (activeView = 'grid')}
+				>
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect x="3" y="3" width="7" height="7" />
+						<rect x="14" y="3" width="7" height="7" />
+						<rect x="14" y="14" width="7" height="7" />
+						<rect x="3" y="14" width="7" height="7" />
+					</svg>
+					<span>Grid Cards</span>
+				</button>
+			</div>
+
+			<form method="GET" class="filter-card">
+				<div class="filter-controls">
+					<div class="filter-field">
+						<label for="status-select">Registration Status</label>
+						<div class="select-wrap">
+							<select id="status-select" name="status" value={data.status}>
+								<option value="open">Open for registration</option>
+								<option value="all">All statuses</option>
+							</select>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="select-arrow" aria-hidden="true">
+								<path d="m6 9 6 6 6-6" />
+							</svg>
+						</div>
+					</div>
+
+					<div class="filter-field filter-checkbox-field">
+						<label class="checkbox-label">
+							<input type="checkbox" name="upcoming" value="1" checked={data.upcoming} />
+							<span class="checkbox-custom" aria-hidden="true"></span>
+							<span>Upcoming only</span>
+						</label>
 					</div>
 				</div>
 
-				<div class="filter-field filter-checkbox-field">
-					<label class="checkbox-label">
-						<input type="checkbox" name="upcoming" value="1" checked={data.upcoming} />
-						<span class="checkbox-custom" aria-hidden="true"></span>
-						<span>Upcoming only</span>
-					</label>
+				<div class="filter-actions">
+					<Button type="submit" variant="primary" size="sm">Apply</Button>
+					{#if isFiltered}
+						<Button variant="ghost" size="sm" href="/events?status=all">Reset</Button>
+					{/if}
 				</div>
-			</div>
-
-			<div class="filter-actions">
-				<Button type="submit" variant="primary" size="sm">Apply filters</Button>
-				{#if isFiltered}
-					<Button variant="ghost" size="sm" href="/events?status=all">Reset</Button>
-				{/if}
-			</div>
-		</form>
+			</form>
+		</div>
 	</section>
 
-	<!-- Events Grid -->
+	<!-- Events Content -->
 	<section class="events-content" aria-label="Event listing">
 		{#if data.events.length === 0}
 			<div class="empty-card">
@@ -79,19 +116,38 @@
 				</div>
 			</div>
 		{:else}
-			<div class="events-summary">
-				<p class="summary-text">
-					Showing <strong>{data.events.length}</strong> {data.events.length === 1 ? 'event' : 'events'}
-					{#if data.status === 'open'}· Open for registration{/if}
-					{#if data.upcoming}· Upcoming schedule{/if}
-				</p>
-			</div>
+			{#if activeView === 'calendar'}
+				<div class="calendar-wrapper">
+					<CalendarView events={data.events} />
+				</div>
 
-			<div class="events-grid">
-				{#each data.events as event (event.id)}
-					<EventCard {event} variant="grid" />
-				{/each}
-			</div>
+				<div class="events-summary" style="margin-top: 2.25rem;">
+					<h2 class="roster-heading">All Events Catalog</h2>
+					<p class="summary-text">
+						Detailed breakdown and direct registration for all <strong>{data.events.length}</strong> events:
+					</p>
+				</div>
+
+				<div class="events-grid">
+					{#each data.events as event (event.id)}
+						<EventCard {event} variant="grid" />
+					{/each}
+				</div>
+			{:else}
+				<div class="events-summary">
+					<p class="summary-text">
+						Showing <strong>{data.events.length}</strong> {data.events.length === 1 ? 'event' : 'events'}
+						{#if data.status === 'open'}· Open for registration{/if}
+						{#if data.upcoming}· Upcoming schedule{/if}
+					</p>
+				</div>
+
+				<div class="events-grid">
+					{#each data.events as event (event.id)}
+						<EventCard {event} variant="grid" />
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</section>
 </div>
@@ -110,6 +166,59 @@
 		font-size: clamp(2.2rem, 5vw, 3.2rem);
 		line-height: 1.15;
 		margin: 0 0 0.75rem;
+	}
+
+	/* View Switcher & Filter Row */
+	.view-switch-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		flex-wrap: wrap;
+	}
+	.view-switcher {
+		display: inline-flex;
+		align-items: center;
+		background: var(--card);
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		padding: 0.3rem;
+		gap: 0.25rem;
+		box-shadow: var(--shadow);
+	}
+	.view-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.5rem 1rem;
+		border-radius: 999px;
+		border: none;
+		background: transparent;
+		color: var(--plum-soft);
+		font-family: var(--font-body);
+		font-size: 0.88rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+	.view-btn:hover {
+		color: var(--plum);
+	}
+	.view-btn.active {
+		background: var(--rose-700);
+		color: #ffffff;
+		box-shadow: 0 2px 8px rgba(166, 58, 92, 0.25);
+	}
+	.view-btn svg {
+		color: currentColor;
+	}
+
+	.calendar-wrapper {
+		margin-top: 0.5rem;
+	}
+	.roster-heading {
+		font-size: 1.5rem;
+		margin: 0 0 0.4rem;
 	}
 
 	/* Filter Card */

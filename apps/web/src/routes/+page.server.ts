@@ -9,16 +9,26 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async () =>
 	cache.getJson(cacheKeys.webHome, 30, async () => {
 		const db = getDb();
-		const openWhere = and(eq(events.status, 'open'), gte(events.startAt, new Date()));
-		const upcoming = await db
+		const openWhere = eq(events.status, 'open');
+		const upcomingWhere = and(eq(events.status, 'open'), gte(events.startAt, new Date()));
+		// Full open roster drives the schedule calendar (past-dated events the
+		// organizers scheduled must still appear on it).
+		const roster = await db
 			.select()
 			.from(events)
 			.where(openWhere)
+			.orderBy(asc(events.startAt));
+		const upcomingRows = await db
+			.select()
+			.from(events)
+			.where(upcomingWhere)
 			.orderBy(asc(events.startAt))
 			.limit(3);
-		const [{ value: openCount }] = await db
+		const upcoming = upcomingRows.length > 0 ? upcomingRows : roster.slice(0, 3);
+		const [{ value: dbOpenCount }] = await db
 			.select({ value: count() })
 			.from(events)
-			.where(openWhere);
-		return { upcoming, openCount };
+			.where(upcomingWhere);
+		const openCount = Number(dbOpenCount) > 0 ? Number(dbOpenCount) : roster.length;
+		return { roster, upcoming, openCount };
 	});

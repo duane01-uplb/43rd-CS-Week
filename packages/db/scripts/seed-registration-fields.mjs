@@ -1,5 +1,6 @@
-// Seed registration fields for the three events that need registration:
-//   Career Orientation, Warframes (organizer form label "Web Design"), Games Day.
+// Seed registration fields for the events that need registration:
+//   Career Orientation, Warframes (organizer form label "Web Design"),
+//   Games Day, Jeopardy, Code Wars, Job Fair.
 //
 // Usage (anywhere):  bun packages/db/scripts/seed-registration-fields.mjs
 //
@@ -41,12 +42,27 @@ const CONSENT_OPTIONS = [
 
 const EVENTS = [
 	{
+		title: 'Job Fair',
+		candidates: ['job fair'],
+		description:
+			'Face-to-face job fair during CS Week — meet employers and tech companies hiring computing talent, and apply on the spot.',
+		startAt: '2026-02-02T09:00:00+08:00',
+		endAt: '2026-02-04T17:00:00+08:00',
+		fields: [
+			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
+			['email', 'Email Address', 'email', null, true],
+			['full_name', 'Full Name (Last Name, First Name, Suffix, MI)', 'text', null, true],
+			['contact_number', 'Contact Number', 'text', null, true],
+			['school_affiliation', 'School Affiliation/Institution', 'text', null, true]
+		]
+	},
+	{
 		title: 'Career Orientation',
 		candidates: ['career orientation'],
 		description:
 			'Career Orientation talks to help you plan your path — open to junior high school, senior high school, and college students.',
-		startAt: '2027-02-19T13:00:00+08:00',
-		endAt: '2027-02-19T15:00:00+08:00',
+		startAt: '2026-02-02T13:00:00+08:00',
+		endAt: '2026-02-03T15:00:00+08:00',
 		fields: [
 			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
 			['email', 'Email Address', 'email', null, true],
@@ -80,7 +96,7 @@ const EVENTS = [
 				'event_attendance',
 				'When will you attend?',
 				'select',
-				['February 19 (Thursday, 1–3 PM only)', 'February 20', 'I will attend both days'],
+				['February 2 (Tuesday, 1–3 PM only)', 'February 3 (Wednesday), 1–3 PM', 'I will attend both days'],
 				true
 			]
 		]
@@ -90,8 +106,8 @@ const EVENTS = [
 		candidates: ['warframes', 'web design'],
 		description:
 			'Warframes team tournament (registration form labeled "Web Design"). Teams of 1–3; registration fee paid manually via bank/GCash — upload your QR/transaction screenshot as proof of payment.',
-		startAt: '2027-02-20T09:00:00+08:00',
-		endAt: '2027-02-20T17:00:00+08:00',
+		startAt: '2026-02-01T09:00:00+08:00',
+		endAt: '2026-02-07T17:00:00+08:00',
 		fields: [
 			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
 			['representative_name', 'Representative Name', 'text', null, true],
@@ -118,9 +134,9 @@ const EVENTS = [
 		title: 'Games Day',
 		candidates: ['games day'],
 		description:
-			'Games Day 5v5 team tournament. Teams of 5 plus one optional reserve player. Register your whole team with one submission.',
-		startAt: '2027-02-20T09:00:00+08:00',
-		endAt: '2027-02-20T17:00:00+08:00',
+			'Games Day 5v5 team tournament that runs for 4 weeks online, with the finals on February 7, 2026 — the finale will be livestreamed. Teams of 5 plus one optional reserve player. Register your whole team with one submission.',
+		startAt: '2026-01-10T09:00:00+08:00',
+		endAt: '2026-02-07T17:00:00+08:00',
 		fields: [
 			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
 			['email', 'Email', 'email', null, true],
@@ -134,6 +150,36 @@ const EVENTS = [
 			['member_4_name_id', 'Full Name + In-Game ID (4th player)', 'text', null, true],
 			['member_5_name_id', 'Full Name + In-Game ID (5th player)', 'text', null, true],
 			['reserve_player_name_id', 'Full Name + In-Game ID (Reserve Player)', 'text', null, false]
+		]
+	},
+	{
+		title: 'Jeopardy',
+		candidates: ['jeopardy'],
+		description:
+			'A quiz-style game show where students participate, compete, and put their knowledge to the test across different categories on various themes and cultures. Students will be presented an answer and they must respond with a question related to the current theme.',
+		startAt: '2026-02-05T13:00:00+08:00',
+		endAt: '2026-02-05T15:00:00+08:00',
+		fields: [
+			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
+			['email', 'Email Address', 'email', null, true],
+			['full_name', 'Full Name (Last Name, First Name, Suffix, MI)', 'text', null, true],
+			['contact_number', 'Contact Number', 'text', null, true],
+			['school_affiliation', 'School Affiliation/Institution', 'text', null, true]
+		]
+	},
+	{
+		title: 'Code Wars',
+		candidates: ['code wars'],
+		description:
+			'Code Wars is an open programming competition where coders of all levels come together to battle it out through problem-solving and creativity. This event is open to all who are passionate about programming and eager to compete, collaborate, and learn.',
+		startAt: '2026-02-06T09:00:00+08:00',
+		endAt: '2026-02-06T17:00:00+08:00',
+		fields: [
+			['data_privacy_consent', CONSENT_LABEL, 'select', CONSENT_OPTIONS, true],
+			['email', 'Email Address', 'email', null, true],
+			['full_name', 'Full Name (Last Name, First Name, Suffix, MI)', 'text', null, true],
+			['contact_number', 'Contact Number', 'text', null, true],
+			['school_affiliation', 'School Affiliation/Institution', 'text', null, true]
 		]
 	}
 ];

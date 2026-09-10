@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EventCard from '$lib/components/EventCard.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import CalendarView from '$lib/components/CalendarView.svelte';
 	import { onDestroy } from 'svelte';
 
 	let { data } = $props();
@@ -46,6 +47,10 @@
 	// 2 seconds after movement stops.
 	let gridLit = $state(false);
 	let idleTimer: ReturnType<typeof setTimeout> | undefined;
+	// One rAF handle per interaction tap so mousemove/resize storm samples at
+	// most once per frame instead of saturating the main thread.
+	let moveRAF: number | undefined;
+	let resizeRAF: number | undefined;
 
 	// 3D rising grid: every square touched by the cursor light lifts toward
 	// the viewer as an extruded prism; lift depth falls off with distance.
@@ -94,8 +99,14 @@
 		const cy = (cursorY / 100) * viewportH;
 		const cellW = viewportW / cols;
 		const cellH = viewportH / rows;
-		for (let r = 0; r < rows; r++) {
-			for (let c = 0; c < cols; c++) {
+		// Only visit the cells inside the light halo's bounding box instead of
+		// re-scanning every tile on every pointer move.
+		const rMin = Math.max(0, Math.floor((cy - LIGHT_RADIUS) / cellH));
+		const rMax = Math.min(rows - 1, Math.ceil((cy + LIGHT_RADIUS) / cellH));
+		const cMin = Math.max(0, Math.floor((cx - LIGHT_RADIUS) / cellW));
+		const cMax = Math.min(cols - 1, Math.ceil((cx + LIGHT_RADIUS) / cellW));
+		for (let r = rMin; r <= rMax; r++) {
+			for (let c = cMin; c <= cMax; c++) {
 				const dx = (c + 0.5) * cellW - cx;
 				const dy = (r + 0.5) * cellH - cy;
 				const dist = Math.hypot(dx, dy);
@@ -109,28 +120,38 @@
 	});
 
 	function handleMouseMove(e: MouseEvent) {
-		if (typeof window !== 'undefined') {
-			const { innerWidth, innerHeight } = window;
-			cursorX = (e.clientX / innerWidth) * 100;
-			cursorY = (e.clientY / innerHeight) * 100;
-			hasMouse = true;
-			gridLit = true;
-			if (idleTimer) clearTimeout(idleTimer);
-			idleTimer = setTimeout(() => {
-				gridLit = false;
-			}, 2000);
-		}
+		if (moveRAF != null) return;
+		moveRAF = requestAnimationFrame(() => {
+			moveRAF = undefined;
+			if (typeof window !== 'undefined') {
+				const { innerWidth, innerHeight } = window;
+				cursorX = (e.clientX / innerWidth) * 100;
+				cursorY = (e.clientY / innerHeight) * 100;
+				hasMouse = true;
+				gridLit = true;
+				if (idleTimer) clearTimeout(idleTimer);
+				idleTimer = setTimeout(() => {
+					gridLit = false;
+				}, 2000);
+			}
+		});
 	}
 
 	onDestroy(() => {
 		if (idleTimer) clearTimeout(idleTimer);
+		if (moveRAF != null) cancelAnimationFrame(moveRAF);
+		if (resizeRAF != null) cancelAnimationFrame(resizeRAF);
 	});
 
 	function handleResize() {
-		if (typeof window !== 'undefined') {
-			viewportW = window.innerWidth;
-			viewportH = window.innerHeight;
-		}
+		if (resizeRAF != null) return;
+		resizeRAF = requestAnimationFrame(() => {
+			resizeRAF = undefined;
+			if (typeof window !== 'undefined') {
+				viewportW = window.innerWidth;
+				viewportH = window.innerHeight;
+			}
+		});
 	}
 </script>
 
@@ -407,7 +428,7 @@
 			</a>
 		</div>
 
-		{#if data.upcoming.length === 0}
+		{#if data.roster.length === 0}
 			<div class="empty-card">
 				<h3>No events currently accepting registrations</h3>
 				<p>Organizers are preparing the next batch of sessions and challenges. Check back soon.</p>
@@ -416,11 +437,16 @@
 				</div>
 			</div>
 		{:else}
-			<div class="track-grid">
-				{#each data.upcoming as event (event.id)}
-					<EventCard {event} variant="track" />
-				{/each}
-			</div>
+			<!-- CS Week overview calendar -->
+			<CalendarView events={data.roster} />
+
+			{#if data.upcoming.length > 0}
+				<div class="track-grid" style="margin-top: 1.75rem;">
+					{#each data.upcoming as event (event.id)}
+						<EventCard {event} variant="track" />
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</div>
 </section>
@@ -539,6 +565,7 @@
 		justify-content: space-between;
 		align-items: center;
 		background: linear-gradient(175deg, #1f1823 0%, #2b1f2e 40%, #341e2b 75%, #231a26 100%);
+		background-attachment: fixed;
 		color: #ffffff;
 		overflow: hidden;
 		padding-top: 5rem;
@@ -1032,6 +1059,8 @@
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 		gap: 1.75rem;
 	}
+
+
 
 	/* ============================== SECTION 3: PILLARS ============================== */
 	.section-experience {

@@ -3,9 +3,344 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/casc4d3-emblem.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Full brand font set loads async (media=print swap trick) so it never
+         blocks first paint; `display=swap` renders fallback faces meanwhile. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+      onerror="this.onerror=null;this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     %sveltekit.head%
+    <style>
+      /* ── Loading Screen ──────────────────────────────────── */
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #2b2430;
+        /* Soft deep-plum vignette so the bloom has room to breathe */
+        background:
+          radial-gradient(ellipse at 50% 38%, #3a2b3d 0%, #2b2430 55%, #201a24 100%);
+        transition: opacity 0.4s cubic-bezier(.4,0,.2,1), visibility 0.4s;
+      }
+      #loading-screen.hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      /* ── Floating petals (ambient background) ─────────── */
+      .loader-petals-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .loader-petal-float {
+        position: absolute;
+        width: 12px;
+        height: 16px;
+        background: radial-gradient(ellipse at 40% 30%, #c25072, #a63a5c);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        opacity: 0;
+        animation: petalDrift linear infinite;
+      }
+      .loader-petal-float:nth-child(1) { left: 12%; width: 10px; height: 13px; animation-duration: 7s; animation-delay: 0s; }
+      .loader-petal-float:nth-child(2) { left: 28%; width: 14px; height: 18px; animation-duration: 9s; animation-delay: 1.2s; }
+      .loader-petal-float:nth-child(3) { left: 45%; width: 8px; height: 11px; animation-duration: 8s; animation-delay: 0.5s; }
+      .loader-petal-float:nth-child(4) { left: 62%; width: 11px; height: 15px; animation-duration: 10s; animation-delay: 2.5s; }
+      .loader-petal-float:nth-child(5) { left: 78%; width: 9px; height: 12px; animation-duration: 7.5s; animation-delay: 1.8s; }
+      .loader-petal-float:nth-child(6) { left: 90%; width: 13px; height: 17px; animation-duration: 8.5s; animation-delay: 3.2s; }
+      .loader-petal-float:nth-child(7) { left: 35%; width: 7px; height: 10px; animation-duration: 11s; animation-delay: 4s; }
+      .loader-petal-float:nth-child(8) { left: 55%; width: 12px; height: 16px; animation-duration: 9.5s; animation-delay: 0.8s; }
+
+      @keyframes petalDrift {
+        0%   { top: -20px; opacity: 0; transform: rotate(0deg) translateX(0); }
+        10%  { opacity: 0.35; }
+        50%  { opacity: 0.2; }
+        100% { top: 105%; opacity: 0; transform: rotate(260deg) translateX(60px); }
+      }
+
+      /* ── Ume flower container ─────────────────────────── */
+      .ume-wrap {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        animation: umeBreath 3s ease-in-out infinite;
+      }
+      @keyframes umeBreath {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.04); }
+      }
+
+      /* ── Petals (5 round petals of an ume blossom) ───── */
+      .ume-petal {
+        position: absolute;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        /* Warm rose petal gradient */
+        background: radial-gradient(ellipse at 35% 30%, #f6e3e9 0%, #c25072 55%, #a63a5c 100%);
+        box-shadow:
+          inset 0 0 12px rgba(255,255,255,0.25),
+          0 0 20px rgba(194,80,114,0.35);
+        opacity: 0;
+        transform: scale(0) translate(0, 0);
+        animation: petalBloom 0.8s cubic-bezier(.34,1.56,.64,1) forwards;
+      }
+      /* Petal vein overlay */
+      .ume-petal::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 80%, transparent 30%, rgba(122,31,61,0.12) 100%);
+      }
+
+      /* Position each petal around center (72° apart) — each rotates to its
+         own angle as it settles for an organic, hand-drawn bloom. */
+      .ume-petal:nth-child(1) { animation-delay: 0.05s; }
+      .ume-petal:nth-child(2) { animation-delay: 0.13s; }
+      .ume-petal:nth-child(3) { animation-delay: 0.21s; }
+      .ume-petal:nth-child(4) { animation-delay: 0.29s; }
+      .ume-petal:nth-child(5) { animation-delay: 0.37s; }
+
+      @keyframes petalBloom {
+        0%   { opacity: 0; transform: scale(0) rotate(calc(var(--petal-rot, 0deg) - 24deg)); }
+        60%  { opacity: 1; }
+        100% { opacity: 1; transform: scale(1) translate(var(--petal-pos)) rotate(var(--petal-rot, 0deg)); }
+      }
+
+      .ume-petal:nth-child(1) { --petal-pos: translate(44px, -10px); --petal-rot: 18deg;  left: 2px; top: 30px; }
+      .ume-petal:nth-child(2) { --petal-pos: translate(72px, 30px);  --petal-rot: 44deg;  left: 6px; top: 20px; }
+      .ume-petal:nth-child(3) { --petal-pos: translate(54px, 68px);  --petal-rot: 72deg;  left: 2px; top: 10px; }
+      .ume-petal:nth-child(4) { --petal-pos: translate(18px, 68px);  --petal-rot: -70deg; left: 2px; top: 10px; }
+      .ume-petal:nth-child(5) { --petal-pos: translate(4px, 30px);   --petal-rot: -18deg; left: 2px; top: 20px; }
+
+      /* ── Center pistil cluster ────────────────────────── */
+      .ume-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 22px;
+        height: 22px;
+        margin: -11px 0 0 -11px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 45% 40%, #faf7f4, #f6e3e9 60%, #c25072);
+        box-shadow: 0 0 18px rgba(194,80,114,0.5);
+        opacity: 0;
+        transform: scale(0);
+        animation: centerPop 0.45s 0.5s cubic-bezier(.34,1.56,.64,1) forwards;
+        z-index: 2;
+      }
+      @keyframes centerPop {
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      /* Stamen dots around pistil */
+      .ume-stamen {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #faf7f4;
+        box-shadow: 0 0 6px rgba(250,247,244,0.6);
+        opacity: 0;
+        animation: stamenAppear 0.4s cubic-bezier(.34,1.56,.64,1) forwards;
+      }
+      .ume-stamen:nth-child(1) { top: 34%; left: 14%;  animation-delay: 0.62s; }
+      .ume-stamen:nth-child(2) { top: 16%; left: 44%;  animation-delay: 0.7s; }
+      .ume-stamen:nth-child(3) { top: 34%; left: 74%;  animation-delay: 0.78s; }
+      .ume-stamen:nth-child(4) { top: 62%; left: 68%;  animation-delay: 0.86s; }
+      .ume-stamen:nth-child(5) { top: 62%; left: 20%;  animation-delay: 0.94s; }
+      .ume-stamen:nth-child(6) { top: 50%; left: 4%;   animation-delay: 0.74s; }
+      .ume-stamen:nth-child(7) { top: 50%; left: 84%;  animation-delay: 0.9s; }
+
+      @keyframes stamenAppear {
+        to { opacity: 0.85; }
+      }
+
+      /* Ambient glow behind flower */
+      .ume-glow {
+        position: absolute;
+        inset: -30px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(194,80,114,0.18) 0%, transparent 70%);
+        animation: glowPulse 3s ease-in-out infinite;
+      }
+      @keyframes glowPulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50%      { opacity: 1; transform: scale(1.12); }
+      }
+
+      /* ── Brand text ─────────────────────────────────── */
+      .loader-brand {
+        margin-top: 2.5rem;
+        text-align: center;
+        opacity: 0;
+        animation: fadeUp 0.5s 0.7s ease forwards;
+      }
+      .loader-kicker {
+        display: block;
+        font-family: 'Space Mono', 'Courier New', monospace;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(246,227,233,0.55);
+        margin-bottom: 0.35rem;
+      }
+      .loader-title {
+        display: block;
+        font-family: 'Space Mono', 'Courier New', monospace;
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: #fbf1f4;
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ── Loading progress hairline (blossom-stem shimmer) ── */
+      .loader-progress {
+        margin-top: 1.4rem;
+        width: 160px;
+        height: 2px;
+        border-radius: 2px;
+        background: rgba(246, 227, 233, 0.12);
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeUp 0.4s 0.85s ease forwards;
+      }
+      .loader-progress-bar {
+        display: block;
+        height: 100%;
+        width: 40%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #a63a5c, #ff8fb3);
+        box-shadow: 0 0 12px rgba(194, 80, 114, 0.8);
+        animation: progressSlide 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+      @keyframes progressSlide {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(290%); }
+      }
+
+      /* ── Reduced motion ─────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        #loading-screen *,
+        #loading-screen *::after {
+          animation-duration: 0.001ms !important;
+          animation-delay: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+        .ume-petal { opacity: 1; transform: scale(1) translate(var(--petal-pos)) rotate(var(--petal-rot, 0deg)) !important; }
+        .ume-center { opacity: 1; transform: scale(1) !important; }
+        .ume-stamen { opacity: 0.85 !important; }
+        .loader-brand { opacity: 1 !important; }
+        .loader-progress { opacity: 1 !important; }
+        .loader-progress-bar { width: 100% !important; transform: none !important; }
+      }
+    </style>
+    <script>
+      // Reveal the server-rendered page as soon as it's on screen instead of
+      // making users wait for the Svelte bundle to parse and hydrate. The
+      // splash fades at DOM-ready (+a beat for first paint), with a hard
+      // failsafe so it can never trap users behind the overlay. When MPA
+      // client-side navigation hydrates later, the SvelteKit layout's own
+      // onMount takes over (guarded by `data-revealed`).
+      (function () {
+        function reveal() {
+          var el = document.getElementById('loading-screen');
+          if (!el || el.dataset.revealed) return;
+          el.dataset.revealed = '1';
+          el.classList.add('hide');
+          setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          }, 500);
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(reveal, 220);
+          });
+        } else {
+          setTimeout(reveal, 220);
+        }
+        setTimeout(reveal, 4500);
+      })();
+    </script>
   </head>
   <body>
+    <!-- Loading screen — fades as soon as the SSR page is painted, with a
+         hard failsafe; removed by SvelteKit onMount after hydration. -->
+    <div id="loading-screen" aria-live="polite" aria-label="Loading CASC4D3">
+      <!-- Floating petal particles -->
+      <div class="loader-petals-bg">
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+        <div class="loader-petal-float"></div>
+      </div>
+
+      <!-- Ume flower -->
+      <div class="ume-wrap">
+        <div class="ume-glow"></div>
+        <div class="ume-petal"></div>
+        <div class="ume-petal"></div>
+        <div class="ume-petal"></div>
+        <div class="ume-petal"></div>
+        <div class="ume-petal"></div>
+        <div class="ume-center">
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+          <div class="ume-stamen"></div>
+        </div>
+      </div>
+
+      <!-- Brand + loading indicator -->
+      <div class="loader-brand">
+        <span class="loader-kicker">43RD COMPUTER SCIENCE WEEK</span>
+        <span class="loader-title">CASC4D3</span>
+      </div>
+      <div class="loader-progress">
+        <span class="loader-progress-bar"></span>
+      </div>
+    </div>
+    <noscript>
+      <style>
+        #loading-screen { display: none !important; }
+      </style>
+    </noscript>
+
     <div id="svelte">%sveltekit.body%</div>
   </body>
 </html>
