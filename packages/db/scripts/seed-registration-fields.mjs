@@ -102,6 +102,24 @@ const EVENTS = [
 		]
 	},
 	{
+		title: 'Jeopardy',
+		candidates: ['jeopardy'],
+		description:
+			'A quiz-style game show where students participate, compete, and put their knowledge to the test across different categories on various themes and cultures. Students will be presented an answer and they must respond with a question related to the current theme.',
+		startAt: '2027-02-19T15:00:00+08:00',
+		endAt: '2027-02-19T17:00:00+08:00',
+		fields: []
+	},
+	{
+		title: 'Code Wars',
+		candidates: ['code wars'],
+		description:
+			'Code Wars is an open programming competition where coders of all levels come together to battle it out through problem-solving and creativity. This event is open to all who are passionate about programming and eager to compete, collaborate, and learn.',
+		startAt: '2027-02-21T09:00:00+08:00',
+		endAt: '2027-02-21T17:00:00+08:00',
+		fields: []
+	},
+	{
 		title: 'Warframes',
 		candidates: ['warframes', 'web design'],
 		description:
@@ -196,7 +214,8 @@ for (const def of EVENTS) {
 	let eventId;
 	if (existing.length === 1) {
 		eventId = existing[0].id;
-		console.log(`= event exists: ${def.title} (${eventId})`);
+		await sql`update events set description = ${def.description} where id = ${eventId}`;
+		console.log(`= event exists (description updated): ${def.title} (${eventId})`);
 	} else if (existing.length === 0) {
 		const [row] = await sql`
 			insert into events (title, description, start_at, end_at, capacity, status)
