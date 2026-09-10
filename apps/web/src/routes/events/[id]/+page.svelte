@@ -1,15 +1,11 @@
 <script lang="ts">
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import { getEventMeta } from '$lib/events';
 
 	let { data, form } = $props();
 
-	const formatDateTime = (date: Date) =>
-		new Intl.DateTimeFormat('en-PH', {
-			dateStyle: 'full',
-			timeStyle: 'short',
-			timeZone: 'Asia/Manila'
-		}).format(new Date(date));
+	const meta = $derived(getEventMeta(data.event.title));
 
 	let isSubmitting = $state(false);
 </script>
@@ -47,6 +43,7 @@
 					{:else}
 						<Badge variant="draft">Draft / Announced</Badge>
 					{/if}
+					<span class="mod-pill mod-pill--{meta.modality.toLowerCase()}">{meta.modality}</span>
 				</div>
 
 				<h1>{data.event.title}</h1>
@@ -63,8 +60,24 @@
 						</svg>
 					</span>
 					<div class="info-text">
-						<span class="info-label">Date & Time</span>
-						<span class="info-val">{formatDateTime(data.event.startAt)}</span>
+						<span class="info-label">Date & Schedule</span>
+						<span class="info-val">{meta.dateLabel}</span>
+						{#if meta.timeLabel}
+							<span class="info-subval">{meta.timeLabel}</span>
+						{/if}
+					</div>
+				</div>
+
+				<div class="info-tile">
+					<span class="info-icon" aria-hidden="true">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10" />
+							<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+						</svg>
+					</span>
+					<div class="info-text">
+						<span class="info-label">Format / Modality</span>
+						<span class="info-val">{meta.venue}</span>
 					</div>
 				</div>
 
@@ -356,6 +369,21 @@
 		color: var(--rose-900);
 		border-radius: 999px;
 	}
+	.mod-pill {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		padding: 0.2rem 0.65rem;
+		border-radius: 999px;
+	}
+	.mod-pill--f2f {
+		background: var(--rose-100);
+		color: var(--rose-800);
+	}
+	.mod-pill--online {
+		background: #d8f1e3;
+		color: #1b633e;
+	}
 
 	.detail-header h1 {
 		font-size: clamp(2.2rem, 5vw, 3.2rem);
@@ -411,6 +439,11 @@
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: var(--plum);
+	}
+	.info-subval {
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--plum-soft);
 	}
 	.val-free {
 		color: var(--ok);

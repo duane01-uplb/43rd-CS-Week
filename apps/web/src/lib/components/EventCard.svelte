@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Badge from './Badge.svelte';
 	import Button from './Button.svelte';
+	import { getEventMeta } from '$lib/events';
 
 	interface EventItem {
 		id: string;
@@ -20,32 +21,30 @@
 		variant?: 'grid' | 'track';
 	} = $props();
 
-	const formatDateTime = (date: Date | string) =>
-		new Intl.DateTimeFormat('en-PH', {
-			dateStyle: 'medium',
-			timeStyle: 'short',
-			timeZone: 'Asia/Manila'
-		}).format(new Date(date));
+	const meta = $derived(getEventMeta(event.title));
 </script>
 
 <article class={`event-card-root variant-${variant}`}>
 	<div class="card-top">
-		{#if event.status === 'open'}
-			<Badge variant="open">Open for registration</Badge>
-		{:else if event.status === 'closed'}
-			<Badge variant="closed">Registration closed</Badge>
-		{:else}
-			<Badge variant="draft">Draft / Announced</Badge>
-		{/if}
+		<div class="card-badges">
+			{#if event.status === 'open'}
+				<Badge variant="open">Open</Badge>
+			{:else if event.status === 'closed'}
+				<Badge variant="closed">Closed</Badge>
+			{:else}
+				<Badge variant="draft">Announced</Badge>
+			{/if}
+			<span class="mod-pill mod-pill--{meta.modality.toLowerCase()}">{meta.modality}</span>
+		</div>
 
-		<time datetime={new Date(event.startAt).toISOString()} class="card-time">
+		<div class="card-time">
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 				<rect x="3" y="4" width="18" height="18" rx="2" />
 				<path d="M3 10h18" />
 				<path d="M8 2v4M16 2v4" />
 			</svg>
-			<span>{formatDateTime(event.startAt)}</span>
-		</time>
+			<span>{meta.dateLabel}</span>
+		</div>
 	</div>
 
 	<h3 class="card-title">
@@ -138,6 +137,27 @@
 		gap: 0.75rem;
 		margin-bottom: 1.15rem;
 		flex-wrap: wrap;
+	}
+	.card-badges {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+	}
+	.mod-pill {
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		line-height: 1.2;
+	}
+	.mod-pill--f2f {
+		background: var(--rose-100);
+		color: var(--rose-800);
+	}
+	.mod-pill--online {
+		background: #d8f1e3;
+		color: #1b633e;
 	}
 	.card-time {
 		display: inline-flex;

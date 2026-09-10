@@ -1,9 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 	let menuOpen = $state(false);
 	let scrolled = $state(false);
+
+	onMount(() => {
+		// The splash is normally faded + removed by the inline script in
+		// app.html as soon as the SSR page is painted. This is the fallback
+		// for navigation/hydration edge cases (guarded by `data-revealed`).
+		const loader = document.getElementById('loading-screen');
+		if (!loader || loader.dataset.revealed) return;
+		loader.dataset.revealed = '1';
+		loader.classList.add('hide');
+		setTimeout(() => loader.remove(), 500);
+	});
 
 	const pathname = $derived(page.url.pathname);
 	const isHome = $derived(pathname === '/');
@@ -25,12 +37,6 @@
 		content="CASC4D3: The 43rd Computer Science Week at UPLB. Keynotes, workshops, and friendly contests for the computing community. All events are free to register."
 	/>
 	<meta name="theme-color" content="#2b2430" />
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap"
-		rel="stylesheet"
-	/>
 </svelte:head>
 
 <header class="site-nav" class:isHome class:scrolled>
@@ -188,7 +194,14 @@
 	:global(body) {
 		display: flex;
 		flex-direction: column;
-		background: var(--paper);
+		background-color: var(--paper);
+		background-image:
+			radial-gradient(ellipse 80% 50% at 50% -10%, rgba(194, 80, 114, 0.09) 0%, transparent 70%),
+			radial-gradient(circle at 100% 40%, rgba(166, 58, 92, 0.05) 0%, transparent 50%),
+			radial-gradient(circle at 0% 80%, rgba(194, 80, 114, 0.05) 0%, transparent 50%);
+		background-attachment: fixed;
+		background-repeat: no-repeat;
+		background-size: cover;
 		color: var(--plum);
 		font-family: var(--font-body);
 		font-size: 16px;
