@@ -6,6 +6,37 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-09-15 — Ship-ready polish (A/C/D/E; B deferred)
+- **A — Keep site-wide backdrop WIP:** finished keeping the uncommitted
+  move of the sakura atmospheric backdrop (grid, pixel trees, wind, petals)
+  from `apps/web/src/routes/+page.svelte` into
+  `apps/web/src/routes/+layout.svelte` as `.site-backdrop` so every public
+  page shares it. Favicon link added in both `apps/web/src/app.html` and
+  `apps/admin/src/app.html`.
+- **B — Hero stats:** intentionally skipped this pass — four
+  `placeholder` pairs remain on the homepage stat bar pending organizer copy.
+- **C — Small polish:** fixed CTA plural typo (`event event are` →
+  `events are`) in `+page.svelte`; copied `casc4d3-emblem.png` into
+  `apps/admin/static/` so the admin favicon resolves (was web-only before).
+- **D — Index check:** live Postgres confirms both `0002` indexes exist
+  (`events_status_start_at_idx`, `registrations_status_created_at_idx`) —
+  no apply needed. Added reusable
+  `packages/db/scripts/check-indexes.mjs`.
+- **E — Manual smoke QA (local):**
+  - [x] Public home loads; no login/signup/logout nav links
+  - [x] `/login` on public web → 404 (accounts removed)
+  - [x] `/events` lists 6 open events; Career Orientation form renders
+    consent + dynamic fields, no account required
+  - [x] Warframes form includes required Proof of Payment file field
+  - [x] Unauthenticated `/admin` and `/admin/registrations/file?path=…`
+    redirect to admin `/login`
+  - [x] Favicon asset returns HTTP 200 on web (5173) and admin (5174)
+  - **Note:** homepage "Open Events" preview was empty (`start_at >= now()`)
+    while `/events` still listed open events — event start dates vs "now"
+    likely out of sync; revisit when setting real CS Week schedule.
+  - Not fully exercised this pass: successful registration submit, CSV
+    export, signed upload URL as logged-in admin, mobile viewport pass.
+
 ## 2026-08-30 — Cinematic hero: sakura wind breeze
 - **Web hero** (`apps/web/src/routes/+page.svelte`): added a **sakura wind
   breeze** layer behind the drifting petals.
