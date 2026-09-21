@@ -1,6 +1,11 @@
 <script lang="ts">
 	import Badge from './Badge.svelte';
-	import Button from './Button.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { getExternalRegistration } from '$lib/externalRegistration';
+	import CalendarIcon from '@lucide/svelte/icons/calendar';
+	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
+	import UsersIcon from '@lucide/svelte/icons/users';
+	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 
 	interface EventItem {
 		id: string;
@@ -26,6 +31,9 @@
 			timeStyle: 'short',
 			timeZone: 'Asia/Manila'
 		}).format(new Date(date));
+
+	const external = $derived(getExternalRegistration(event.title));
+	const registerHref = $derived(external?.url ?? `/events/${event.id}`);
 </script>
 
 <article class={`event-card-root variant-${variant}`}>
@@ -39,11 +47,7 @@
 		{/if}
 
 		<time datetime={new Date(event.startAt).toISOString()} class="card-time">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<rect x="3" y="4" width="18" height="18" rx="2" />
-				<path d="M3 10h18" />
-				<path d="M8 2v4M16 2v4" />
-			</svg>
+			<CalendarIcon size={14} strokeWidth={2} />
 			<span>{formatDateTime(event.startAt)}</span>
 		</time>
 	</div>
@@ -69,8 +73,8 @@
 				</span>
 			</div>
 			<div class="meta-item">
-				<span class="meta-label">Entry</span>
-				<span class="meta-val val-free">100% Free</span>
+				<span class="meta-label">Account</span>
+				<span class="meta-val">Not required</span>
 			</div>
 		</div>
 	{/if}
@@ -79,36 +83,34 @@
 		{#if variant === 'track'}
 			<div class="track-capacity">
 				{#if event.capacity !== null}
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-						<circle cx="9" cy="7" r="4" />
-					</svg>
+					<UsersIcon size={14} strokeWidth={2} />
 					<span>{event.capacity} total slots</span>
 				{:else}
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<circle cx="12" cy="12" r="10" />
-						<path d="m9 12 2 2 4-4" />
-					</svg>
+					<CircleCheckIcon size={14} strokeWidth={2} />
 					<span>Open Capacity</span>
 				{/if}
 			</div>
 		{/if}
 
 		{#if event.status === 'open'}
-			<Button variant="primary" size="sm" href={`/events/${event.id}`} fullWidth={variant === 'grid'}>
-				<span>Register for event</span>
-				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M5 12h14" />
-					<path d="m12 5 7 7-7 7" />
-				</svg>
+			<Button
+				variant="default"
+				size="lg"
+				href={registerHref}
+				class={variant === 'grid' ? 'h-10 w-full gap-2 px-4 text-[0.88rem] font-semibold' : 'h-10 gap-2 px-4 text-[0.88rem] font-semibold'}
+			>
+				<span>{external ? `Register at ${external.hostLabel}` : 'Register for event'}</span>
+				<ArrowRightIcon size={15} strokeWidth={2} />
 			</Button>
 		{:else}
-			<Button variant="ghost" size="sm" href={`/events/${event.id}`} fullWidth={variant === 'grid'}>
+			<Button
+				variant="outline"
+				size="lg"
+				href={`/events/${event.id}`}
+				class={variant === 'grid' ? 'h-10 w-full gap-2 px-4 text-[0.88rem] font-semibold' : 'h-10 gap-2 px-4 text-[0.88rem] font-semibold'}
+			>
 				<span>View details</span>
-				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M5 12h14" />
-					<path d="m12 5 7 7-7 7" />
-				</svg>
+				<ArrowRightIcon size={15} strokeWidth={2} />
 			</Button>
 		{/if}
 	</div>
@@ -118,17 +120,12 @@
 	.event-card-root {
 		display: flex;
 		flex-direction: column;
+		height: 100%;
 		background: var(--card);
 		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-		padding: 1.85rem;
-		transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-	}
-	.event-card-root:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--shadow-hover);
-		border-color: var(--rose-100);
+		border-radius: var(--radius-sm);
+		box-shadow: none;
+		padding: 1.65rem;
 	}
 
 	.card-top {
@@ -147,7 +144,7 @@
 		color: var(--plum-soft);
 		font-weight: 500;
 	}
-	.card-time svg {
+	.card-time :global(svg) {
 		color: var(--rose-600);
 	}
 
@@ -198,9 +195,6 @@
 		font-weight: 600;
 		color: var(--plum);
 	}
-	.val-free {
-		color: var(--ok);
-	}
 
 	.card-footer {
 		display: flex;
@@ -221,7 +215,7 @@
 		color: var(--plum-soft);
 		font-weight: 500;
 	}
-	.track-capacity svg {
+	.track-capacity :global(svg) {
 		color: var(--rose-600);
 	}
 

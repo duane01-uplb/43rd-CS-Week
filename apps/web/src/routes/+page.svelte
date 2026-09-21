@@ -1,7 +1,10 @@
 <script lang="ts">
 	import EventCard from '$lib/components/EventCard.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { gsap } from 'gsap';
+	import MusicIcon from '@lucide/svelte/icons/music';
+	import AudioLinesIcon from '@lucide/svelte/icons/audio-lines';
 
 	let { data } = $props();
 
@@ -33,6 +36,19 @@
 		}
 	}
 
+	onMount(() => {
+		if (typeof window === 'undefined') return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		const content = document.querySelector('.hero-content');
+		const stats = document.querySelector('.hero-stat-bar');
+		if (content) {
+			gsap.fromTo(content, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' });
+		}
+		if (stats) {
+			gsap.fromTo(stats, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.15, ease: 'power2.out' });
+		}
+	});
+
 	onDestroy(() => {
 		audio?.pause();
 		audio = undefined;
@@ -48,9 +64,7 @@
 	<!-- Central Hero Overlay Content -->
 	<div class="hero-inner shell">
 		<div class="hero-content">
-			<div class="hero-badge">
-				<span class="hero-badge-text">43RD COMPUTER SCIENCE WEEK</span>
-			</div>
+			<p class="hero-kicker">43rd Computer Science Week</p>
 
 			<h1 class="hero-title">
 				CASC<span class="hero-digit">4</span>D<span class="hero-digit">3</span>
@@ -58,7 +72,8 @@
 			</h1>
 
 			<p class="hero-description">
-				The Annual Flagship Event of UPLB Computer Science Society
+				The Annual Flagship Event of UPLB Computer Science Society.
+				Register without an account. Slots lock in when organizers confirm.
 			</p>
 
 			<div class="hero-action-row">
@@ -70,7 +85,7 @@
 					</svg>
 				</Button>
 				<Button variant="ghost-dark" size="lg" href="#event">
-					<span>Explore Schedule</span>
+					<span>See the schedule</span>
 				</Button>
 			</div>
 		</div>
@@ -78,23 +93,23 @@
 		<!-- Bottom Metadata & Stat Bar -->
 		<div class="hero-stat-bar">
 			<div class="stat-item">
-				<span class="stat-val">placeholder</span>
-				<span class="stat-lbl">placeholder</span>
+				<span class="stat-val">{data.openCount}</span>
+				<span class="stat-lbl">Open events</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">placeholder</span>
-				<span class="stat-lbl">placeholder</span>
+				<span class="stat-val">No account</span>
+				<span class="stat-lbl">Required</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">placeholder</span>
-				<span class="stat-lbl">placeholder</span>
+				<span class="stat-val">43rd</span>
+				<span class="stat-lbl">Edition</span>
 			</div>
 			<div class="stat-divider" aria-hidden="true"></div>
 			<div class="stat-item">
-				<span class="stat-val">placeholder</span>
-				<span class="stat-lbl">placeholder</span>
+				<span class="stat-val">UPLB</span>
+				<span class="stat-lbl">ComSci Soc</span>
 			</div>
 		</div>
 	</div>
@@ -108,37 +123,11 @@
 		title="Toggle ambient music"
 	>
 		{#if playing}
-			<span class="music-bars" aria-hidden="true">
-				<i></i><i></i><i></i><i></i>
-			</span>
+			<AudioLinesIcon size={18} strokeWidth={2} />
 		{:else}
-			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M9 18V5l12-2v13" />
-				<circle cx="6" cy="18" r="3" />
-				<circle cx="18" cy="16" r="3" />
-			</svg>
+			<MusicIcon size={18} strokeWidth={2} />
 		{/if}
 	</button>
-
-	<!-- Minimal Right-Edge Section Index Indicator -->
-	<aside class="hero-edge-nav" aria-label="Page section navigation">
-		<a href="#intro" class="edge-dot">
-			<span class="edge-dot-mark" aria-hidden="true"></span>
-			<span class="edge-label">01 INTRO</span>
-		</a>
-		<a href="#event" class="edge-dot">
-			<span class="edge-dot-mark" aria-hidden="true"></span>
-			<span class="edge-label">02 EVENTS</span>
-		</a>
-		<a href="#experience" class="edge-dot">
-			<span class="edge-dot-mark" aria-hidden="true"></span>
-			<span class="edge-label">03 ABOUT</span>
-		</a>
-		<a href="#how-it-works" class="edge-dot">
-			<span class="edge-dot-mark" aria-hidden="true"></span>
-			<span class="edge-label">04 GUIDE</span>
-		</a>
-	</aside>
 </section>
 
 <!-- ====================== SECTION 1: IDENTITY & OVERVIEW ====================== -->
@@ -154,7 +143,7 @@
 					CASC4D3 honors the legacy of Computer Science at UPLB by creating an open arena for everyone — from first-year explorers to senior systems architects.
 				</p>
 				<p class="intro-sub">
-					No paywalls. No gatekeeping. Just pure passion for algorithms, interfaces, design challenges, and community.
+					No gatekeeping. Just passion for algorithms, interfaces, design challenges, and community.
 				</p>
 			</div>
 		</div>
@@ -272,7 +261,7 @@
 			<li class="step-card">
 				<span class="step-counter" aria-hidden="true">03</span>
 				<h3>Instant Reservation</h3>
-				<p>Your spot is immediately locked in. Free admission with no checkout steps or payment gates.</p>
+				<p>Your spot is locked in as soon as the organizers confirm your registration.</p>
 			</li>
 		</ol>
 	</div>
@@ -309,7 +298,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-		align-items: center;
+		align-items: stretch;
 		background: transparent;
 		color: #ffffff;
 		overflow: hidden;
@@ -328,52 +317,37 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-		align-items: center;
-		text-align: center;
+		align-items: flex-start;
+		text-align: left;
 		box-sizing: border-box;
 	}
 	.hero-content {
-		max-width: 44rem;
-		margin: auto auto;
+		max-width: 46rem;
+		margin: auto 0;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: flex-start;
 	}
 
-	.hero-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.55rem;
-		padding: 0.35rem 0.95rem;
-		border-radius: 999px;
-		background: rgba(166, 58, 92, 0.18);
-		border: 1px solid rgba(194, 80, 114, 0.45);
-		backdrop-filter: blur(8px);
-		margin-bottom: 1.25rem;
-	}
-	.hero-badge-glow {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: var(--rose-600);
-		box-shadow: 0 0 10px var(--rose-600);
-	}
-	.hero-badge-text {
-		font-size: 0.72rem;
+	.hero-kicker {
+		margin: 0 0 1.1rem;
+		font-size: 0.78rem;
 		font-weight: 700;
-		letter-spacing: 0.18em;
-		color: var(--rose-100);
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--rose-600);
 	}
 
 	.hero-title {
-		font-family: 'Macondo Swash Caps', var(--font-display);
-		font-size: clamp(3rem, 7.5vw, 5.4rem);
+		font-family: var(--font-display);
+		font-size: clamp(2.8rem, 7vw, 5.2rem);
 		font-weight: 700;
-		line-height: 0.98;
-		letter-spacing: 0.04em;
+		line-height: 0.92;
+		letter-spacing: -0.01em;
 		margin: 0 0 0.5rem;
 		color: #ffffff;
-		text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+		text-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+		text-transform: uppercase;
 	}
 	.hero-digit {
 		display: inline-block;
@@ -381,109 +355,75 @@
 		font-weight: 400;
 		font-size: 0.68em;
 		line-height: 1;
-		color: #ff7096;
+		color: var(--rose-600);
 		text-shadow: 0 0 12px rgba(194, 80, 114, 0.65), 0 2px 0 rgba(122, 31, 61, 0.9);
 		transform: translateY(0.05em);
+		text-transform: none;
 	}
 	.hero-subtitle-line {
 		display: block;
-		font-family: 'Macondo Swash Caps', var(--font-body);
-		font-size: clamp(1rem, 2.2vw, 1.35rem);
-		font-weight: 700;
-		letter-spacing: 0.08em;
+		font-family: var(--font-body);
+		font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: none;
 		color: var(--rose-100);
-		margin-top: 0.35rem;
+		margin-top: 0.55rem;
 	}
 
 	.hero-description {
-		font-size: clamp(0.95rem, 1.6vw, 1.1rem);
-		line-height: 1.6;
+		font-size: clamp(0.95rem, 1.6vw, 1.12rem);
+		line-height: 1.55;
 		color: rgba(255, 255, 255, 0.82);
-		max-width: 36rem;
-		margin: 0.65rem 0 1.85rem;
+		max-width: 34rem;
+		margin: 0.85rem 0 1.75rem;
 	}
 
 	.hero-action-row {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: center;
-		gap: 1rem;
+		justify-content: flex-start;
+		gap: 0.75rem;
 		margin-bottom: 1rem;
 	}
 
 	/* Bottom Stat Bar */
 	.hero-stat-bar {
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 1.75rem;
+		align-items: flex-end;
+		justify-content: flex-start;
+		gap: 2.25rem;
 		flex-wrap: wrap;
-		padding: 1.15rem 2rem;
-		border-radius: 999px;
-		background: rgba(43, 36, 48, 0.75);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		backdrop-filter: blur(14px);
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+		padding: 0 0 0.35rem;
+		border-radius: 0;
+		background: transparent;
+		border: 0;
+		backdrop-filter: none;
+		box-shadow: none;
 	}
 	.stat-item {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		gap: 0.15rem;
+		align-items: flex-start;
+		gap: 0.2rem;
 	}
 	.stat-val {
 		font-family: var(--font-display);
-		font-size: 1.1rem;
+		font-size: 1.35rem;
 		font-weight: 700;
 		color: #ffffff;
-		line-height: 1.2;
+		line-height: 1.1;
 	}
 	.stat-lbl {
-		font-size: 0.74rem;
-		color: rgba(255, 255, 255, 0.65);
-		letter-spacing: 0.02em;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.55);
 	}
 	.stat-divider {
 		width: 1px;
-		height: 24px;
-		background: rgba(255, 255, 255, 0.14);
-	}
-
-	/* Right Edge Minimal Section Indicator */
-	.hero-edge-nav {
-		position: absolute;
-		right: 1.5rem;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		z-index: 5;
-	}
-	.edge-dot {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		text-decoration: none;
-		opacity: 0.65;
-		transition: opacity 0.15s ease, transform 0.15s ease;
-	}
-	.edge-dot:hover {
-		opacity: 1;
-		transform: translateX(-3px);
-		text-decoration: none;
-	}
-	.edge-dot-mark {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--rose-600);
-	}
-	.edge-label {
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		color: var(--rose-100);
+		height: 28px;
+		background: rgba(255, 255, 255, 0.16);
 	}
 
 	/* ============================== SECTION 1: INTRO ============================== */
@@ -499,8 +439,10 @@
 		align-items: center;
 	}
 	.intro-heading-col h2 {
-		font-size: clamp(2.1rem, 4.5vw, 3rem);
-		line-height: 1.15;
+		font-size: clamp(2.4rem, 5vw, 3.6rem);
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-transform: uppercase;
 		margin: 0;
 	}
 	.intro-lead {
@@ -530,26 +472,38 @@
 
 	/* ============================== SECTION 3: PILLARS ============================== */
 	.section-experience {
-		background: var(--rose-050);
-		border-block: 1px solid var(--line);
+		background: var(--plum);
+		border-block: 0;
 		padding: clamp(5rem, 9vw, 7.5rem) 0;
+		color: rgba(255, 255, 255, 0.78);
+	}
+	.section-experience :global(.eyebrow) {
+		color: var(--rose-600);
+	}
+	.section-experience h2,
+	.section-experience .pillar-card h3 {
+		color: #ffffff;
+	}
+	.section-experience :global(.lede) {
+		color: rgba(255, 255, 255, 0.62);
 	}
 	.pillars-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 1.75rem;
+		gap: 1.25rem;
 	}
 	.pillar-card {
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-		padding: 2.25rem 2rem;
-		transition: transform 0.15s ease, box-shadow 0.15s ease;
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: var(--radius-sm);
+		box-shadow: none;
+		padding: 2.1rem 1.75rem;
 	}
-	.pillar-card:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--shadow-hover);
+	.pillar-card p {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.62);
+		font-size: 0.95rem;
+		line-height: 1.65;
 	}
 	.pillar-icon {
 		display: inline-flex;
@@ -565,61 +519,67 @@
 	.pillar-card h3 {
 		font-size: 1.25rem;
 		margin: 0 0 0.6rem;
-		color: var(--plum);
-	}
-	.pillar-card p {
-		margin: 0;
-		color: var(--plum-soft);
-		font-size: 0.95rem;
-		line-height: 1.65;
+		color: #ffffff;
 	}
 
 	/* ============================== SECTION 4: HOW IT WORKS ============================== */
 	.section-howto {
 		padding: clamp(5rem, 9vw, 7.5rem) 0;
-		background: var(--paper);
+		background: var(--plum);
+	}
+	.section-howto :global(.eyebrow) {
+		color: var(--rose-600);
+	}
+	.section-howto h2,
+	.section-howto h3 {
+		color: #ffffff;
+	}
+	.section-howto :global(.lede) {
+		color: rgba(255, 255, 255, 0.62);
 	}
 	.steps-flow {
 		list-style: none;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		grid-template-columns: 1fr;
 		gap: 1.75rem;
 		padding: 0;
 		margin: 0;
+		max-width: 42rem;
 	}
 	.step-card {
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-		padding: 2.25rem 2rem;
-		transition: transform 0.15s ease, box-shadow 0.15s ease;
-	}
-	.step-card:hover {
-		transform: translateY(-3px);
-		box-shadow: var(--shadow-hover);
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		padding: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		column-gap: 1.25rem;
+		row-gap: 0.35rem;
 	}
 	.step-counter {
-		display: block;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		grid-row: 1 / span 2;
+		width: 2.4rem;
+		height: 2.4rem;
+		border: 1px solid rgba(255, 255, 255, 0.22);
 		font-family: var(--font-display);
-		font-size: 2.8rem;
+		font-size: 0.82rem;
 		font-weight: 700;
 		line-height: 1;
-		color: var(--rose-100);
-		margin-bottom: 1.25rem;
-		transition: color 0.15s ease;
-	}
-	.step-card:hover .step-counter {
-		color: var(--rose-600);
+		color: #ffffff;
+		margin: 0.15rem 0 0;
 	}
 	.step-card h3 {
-		font-size: 1.2rem;
-		margin: 0 0 0.5rem;
-		color: var(--plum);
+		font-size: 1.35rem;
+		margin: 0;
+		color: #ffffff;
 	}
 	.step-card p {
 		margin: 0;
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.62);
 		font-size: 0.95rem;
 		line-height: 1.65;
 	}
@@ -630,35 +590,37 @@
 		background: var(--paper);
 	}
 	.cta-master-card {
-		background: linear-gradient(135deg, var(--rose-900), var(--rose-800));
-		border-radius: 20px;
-		text-align: center;
-		padding: clamp(3.5rem, 8vw, 5.5rem) clamp(1.5rem, 6vw, 4rem);
-		box-shadow: 0 24px 60px rgba(122, 31, 61, 0.28);
+		background: var(--rose-700);
+		border-radius: var(--radius-sm);
+		text-align: left;
+		padding: clamp(3rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 3rem);
+		box-shadow: none;
 	}
 	.cta-kicker {
 		font-size: 0.72rem;
 		font-weight: 700;
-		letter-spacing: 0.22em;
-		color: rgba(255, 255, 255, 0.75);
+		letter-spacing: 0.18em;
+		color: rgba(255, 255, 255, 0.78);
 		margin: 0 0 1rem;
 	}
 	.cta-master-card h2 {
 		color: #ffffff;
-		font-size: clamp(2.1rem, 5vw, 3.2rem);
+		font-size: clamp(2rem, 5vw, 3.1rem);
 		margin: 0 0 1rem;
-		line-height: 1.15;
+		line-height: 1.05;
+		text-transform: uppercase;
+		letter-spacing: -0.01em;
 	}
 	.cta-summary {
 		color: rgba(255, 255, 255, 0.88);
-		max-width: 44ch;
-		margin: 0 auto 2.25rem;
-		font-size: 1.1rem;
+		max-width: 48ch;
+		margin: 0 0 1.75rem;
+		font-size: 1.05rem;
 		line-height: 1.65;
 	}
 	.cta-buttons {
 		display: flex;
-		justify-content: center;
+		justify-content: flex-start;
 	}
 
 	/* ============================== RESPONSIVE BREAKPOINTS ============================== */
@@ -668,9 +630,6 @@
 			padding-top: 6rem;
 			padding-bottom: 4.5rem;
 		}
-		.hero-edge-nav {
-			display: none;
-		}
 		.intro-grid {
 			grid-template-columns: 1fr;
 			gap: 1.5rem;
@@ -679,9 +638,8 @@
 
 	@media (max-width: 720px) {
 		.hero-stat-bar {
-			border-radius: var(--radius);
 			gap: 1.25rem;
-			padding: 1.25rem;
+			padding: 0;
 		}
 		.stat-divider {
 			display: none;
@@ -697,6 +655,12 @@
 		}
 		.hero-stat-bar .stat-item {
 			width: 100%;
+		}
+		.music-toggle {
+			bottom: 1rem;
+			right: 1rem;
+			width: 42px;
+			height: 42px;
 		}
 	}
 

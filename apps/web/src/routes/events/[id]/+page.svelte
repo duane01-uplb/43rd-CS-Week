@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import { getExternalRegistration } from '$lib/externalRegistration';
 
 	let { data, form } = $props();
 
@@ -11,6 +12,9 @@
 			timeZone: 'Asia/Manila'
 		}).format(new Date(date));
 
+	const fileFields = $derived(data.fields.filter((field) => field.fieldType === 'file'));
+	const external = $derived(getExternalRegistration(data.event.title));
+
 	let isSubmitting = $state(false);
 </script>
 
@@ -18,7 +22,11 @@
 	<title>{data.event.title} | CASC4D3</title>
 	<meta
 		name="description"
-		content={`Register for ${data.event.title} at the 43rd Computer Science Week. Free admission.`}
+		content={
+			external
+				? `Register for ${data.event.title} at ${external.hostLabel}.`
+				: `Register for ${data.event.title} at the 43rd Computer Science Week. No account required.`
+		}
 	/>
 </svelte:head>
 
@@ -97,8 +105,8 @@
 						</svg>
 					</span>
 					<div class="info-text">
-						<span class="info-label">Admission</span>
-						<span class="info-val val-free">100% Free · No Payment</span>
+						<span class="info-label">Account</span>
+						<span class="info-val">Not required</span>
 					</div>
 				</div>
 			</div>
@@ -132,6 +140,26 @@
 						</svg>
 						<span><strong>Timezone:</strong> All event times are displayed in Philippine Standard Time (PST / Asia/Manila).</span>
 					</li>
+					{#if external}
+						<li>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								<polyline points="15 3 21 3 21 9" />
+								<line x1="10" y1="14" x2="21" y2="3" />
+							</svg>
+							<span><strong>Registration site:</strong> Sign up for {data.event.title} at <a href={external.url}>{external.hostLabel}</a>. This site does not accept Code Wars registrations.</span>
+						</li>
+					{/if}
+					{#each fileFields as field (field.id)}
+						<li>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="17 8 12 3 7 8" />
+								<line x1="12" y1="3" x2="12" y2="15" />
+							</svg>
+							<span><strong>Required at registration:</strong> {field.label}</span>
+						</li>
+					{/each}
 				</ul>
 			</section>
 		</div>
@@ -177,9 +205,28 @@
 							<Button variant="ghost" size="md" fullWidth href="/events">View available events</Button>
 						</div>
 					</div>
+				{:else if external}
+					<div class="external-register" role="note">
+						<p class="external-kicker">Official registration site</p>
+						<h2>Register for {data.event.title} on {external.hostLabel}</h2>
+						<p>
+							Code Wars does not use this form. Go to
+							<a href={external.url}>{external.hostLabel}</a>
+							to sign up for the competition.
+						</p>
+						<div class="external-actions">
+							<Button variant="primary" size="lg" fullWidth href={external.url}>
+								<span>Continue to {external.hostLabel}</span>
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<path d="M5 12h14" />
+									<path d="m12 5 7 7-7 7" />
+								</svg>
+							</Button>
+						</div>
+					</div>
 				{:else}
 					<div class="form-header">
-						<h2>Register for Free</h2>
+						<h2>Register</h2>
 						<p class="form-subtitle">Complete the fields below to secure your spot. No account required.</p>
 					</div>
 
@@ -358,8 +405,10 @@
 	}
 
 	.detail-header h1 {
-		font-size: clamp(2.2rem, 5vw, 3.2rem);
-		line-height: 1.15;
+		font-size: clamp(2.4rem, 6vw, 3.6rem);
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-transform: uppercase;
 		margin: 0;
 	}
 
@@ -370,9 +419,9 @@
 		gap: 0.75rem;
 		background: var(--card);
 		border: 1px solid var(--line);
-		border-radius: var(--radius);
+		border-radius: var(--radius-sm);
 		padding: 1.25rem 1.5rem;
-		box-shadow: var(--shadow);
+		box-shadow: none;
 	}
 	.info-tile {
 		display: flex;
@@ -411,9 +460,6 @@
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: var(--plum);
-	}
-	.val-free {
-		color: var(--ok);
 	}
 
 	/* Description Card */
@@ -646,6 +692,32 @@
 		font-size: 0.95rem;
 		line-height: 1.6;
 		margin: 0;
+	}
+
+	.external-register {
+		text-align: center;
+	}
+	.external-kicker {
+		margin: 0 0 0.5rem;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--rose-700);
+	}
+	.external-register h2 {
+		font-size: 1.45rem;
+		margin: 0 0 0.75rem;
+		line-height: 1.3;
+	}
+	.external-register p {
+		margin: 0 0 1.5rem;
+		color: var(--plum-soft);
+		font-size: 0.98rem;
+		line-height: 1.65;
+	}
+	.external-actions {
+		margin-top: 0.25rem;
 	}
 
 	/* Responsive */

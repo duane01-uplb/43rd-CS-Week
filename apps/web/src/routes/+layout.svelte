@@ -1,6 +1,14 @@
 <script lang="ts">
+	import '../app.css';
+	import '@fontsource/space-mono/400.css';
+	import '@fontsource/space-mono/700.css';
+	import '@fontsource/ibm-plex-sans/400.css';
+	import '@fontsource/ibm-plex-sans/500.css';
+	import '@fontsource/ibm-plex-sans/600.css';
+	import '@fontsource/ibm-plex-sans/700.css';
+	import '@fontsource/macondo-swash-caps/400.css';
+	import '@fontsource/press-start-2p/400.css';
 	import { page } from '$app/state';
-	import { onDestroy } from 'svelte';
 
 	let { children } = $props();
 	let menuOpen = $state(false);
@@ -16,20 +24,6 @@
 		}
 	}
 
-	// ── Site-wide Sakura backdrop (shared hero background) ──────────────
-	// Mouse parallax & interactive grid spotlight tracking
-	let cursorX = $state(50);
-	let cursorY = $state(50);
-	let hasMouse = $state(false);
-	// Tiles stay raised while the cursor moves, then settle back to rest
-	// 2 seconds after movement stops.
-	let gridLit = $state(false);
-	let idleTimer: ReturnType<typeof setTimeout> | undefined;
-
-	// 3D rising grid: every square touched by the cursor light lifts toward
-	// the viewer as an extruded prism; lift depth falls off with distance.
-	const CELL = 48;
-	const LIGHT_RADIUS = 110;
 	// Pixel-art sakura tree (22 wide). '.' empty, 'P' blossom, 'L' light
 	// blossom, 'D' deep blossom, 'T' trunk.
 	const PTREE = [
@@ -61,73 +55,17 @@
 		D: '#c25072',
 		T: '#46333f'
 	};
-	let viewportW = $state(typeof window !== 'undefined' ? window.innerWidth : 1440);
-	let viewportH = $state(typeof window !== 'undefined' ? window.innerHeight : 900);
-	let cols = $derived(Math.max(1, Math.floor(viewportW / CELL)));
-	let rows = $derived(Math.max(1, Math.floor(viewportH / CELL)));
-	let cells = $derived(Array.from({ length: cols * rows }, (_, i) => i));
-	let lightPath = $derived.by(() => {
-		const lifts = new Map<number, number>();
-		if (!hasMouse || !gridLit) return lifts;
-		const cx = (cursorX / 100) * viewportW;
-		const cy = (cursorY / 100) * viewportH;
-		const cellW = viewportW / cols;
-		const cellH = viewportH / rows;
-		for (let r = 0; r < rows; r++) {
-			for (let c = 0; c < cols; c++) {
-				const dx = (c + 0.5) * cellW - cx;
-				const dy = (r + 0.5) * cellH - cy;
-				const dist = Math.hypot(dx, dy);
-				if (dist <= LIGHT_RADIUS) {
-					const t = 1 - dist / LIGHT_RADIUS;
-					lifts.set(r * cols + c, Math.round(16 + t * 72));
-				}
-			}
-		}
-		return lifts;
-	});
-
-	function handleMouseMove(e: MouseEvent) {
-		if (typeof window !== 'undefined') {
-			const { innerWidth, innerHeight } = window;
-			cursorX = (e.clientX / innerWidth) * 100;
-			cursorY = (e.clientY / innerHeight) * 100;
-			hasMouse = true;
-			gridLit = true;
-			if (idleTimer) clearTimeout(idleTimer);
-			idleTimer = setTimeout(() => {
-				gridLit = false;
-			}, 2000);
-		}
-	}
-
-	function handleBackdropResize() {
-		if (typeof window !== 'undefined') {
-			viewportW = window.innerWidth;
-			viewportH = window.innerHeight;
-		}
-	}
-
-	onDestroy(() => {
-		if (idleTimer) clearTimeout(idleTimer);
-	});
 </script>
 
-<svelte:window onscroll={handleScroll} onmousemove={handleMouseMove} onresize={handleBackdropResize} />
+<svelte:window onscroll={handleScroll} />
 
 <svelte:head>
 	<title>CASC4D3 — The 43rd Computer Science Week</title>
 	<meta
 		name="description"
-		content="CASC4D3: The 43rd Computer Science Week at UPLB. Keynotes, workshops, and friendly contests for the computing community. All events are free to register."
+		content="CASC4D3: The 43rd Computer Science Week at UPLB. Keynotes, workshops, and friendly contests for the computing community."
 	/>
 	<meta name="theme-color" content="#2b2430" />
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap"
-		rel="stylesheet"
-	/>
 </svelte:head>
 
 <header class="site-nav" class:isHome class:scrolled>
@@ -152,7 +90,7 @@
 			<a href="/" class:active={isHome}>Home</a>
 			<a href="/events" class:active={isEvents}>Events</a>
 			<a href="/#how-it-works">How It Works</a>
-			<a href="/events" class="btn btn-primary btn-sm nav-cta">Register for Events</a>
+			<a href="/events" class="btn btn-nav-outline btn-sm nav-cta">Register for Events →</a>
 		</nav>
 
 		<button
@@ -178,27 +116,16 @@
 			<a href="/events" class:active={isEvents} onclick={() => (menuOpen = false)}>Events & Schedule</a>
 			<a href="/#how-it-works" onclick={() => (menuOpen = false)}>How It Works</a>
 			<div class="mobile-menu-cta">
-				<a href="/events" class="btn btn-primary btn-full" onclick={() => (menuOpen = false)}>Register for Events</a>
+				<a href="/events" class="btn btn-nav-outline btn-full" onclick={() => (menuOpen = false)}>Register for Events →</a>
 			</div>
 		</nav>
 	{/if}
 </header>
 
 <!-- Site-wide atmospheric Sakura backdrop shared across every page -->
-<div
-	class="site-backdrop"
-	style={`--cursor-x: ${cursorX}%; --cursor-y: ${cursorY}%;`}
-	aria-hidden="true"
->
+<div class="site-backdrop" aria-hidden="true">
 	<div class="ambient-glow"></div>
 	<div class="sakura-bloom-glow"></div>
-	<div class="cursor-aura" class:active={hasMouse}></div>
-	<div class="grid-3d" style={`--cols: ${cols}; --rows: ${rows};`} aria-hidden="true">
-		{#each cells as i}
-			{@const lift = lightPath.get(i) ?? 0}
-			<div class="grid-cell" class:active={lift > 0} style={`--lift: ${lift}px`}></div>
-		{/each}
-	</div>
 
 	<!-- Pixel-Art Sakura Trees on the sides (petals fall from their canopies) -->
 	<svg class="pixel-tree tree-left" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
@@ -342,17 +269,25 @@
 				</span>
 			</div>
 			<p class="footer-tag">
-				The official annual gathering of students, educators, developers, and tech creators at the University of the Philippines Los Baños. Every event is 100% free to attend.
+				The official annual gathering of students, educators, developers, and tech creators at the University of the Philippines Los Baños.
 			</p>
 			<div class="footer-socials">
 				<a href="https://www.facebook.com/uplbcossph" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-					<i class="fa-brands fa-facebook"></i>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+					</svg>
 				</a>
 				<a href="https://www.instagram.com/uplbcossph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-					<i class="fa-brands fa-instagram"></i>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+						<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+						<line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+					</svg>
 				</a>
 				<a href="https://www.tiktok.com/@uplbcossph?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-					<i class="fa-brands fa-tiktok"></i>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M14.5 3c.4 2.6 1.9 4.4 4.5 4.7v3.1c-1.5 0-2.9-.5-4.1-1.3v6.7c0 3.7-3 6.8-6.7 6.8S1.5 19.9 1.5 16.2c0-3.5 2.7-6.4 6.1-6.7v3.2c-1.4.3-2.4 1.5-2.4 3 0 1.7 1.4 3.1 3.1s3.1-1.4 3.1-3.1V3h3.1Z" />
+					</svg>
 				</a>
 			</div>
 		</div>
@@ -457,60 +392,6 @@
 		border-radius: 50%;
 		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
 		filter: blur(50px);
-	}
-	:global(.site-backdrop) :global(.grid-3d) {
-		position: absolute;
-		inset: 0;
-		display: grid;
-		grid-template-columns: repeat(var(--cols), 1fr);
-		grid-template-rows: repeat(var(--rows), 1fr);
-		perspective: 700px;
-		mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
-		-webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.95) 0%, transparent 82%);
-	}
-	:global(.site-backdrop) :global(.grid-cell) {
-		position: relative;
-		border-right: 1px solid rgba(246, 227, 233, 0.05);
-		border-bottom: 1px solid rgba(246, 227, 233, 0.05);
-		background: rgba(246, 227, 233, 0.015);
-		transition:
-			transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-			background 0.2s ease,
-			border-color 0.2s ease,
-			filter 0.3s ease;
-	}
-	:global(.site-backdrop) :global(.grid-cell::after) {
-		content: '';
-		position: absolute;
-		inset: 0;
-		border-radius: 2px;
-		background: linear-gradient(120deg, rgba(90, 20, 44, 0.4) 0%, rgba(166, 58, 92, 0.2) 55%, rgba(246, 227, 233, 0.04) 100%);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-	}
-	:global(.site-backdrop) :global(.grid-cell.active) {
-		z-index: 2;
-		border-color: rgba(246, 227, 233, 0.28);
-		background: radial-gradient(circle at center, rgba(194, 80, 114, 0.18) 0%, rgba(246, 227, 233, 0.05) 70%);
-		transform: translateZ(var(--lift, 0px));
-		filter: brightness(1.18);
-	}
-	:global(.site-backdrop) :global(.grid-cell.active::after) {
-		opacity: 1;
-		transform: translate(7px, 11px) translateZ(calc(var(--lift, 0px) * -0.85));
-	}
-	:global(.site-backdrop) :global(.cursor-aura) {
-		position: absolute;
-		inset: 0;
-		background: radial-gradient(420px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(194, 80, 114, 0.22) 0%, rgba(122, 31, 61, 0.09) 45%, transparent 75%);
-		opacity: 0;
-		transition: opacity 0.25s ease;
-		pointer-events: none;
-	}
-	:global(.site-backdrop) :global(.cursor-aura.active) {
-		opacity: 1;
 	}
 	:global(.site-backdrop) :global(.sakura-branches) {
 		position: absolute;
@@ -715,12 +596,12 @@
 		letter-spacing: 0.02em;
 	}
 
-	:global(a) {
+	:global(a:not([data-slot='button']):not(.btn)) {
 		color: var(--rose-700);
 		text-decoration: none;
 		transition: color 0.15s ease;
 	}
-	:global(a:hover) {
+	:global(a:not([data-slot='button']):not(.btn):hover) {
 		text-decoration: underline;
 	}
 
@@ -740,6 +621,14 @@
 		padding: 3rem clamp(1.25rem, 5vw, 2.5rem) 5rem;
 		background: var(--paper);
 		border-inline: 1px solid var(--line);
+	}
+	@media (max-width: 720px) {
+		:global(main.page:not(.isHome)) {
+			max-width: none;
+			margin-inline: 0;
+			border-inline: none;
+			padding: 1.5rem 1.15rem 3.25rem;
+		}
 	}
 
 	/* ---- button utilities ---- */
@@ -768,12 +657,22 @@
 	:global(.btn-primary) {
 		background: var(--rose-700);
 		color: #ffffff;
-		box-shadow: 0 2px 8px rgba(166, 58, 92, 0.25);
+		box-shadow: none;
 	}
 	:global(.btn-primary:hover) {
 		background: var(--rose-800);
 		color: #ffffff;
-		box-shadow: 0 4px 14px rgba(166, 58, 92, 0.35);
+		box-shadow: none;
+	}
+	:global(.btn-nav-outline) {
+		background: transparent;
+		color: #ffffff;
+		border-color: rgba(255, 255, 255, 0.45);
+	}
+	:global(.btn-nav-outline:hover) {
+		background: rgba(255, 255, 255, 0.08);
+		border-color: #ffffff;
+		color: #ffffff;
 	}
 	:global(.btn-ghost) {
 		background: transparent;
@@ -870,7 +769,7 @@
 	.footer-tag {
 		font-size: 0.95rem;
 		line-height: 1.6;
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.62);
 		max-width: 400px;
 	}
 
@@ -884,7 +783,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--plum);
+		color: #ffffff;
 		font-size: 1.5rem;
 		opacity: 0.8;
 		transition: opacity 0.2s ease, color 0.2s ease;
@@ -892,7 +791,12 @@
 
 	.footer-socials a:hover {
 		opacity: 1;
-		color: var(--rose-700);
+		color: var(--rose-100);
+	}
+
+	.footer-socials a:hover {
+		opacity: 1;
+		color: var(--rose-100);
 	}
 	:global(.field input:not([type='checkbox']):not([type='radio'])),
 	:global(.field select),
@@ -1081,137 +985,94 @@
 		line-height: 1.15;
 	}
 	.brand-kicker {
-		font-size: 0.65rem;
+		font-size: 0.62rem;
 		font-weight: 700;
 		letter-spacing: 0.16em;
-		color: var(--rose-700);
+		color: var(--rose-100);
 	}
 	.brand-name {
 		font-family: var(--font-display);
 		font-weight: 700;
 		font-size: 1.18rem;
-		color: var(--plum);
+		color: #ffffff;
 		letter-spacing: 0.02em;
 	}
 
-	/* Nav over Home Cinematic Dark Hero */
-	.site-nav.isHome:not(.scrolled) .brand-kicker {
-		color: var(--rose-100);
-	}
-	.site-nav.isHome:not(.scrolled) .brand-name {
-		color: #ffffff;
-	}
-	.site-nav.isHome:not(.scrolled) .nav-links a:not(.btn) {
-		color: rgba(255, 255, 255, 0.78);
-	}
-	.site-nav.isHome:not(.scrolled) .nav-links a:not(.btn):hover {
-		color: #ffffff;
-	}
-	.site-nav.isHome:not(.scrolled) .nav-links a:not(.btn).active {
-		color: #ffffff;
-	}
-	.site-nav.isHome:not(.scrolled) .nav-links a:not(.btn).active::after {
-		background: var(--rose-600);
-	}
-	.site-nav.isHome:not(.scrolled) .nav-toggle {
-		color: #ffffff;
-		border-color: rgba(255, 255, 255, 0.2);
-	}
-
-	/* ---- header navigation ---- */
+	/* ---- header navigation (RecordRecharge chrome, sakura tokens) ---- */
 	.site-nav {
 		position: sticky;
 		top: 0;
 		z-index: 50;
-		background: rgba(250, 247, 244, 0.92);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border-bottom: 1px solid var(--line);
-		transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+		background: var(--plum);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	}
 	.site-nav.isHome:not(.scrolled) {
 		position: absolute;
 		left: 0;
 		right: 0;
-		background: transparent;
-		border-bottom-color: rgba(255, 255, 255, 0.08);
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
+		background: linear-gradient(180deg, rgba(43, 36, 48, 0.72) 0%, rgba(43, 36, 48, 0) 100%);
+		border-bottom-color: transparent;
 	}
 	.site-nav.isHome.scrolled {
 		position: sticky;
-		background: rgba(43, 36, 48, 0.95);
+		background: var(--plum);
 		border-bottom-color: rgba(255, 255, 255, 0.1);
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-	}
-	.site-nav.isHome.scrolled .brand-kicker {
-		color: var(--rose-100);
-	}
-	.site-nav.isHome.scrolled .brand-name {
-		color: #ffffff;
-	}
-	.site-nav.isHome.scrolled .nav-links a:not(.btn) {
-		color: rgba(255, 255, 255, 0.8);
-	}
-	.site-nav.isHome.scrolled .nav-links a:not(.btn):hover,
-	.site-nav.isHome.scrolled .nav-links a:not(.btn).active {
-		color: #ffffff;
 	}
 
 	.nav-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		height: 72px;
+		height: 64px;
 	}
 	.nav-links {
 		display: flex;
 		align-items: center;
-		gap: 1.65rem;
+		gap: 1.35rem;
 	}
 	.nav-links a:not(.btn) {
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.78);
 		font-weight: 500;
-		font-size: 0.94rem;
+		font-size: 0.82rem;
 		padding: 0.25rem 0;
 		position: relative;
+		letter-spacing: 0.01em;
 		transition: color 0.15s ease;
 	}
 	.nav-links a:not(.btn):hover {
-		color: var(--rose-700);
+		color: #ffffff;
 		text-decoration: none;
 	}
 	.nav-links a:not(.btn).active {
-		color: var(--rose-700);
+		color: #ffffff;
 		font-weight: 600;
 	}
 	.nav-links a:not(.btn).active::after {
 		content: '';
 		position: absolute;
-		bottom: -2px;
+		bottom: -6px;
 		left: 0;
 		right: 0;
 		height: 2px;
-		background: var(--rose-700);
-		border-radius: 2px;
+		background: var(--rose-600);
 	}
 	.nav-cta {
-		margin-left: 0.5rem;
+		margin-left: 0.35rem;
 	}
 
 	.nav-toggle {
 		display: none;
 		background: none;
-		border: 1px solid var(--line);
+		border: 1px solid rgba(255, 255, 255, 0.22);
 		border-radius: var(--radius-sm);
 		padding: 0.5rem;
 		cursor: pointer;
-		color: var(--plum);
+		color: #ffffff;
 		transition: background 0.15s ease, border-color 0.15s ease;
 	}
 	.nav-toggle:hover {
-		background: var(--rose-050);
-		border-color: var(--rose-100);
+		background: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.4);
 	}
 
 	.mobile-menu {
@@ -1220,9 +1081,10 @@
 
 	/* ---- footer ---- */
 	.site-footer {
-		border-top: 1px solid var(--line);
-		background: var(--rose-050);
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		background: var(--plum);
 		margin-top: auto;
+		color: rgba(255, 255, 255, 0.72);
 	}
 	.footer-row {
 		display: flex;
@@ -1241,7 +1103,7 @@
 	}
 	.footer-tag {
 		margin: 0.25rem 0 0;
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.62);
 		font-size: 0.92rem;
 		line-height: 1.65;
 	}
@@ -1260,27 +1122,27 @@
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--rose-700);
+		color: var(--rose-600);
 		margin-bottom: 0.35rem;
 	}
 	.footer-col a {
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.68);
 		font-size: 0.92rem;
 		text-decoration: none;
 		transition: color 0.15s ease;
 	}
 	.footer-col a:hover {
-		color: var(--rose-700);
-		text-decoration: underline;
+		color: #ffffff;
+		text-decoration: none;
 	}
 	.footer-bottom {
-		border-top: 1px solid var(--line);
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
 		padding-top: 1.5rem;
 		padding-bottom: 2.25rem;
 	}
 	.footer-legal {
 		margin: 0;
-		color: var(--plum-soft);
+		color: rgba(255, 255, 255, 0.45);
 		font-size: 0.82rem;
 	}
 
@@ -1297,22 +1159,22 @@
 			flex-direction: column;
 			gap: 0.35rem;
 			padding: 1.25rem clamp(1.25rem, 5vw, 2.5rem) 1.75rem;
-			border-top: 1px solid var(--line);
-			background: var(--card);
-			box-shadow: 0 10px 24px rgba(43, 36, 48, 0.08);
+			border-top: 1px solid rgba(255, 255, 255, 0.08);
+			background: var(--plum);
+			box-shadow: none;
 		}
 		.mobile-menu > a {
 			padding: 0.7rem 0.25rem;
-			color: var(--plum);
+			color: rgba(255, 255, 255, 0.86);
 			font-weight: 500;
-			border-bottom: 1px solid var(--line);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 		}
 		.mobile-menu > a.active {
-			color: var(--rose-700);
+			color: #ffffff;
 			font-weight: 600;
 		}
 		.mobile-menu > a:hover {
-			color: var(--rose-700);
+			color: #ffffff;
 			text-decoration: none;
 		}
 		.mobile-menu-cta {
@@ -1334,11 +1196,6 @@
 		}
 		:global(.site-backdrop) :global(.sakura-wind) {
 			opacity: 0;
-		}
-		:global(.site-backdrop) :global(.grid-cell),
-		:global(.site-backdrop) :global(.grid-cell.active),
-		:global(.site-backdrop) :global(.grid-cell::after) {
-			transform: none !important;
 		}
 	}
 </style>

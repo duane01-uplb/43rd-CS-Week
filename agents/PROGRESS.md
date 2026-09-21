@@ -6,6 +6,58 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-09-21 — RecordRecharge UI chrome on a separate branch
+- Branch `cursor/recordrecharge-ui-styles` restyles public web chrome after
+  Authenticom RecordRecharge: dark sticky nav, outline header CTA, left
+  hero copy, uppercase tight headlines, high-contrast dark sections,
+  numbered 01/02/03 steps, darker footer. Sakura tokens are unchanged.
+- Hero backdrop keeps pixel trees, petals, wind, and bloom glow. The
+  interactive 3D grid, cursor aura, and card/grid hover lifts are gone.
+
+## 2026-09-21 — UI toolchain: Tailwind, shadcn-svelte, Lucide, Motion, GSAP, LayerChart
+- Both apps now share the recommended UI stack on top of SvelteKit 5:
+  Tailwind v4 (`@tailwindcss/vite` + `src/app.css` sakura tokens),
+  shadcn-svelte (`button`, `badge`, `card`, `input`, `label`) on Bits UI,
+  Lucide icons, Fontsource instead of Google Fonts CDN, Motion for Svelte on
+  event cards, GSAP on the public hero, LayerChart bar chart on admin overview.
+- Brand look is unchanged (sakura tokens). Cinematic backdrop CSS stays scoped.
+- Event cards use shadcn `Button` + Lucide, with Motion wrapping an inner article so scoped card styles still apply. Footer socials stay inline SVGs because Lucide dropped trademarked brand icons.
+- Global link color skips `[data-slot=button]` and `.btn` so Tailwind/shadcn button labels stay readable on rose fills.
+- Docs: `ARCHITECTURE.md` stack list, `UI.md` infrastructure table, `DECISIONS.md`.
+
+## 2026-09-21 — Code Wars registers on code-wars.dev
+- Code Wars "Register" CTAs on cards go to `https://code-wars.dev/` instead of
+  this site's form. Event detail replaces the form with a highlighted notice
+  that sign-up happens on code-wars.dev. Server `register` action 303s there
+  if posted anyway. Mapping lives in `apps/web/src/lib/externalRegistration.ts`.
+
+## 2026-09-21 — Event dates shifted to 2027
+- Live `events.start_at` / `end_at` year-bumped from 2026 → 2027 (month/day/time
+  kept). Descriptions that mentioned 2026 (e.g. Games Day finals) now say 2027.
+- Homepage Open Events now lists upcoming open events; CTA shows
+  "6 events are accepting registrations".
+- Seed (`packages/db/scripts/seed-registration-fields.mjs`) now updates dates
+  on existing events and matches the live 2027 Manila times. Added
+  `packages/db/scripts/set-event-year.mjs` for a repeatable year bump.
+
+## 2026-09-21 — Launch polish: copy, payment-copy scope, inner-page UI
+- **Hero stats** (`apps/web/src/routes/+page.svelte`): replaced the four
+  `placeholder` pairs with live `{openCount}` Open events, No account /
+  Required, 43rd / Edition, UPLB / ComSci Soc.
+- **Payment copy:** stripped paywall / 100% free / no-checkout language from
+  homepage, layout meta + footer, `/events` listing, and `EventCard`. Event
+  detail no longer claims "100% Free · No Payment". Payment hints remain only
+  where they belong: organizer field labels on the event page + registration
+  form (Warframes shows "Required at registration: Proof of Payment" and the
+  form fields). Career Orientation has no payment copy.
+- **UI:** inner pages go full-bleed paper at ≤720px; `/events` filter explains
+  that homepage Open Events is upcoming-only; music toggle inset on small
+  screens. `UI.md` / `DESIGN_TOKENS.md` philosophy now says Space Mono, not
+  Mincho.
+- **Still blocked:** real event dates (homepage Open Events stays empty until
+  `start_at >= now()`). Confirmation email, Playwright, admin field editor
+  remain deferred.
+
 ## 2026-09-15 — Ship-ready polish (A/C/D/E; B deferred)
 - **A — Keep site-wide backdrop WIP:** finished keeping the uncommitted
   move of the sakura atmospheric backdrop (grid, pixel trees, wind, petals)
