@@ -1,6 +1,6 @@
-import { and, count, eq, ne } from 'drizzle-orm';
-import { error, fail, redirect } from '@sveltejs/kit';
-import { ANONYMOUS_USER_ID, eventRegistrationFields, events, registrations } from '@csweek/db';
+import { and, eq, ne } from 'drizzle-orm';
+import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
+import { ANONYMOUS_USER_ID, countConfirmedRegistrations, eventRegistrationFields, events, registrations } from '@csweek/db';
 import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
@@ -11,6 +11,7 @@ import type { Actions, PageServerLoad } from './$types';
 const UPLOAD_BUCKET = 'registration-uploads';
 // 4 MB — must stay under Vercel serverless' ~4.5 MB request-body cap.
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+type UploadStorage = ReturnType<ReturnType<typeof createServiceRoleClient>['storage']['from']>;
 
 // Fixed-window rate limits for the anonymous registration action. The public
 // site has no sessions, so per-IP counters are the abuse guard for the one
@@ -25,6 +26,16 @@ const RATE_LIMIT = {
 function sanitizeFileName(name: string) {
 	const cleaned = name.replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '');
 	return cleaned.slice(-80) || 'upload';
+}
+
+async function removeRegistrationUploads(storage: UploadStorage, paths: string[]) {
+  if (!paths.length) return;
+  try {
+    const { error } = await storage.remove(paths);
+    if (error) throw error;
+  } catch (cleanupError) {
+    console.error('Could not remove unreferenced registration uploads:', paths, cleanupError);
+  }
 }
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -58,9 +69,7 @@ export const actions: Actions = {
     const form = await event.request.formData();
     const responses: Record<string, string | boolean> = {};
     const pendingUploads: { fieldKey: string; file: File }[] = [];
-    // Pass 1: validate all answers first — uploads happen only after the
-    // capacity check below, so failed registrations do not leave orphaned
-    // files in storage.
+    // Validate answers and check capacity before starting any uploads.
     for (const field of fields) {
       if (field.fieldType === 'file') {
         const upload = form.get(field.fieldKey);
@@ -77,31 +86,89 @@ export const actions: Actions = {
       if (field.isRequired && (value === null || value === '' || value === false)) return fail(400, { error: `${field.label} is required.` });
       if (value !== null && !(value instanceof File)) responses[field.fieldKey] = value;
     }
-    if (target.capacity !== null) {
-      const [{ total }] = await db.select({ total: count() }).from(registrations).where(and(eq(registrations.eventId, target.id), eq(registrations.status, 'confirmed')));
-      if (total >= target.capacity) return fail(409, { error: 'This event is at capacity.' });
+    if (target.capacity !== null && await countConfirmedRegistrations(db, eventId) >= target.capacity) {
+      return fail(409, { error: 'This event is at capacity.' });
     }
-    // Pass 2: push uploads to Supabase Storage with the service-role client
-    // (the public site has no user sessions). Only the resulting storage path
-    // is stored in responses — never the raw file. The top-level folder is
-    // the anonymous identity so the admin file endpoint's {uuid}/ prefix
-    // guard keeps working unchanged.
-    if (pendingUploads.length) {
-      const supabase = createServiceRoleClient();
-      for (const { fieldKey, file } of pendingUploads) {
-        const path = `${ANONYMOUS_USER_ID}/${target.id}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizeFileName(file.name)}`;
-        const { error: uploadError } = await supabase.storage.from(UPLOAD_BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' });
-        if (uploadError) {
-          console.error(`Storage upload failed for ${path}:`, uploadError.message);
-          return fail(500, { error: 'We could not upload your file. Please try again.' });
+
+    const registrationId = crypto.randomUUID();
+    const uploadPaths: string[] = [];
+    let storage: UploadStorage | undefined;
+    try {
+      if (pendingUploads.length) {
+        storage = createServiceRoleClient().storage.from(UPLOAD_BUCKET);
+        for (const { fieldKey, file } of pendingUploads) {
+          const path = `${ANONYMOUS_USER_ID}/${eventId}/${Date.now()}-${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+          // Include attempted paths in case Storage wrote the object before a transport error.
+          uploadPaths.push(path);
+          const { error: uploadError } = await storage.upload(path, file, { contentType: file.type });
+          if (uploadError) throw uploadError;
+          responses[fieldKey] = path;
         }
-        responses[fieldKey] = path;
       }
+    } catch (uploadError) {
+      console.error('Registration upload failed:', uploadError);
+      if (storage) await removeRegistrationUploads(storage, uploadPaths);
+      return fail(500, { error: 'We could not upload your file. Please try again.' });
     }
-    try { await db.insert(registrations).values({ eventId: target.id, userId: ANONYMOUS_USER_ID, status: 'confirmed', responses }); }
-    catch (e) {
-      console.error('Registration insert failed:', e);
-      return fail(409, { error: 'We could not complete your registration. It may already exist.' });
+
+    let inserted = false;
+    try {
+      const rejection = await db.transaction(async (tx) => {
+        // Read status and capacity after acquiring the lock shared with admin edits.
+        const [current] = await tx.select().from(events).where(eq(events.id, eventId)).for('update');
+        if (!current || current.status !== 'open') {
+          return { failure: fail(400, { error: 'This event is not open for registration.' }) };
+        }
+        const external = getExternalRegistration(current.title);
+        if (external) return { redirectUrl: external.url };
+        if (current.capacity !== null && await countConfirmedRegistrations(tx, eventId) >= current.capacity) {
+          return { failure: fail(409, { error: 'This event is at capacity.' }) };
+        }
+
+        await tx.insert(registrations).values({
+          id: registrationId,
+          eventId,
+          userId: ANONYMOUS_USER_ID,
+          status: 'confirmed',
+          responses
+        });
+        inserted = true;
+      }, { isolationLevel: 'read committed' });
+
+      if (rejection) {
+        if (storage) await removeRegistrationUploads(storage, uploadPaths);
+        if (rejection.failure) return rejection.failure;
+        throw redirect(303, rejection.redirectUrl);
+      }
+    } catch (registrationError) {
+      if (isRedirect(registrationError)) throw registrationError;
+      // Postgres error details may contain submitted answers.
+      const errorCode = registrationError instanceof Error && 'code' in registrationError
+        ? registrationError.code
+        : undefined;
+      console.error('Registration transaction failed:', registrationId, errorCode);
+      let committed = false;
+      try {
+        // A lost COMMIT response can leave a registration that still needs its files.
+        if (inserted) {
+          committed = await db.transaction(async (tx) => {
+            // Wait for the original transaction to release the event before reading its outcome.
+            await tx.select({ id: events.id }).from(events).where(eq(events.id, eventId)).for('update');
+            const registration = await tx.query.registrations.findFirst({
+              columns: { id: true },
+              where: eq(registrations.id, registrationId)
+            });
+            return Boolean(registration);
+          }, { isolationLevel: 'read committed' });
+        }
+      } catch (verificationError) {
+        console.error('Could not verify registration outcome:', registrationId, verificationError);
+        return fail(500, { error: 'We could not verify whether your registration completed. Please contact the organizers.' });
+      }
+      if (!committed) {
+        if (storage) await removeRegistrationUploads(storage, uploadPaths);
+        return fail(500, { error: 'We could not complete your registration. Please try again.' });
+      }
     }
     // A confirmed registration changes dashboard counts immediately.
     await cache.bust(cacheKeys.adminOverview);

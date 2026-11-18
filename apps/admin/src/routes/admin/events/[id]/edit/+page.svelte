@@ -14,8 +14,7 @@
 <form method="POST" class="card">
 	{#if data.registrationCount > 0}
 		<p class="status-msg info" role="status">
-			{data.registrationCount} participant{data.registrationCount === 1 ? '' : 's'} already registered. Lowering
-			capacity below that number will not cancel existing seats.
+			Confirmed registrations: {data.registrationCount}. Capacity must be at least this number.
 		</p>
 	{/if}
 	{#if form?.error}<p class="status-msg alert" role="alert">{form.error}</p>{/if}

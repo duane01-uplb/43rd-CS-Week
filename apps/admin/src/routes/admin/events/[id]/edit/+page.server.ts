@@ -1,6 +1,6 @@
-import { count, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { events, registrations } from '@csweek/db';
+import { countConfirmedRegistrations, events } from '@csweek/db';
 import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
@@ -12,20 +12,13 @@ export const load: PageServerLoad = async (event) => {
   const db = getDb();
   const target = await db.query.events.findFirst({ where: eq(events.id, event.params.id) });
   if (!target) throw error(404, 'Event not found');
-  const [{ total: registrationCount }] = await db
-    .select({ total: count() })
-    .from(registrations)
-    .where(eq(registrations.eventId, target.id));
+  const registrationCount = await countConfirmedRegistrations(db, target.id);
   return { event: target, registrationCount };
 };
 
 export const actions: Actions = {
   default: async (event) => {
     await requireAdmin(event);
-    const db = getDb();
-    const target = await db.query.events.findFirst({ where: eq(events.id, event.params.id) });
-    if (!target) throw error(404, 'Event not found');
-
     const form = await event.request.formData();
     const title = String(form.get('title') ?? '').trim();
     const startAt = new Date(String(form.get('startAt') ?? ''));
@@ -37,28 +30,33 @@ export const actions: Actions = {
       return fail(400, { error: 'Title and start time are required.' });
     }
 
-    if (capacity !== null) {
-      const [{ total: registrationCount }] = await db
-        .select({ total: count() })
-        .from(registrations)
-        .where(eq(registrations.eventId, target.id));
-      if (capacity < registrationCount) {
-        return fail(400, {
-          error: `Capacity (${capacity}) is below the current registration count (${registrationCount}). Increase capacity or leave it unset before saving.`
-        });
-      }
-    }
+    const eventId = event.params.id;
+    const failure = await getDb().transaction(async (tx) => {
+      // Signups take the same lock before checking status and reserving a seat.
+      const [target] = await tx.select({ id: events.id }).from(events).where(eq(events.id, eventId)).for('update');
+      if (!target) throw error(404, 'Event not found');
 
-    await db
-      .update(events)
-      .set({
-        title,
-        description: String(form.get('description') ?? '').trim() || null,
-        startAt,
-        capacity,
-        status
-      })
-      .where(eq(events.id, target.id));
+      if (capacity !== null) {
+        const registrationCount = await countConfirmedRegistrations(tx, eventId);
+        if (capacity < registrationCount) {
+          return fail(400, {
+            error: `Capacity (${capacity}) is below the confirmed registration count (${registrationCount}). Increase capacity or leave it unset before saving.`
+          });
+        }
+      }
+
+      await tx
+        .update(events)
+        .set({
+          title,
+          description: String(form.get('description') ?? '').trim() || null,
+          startAt,
+          capacity,
+          status
+        })
+        .where(eq(events.id, eventId));
+    }, { isolationLevel: 'read committed' });
+    if (failure) return failure;
 
     await cache.bust(cacheKeys.adminOverview);
 

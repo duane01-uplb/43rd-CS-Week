@@ -23,7 +23,13 @@
 - `POST /events/:id?/register` creates a registration without a session:
   field/event-status/capacity validation, then an insert pinned to the
   single anonymous identity (`ANONYMOUS_USER_ID`). File answers are
-  uploaded to Supabase Storage with the service-role client.
+  uploaded to Supabase Storage with the service-role client before the database
+  transaction. The transaction locks the event, rechecks its status and
+  confirmed seat count, then inserts. Rejected registrations trigger cleanup
+  of their attempted uploads.
 - `POST /admin/login` is the admin-only sign-in via the cookie-backed SSR
   Supabase client.
 - `POST /admin/events/new` is role-gated by `requireAdmin()`.
+- `POST /admin/events/:id/edit` is role-gated by `requireAdmin()`. It
+  acquires the same event lock before checking confirmed seats and saving
+  capacity or status changes.
