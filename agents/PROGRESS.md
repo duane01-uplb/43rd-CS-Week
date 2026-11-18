@@ -6,6 +6,11 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-18 — Registration search and CSV export
+- Shared the registration query between the admin table and CSV export.
+- Combined search and status filters and included submitted participant names.
+- Neutralized spreadsheet formula prefixes when exporting CSV cells.
+
 ## 2026-11-18 — Server form validation
 - Validated registration answers against configured field types and options.
 - Matched accepted upload MIME types and file size to the Storage bucket.

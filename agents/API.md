@@ -35,3 +35,6 @@
   capacity or status changes.
 - Admin create and edit share event input validation. Start times are
   entered in Asia/Manila and stored as a timezone-aware timestamp.
+- The admin registration list and `GET /admin/registrations/export` share
+  the `q` and `status` filters. Search matches event titles, profile names,
+  and submitted participant names. CSV export neutralizes formula-like cells.

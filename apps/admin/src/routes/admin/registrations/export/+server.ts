@@ -1,75 +1,37 @@
-import { asc, eq, ilike, or } from 'drizzle-orm';
-import { eventRegistrationFields, events, profiles, registrations } from '@csweek/db';
-import { getDb } from '$lib/server/db';
 import { requireAdmin } from '$lib/server/auth-guards';
+import { listRegistrations } from '$lib/server/registration-list';
 import type { RequestHandler } from './$types';
 
 function escapeCSV(value: unknown): string {
 	if (value === null || value === undefined) return '';
-	const str = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
-	if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-		return `"${str.replace(/"/g, '""')}"`;
-	}
-	return str;
+	const text = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+	// Treat formula-like text as literal even if the trigger follows whitespace.
+	const formulaLike = /^[\t\r\n]|^\s*[=+@＝＋－＠-]/u.test(text);
+	const cell = formulaLike ? `'${text}` : text;
+	return formulaLike || /[,"\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
 }
 
 export const GET: RequestHandler = async (event) => {
 	await requireAdmin(event);
-
-	const q = event.url.searchParams.get('q')?.trim();
-	const status = event.url.searchParams.get('status');
-	const db = getDb();
-
-	const rows = await db
-		.select({
-			id: registrations.id,
-			eventId: registrations.eventId,
-			status: registrations.status,
-			createdAt: registrations.createdAt,
-			responses: registrations.responses,
-			event: events.title,
-			name: profiles.fullName
-		})
-		.from(registrations)
-		.innerJoin(events, eq(registrations.eventId, events.id))
-		.innerJoin(profiles, eq(registrations.userId, profiles.id))
-		.where(
-			q
-				? or(ilike(events.title, `%${q}%`), ilike(profiles.fullName, `%${q}%`))
-				: status
-					? eq(registrations.status, status)
-					: undefined
-		)
-		.orderBy(asc(registrations.createdAt));
-
-	const fields = await db
-		.select({
-			eventId: eventRegistrationFields.eventId,
-			fieldKey: eventRegistrationFields.fieldKey,
-			label: eventRegistrationFields.label,
-			sortOrder: eventRegistrationFields.sortOrder
-		})
-		.from(eventRegistrationFields)
-		.orderBy(eventRegistrationFields.sortOrder);
-
-	const dynamicKeys = [...new Set(fields.map((f) => f.fieldKey))];
-
+	const { rows, fields } = await listRegistrations(event.url);
+	const dynamicKeys = [...new Set(fields.map((field) => field.fieldKey))];
 	const headers = ['Participant', 'Event', 'Status', 'Registered', ...dynamicKeys];
 
 	const csvRows = rows.map((row) => {
 		const responses = (row.responses ?? {}) as Record<string, unknown>;
-		const dynamicCols = dynamicKeys.map((key) => responses[key]);
+		const dynamicColumns = dynamicKeys.map((key) =>
+			Object.prototype.hasOwnProperty.call(responses, key) ? responses[key] : undefined
+		);
 		return [
-			escapeCSV(row.name ?? 'Unnamed'),
-			escapeCSV(row.event),
-			escapeCSV(row.status),
-			escapeCSV(new Date(row.createdAt).toLocaleString()),
-			...dynamicCols.map(escapeCSV)
-		];
+			row.name ?? 'Unnamed',
+			row.event,
+			row.status,
+			new Date(row.createdAt).toLocaleString(),
+			...dynamicColumns
+		].map(escapeCSV).join(',');
 	});
 
-	const csv = [headers.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
-
+	const csv = [headers.map(escapeCSV).join(','), ...csvRows].join('\r\n');
 	return new Response(csv, {
 		headers: {
 			'Content-Type': 'text/csv; charset=utf-8',
