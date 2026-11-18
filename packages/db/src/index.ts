@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+import { and, count, eq } from 'drizzle-orm';
 import * as schema from './schema';
 
 export * from './schema';
@@ -18,3 +19,12 @@ export function createDb(databaseUrl: string) {
 }
 
 export type Database = ReturnType<typeof createDb>;
+
+export async function countConfirmedRegistrations(db: Pick<Database, 'select'>, eventId: string) {
+  const { registrations } = schema;
+  const [row] = await db
+    .select({ total: count() })
+    .from(registrations)
+    .where(and(eq(registrations.eventId, eventId), eq(registrations.status, 'confirmed')));
+  return row.total;
+}

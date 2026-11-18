@@ -6,6 +6,11 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-18 — Concurrent registration capacity
+- Serialized signup and admin event edits with a shared event row lock.
+- Used confirmed registrations for both signup and admin capacity decisions.
+- Added cleanup for uploads from rejected or failed registrations.
+
 ## 2026-11-18 — Backend access enforcement
 - Added per-loader admin authorization before dashboard, event, and registration reads.
 - Restricted public event and registration-field reads to published events.

@@ -61,3 +61,7 @@ __pycache__/
 # SvelteKit build output
 .svelte-kit/
 apps/*/.svelte-kit/
+
+# Local agent skills
+/.agents/skills/
+/.opencode/skills/
