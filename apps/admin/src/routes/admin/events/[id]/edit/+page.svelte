@@ -1,6 +1,5 @@
 <script lang="ts">
 	let { data, form } = $props();
-	const toLocalInput = (date: string | Date) => new Date(date).toISOString().slice(0, 16);
 </script>
 
 <svelte:head><title>Edit event · CS Week Admin</title></svelte:head>
@@ -28,8 +27,8 @@
 		<textarea id="description" name="description">{data.event.description ?? ''}</textarea>
 	</div>
 	<div class="field">
-		<label for="startAt">Starts</label>
-		<input id="startAt" name="startAt" type="datetime-local" value={toLocalInput(data.event.startAt)} required />
+		<label for="startAt">Starts (Manila time)</label>
+		<input id="startAt" name="startAt" type="datetime-local" value={data.startAtInput} required />
 	</div>
 	<div class="field">
 		<label for="capacity">Capacity</label>

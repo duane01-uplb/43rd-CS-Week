@@ -5,12 +5,11 @@ import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
 import { createServiceRoleClient } from '$lib/server/supabase';
+import { readRegistrationForm } from '$lib/server/registration-form';
 import { getExternalRegistration } from '$lib/externalRegistration';
 import type { Actions, PageServerLoad } from './$types';
 
 const UPLOAD_BUCKET = 'registration-uploads';
-// 4 MB — must stay under Vercel serverless' ~4.5 MB request-body cap.
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 type UploadStorage = ReturnType<ReturnType<typeof createServiceRoleClient>['storage']['from']>;
 
 // Fixed-window rate limits for the anonymous registration action. The public
@@ -66,26 +65,11 @@ export const actions: Actions = {
     const external = getExternalRegistration(target.title);
     if (external) throw redirect(303, external.url);
     const fields = await db.select().from(eventRegistrationFields).where(eq(eventRegistrationFields.eventId, target.id));
-    const form = await event.request.formData();
-    const responses: Record<string, string | boolean> = {};
-    const pendingUploads: { fieldKey: string; file: File }[] = [];
-    // Validate answers and check capacity before starting any uploads.
-    for (const field of fields) {
-      if (field.fieldType === 'file') {
-        const upload = form.get(field.fieldKey);
-        const hasFile = upload instanceof File && upload.size > 0;
-        if (field.isRequired && !hasFile) return fail(400, { error: `${field.label} is required.` });
-        if (!hasFile) continue;
-        const file = upload as File;
-        if (!file.type.startsWith('image/')) return fail(400, { error: `${field.label} must be an image (PNG, JPG, WebP, or HEIC).` });
-        if (file.size > MAX_UPLOAD_BYTES) return fail(400, { error: `${field.label} must be 4 MB or smaller.` });
-        pendingUploads.push({ fieldKey: field.fieldKey, file });
-        continue;
-      }
-      const value = field.fieldType === 'checkbox' ? form.has(field.fieldKey) : form.get(field.fieldKey);
-      if (field.isRequired && (value === null || value === '' || value === false)) return fail(400, { error: `${field.label} is required.` });
-      if (value !== null && !(value instanceof File)) responses[field.fieldKey] = value;
-    }
+    const form = await event.request.formData().catch(() => null);
+    if (!form) return fail(400, { error: 'Could not read the registration form.' });
+    const input = readRegistrationForm(form, fields);
+    if (!input.responses) return fail(400, { error: input.error });
+    const { responses, pendingUploads } = input;
     if (target.capacity !== null && await countConfirmedRegistrations(db, eventId) >= target.capacity) {
       return fail(409, { error: 'This event is at capacity.' });
     }
@@ -130,7 +114,7 @@ export const actions: Actions = {
           eventId,
           userId: ANONYMOUS_USER_ID,
           status: 'confirmed',
-          responses
+          responses: { ...responses }
         });
         inserted = true;
       }, { isolationLevel: 'read committed' });

@@ -30,6 +30,7 @@
 
 	const statusBadge = (s: string) => `badge badge-${s}`;
 	const hasFilter = $derived(data.q !== '' || data.status !== '');
+	const exportQuery = $derived(new URLSearchParams({ q: data.q, status: data.status }).toString());
 	const fmtDate = (d: Date | string) =>
 		new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Manila' }).format(
 			new Date(d)
@@ -45,7 +46,7 @@
 	</div>
 	<a
 		class="btn btn-ghost"
-		href="/admin/registrations/export?q={data.q}&status={data.status}"
+		href="/admin/registrations/export?{exportQuery}"
 	>Export CSV</a>
 </section>
 
