@@ -1,8 +1,8 @@
 # Authorization
 
 ## Roles
-- `participant` (default; the single `ANONYMOUS_USER_ID` profile used for
-  all public web registrations)
+- `participant` is the default profile role. All public web registrations
+  use the single `ANONYMOUS_USER_ID` participant profile.
 - `admin` (has a profile + Supabase auth user, logs into the admin console)
 
 ## Access Rules
@@ -41,11 +41,10 @@ checks remain the source of truth since Drizzle bypasses RLS.
 
 - **events**: public SELECT (`anon`, `authenticated`) for open and closed events; admin-only ALL
   (INSERT/UPDATE/DELETE) via `profiles.role = 'admin'` check
-- **registrations**: user can SELECT own rows or admin can SELECT all
-  (only admin rows are meaningful now — web registrations share the
-  anonymous identity); no client INSERT; admin-only UPDATE; no DELETE
-  policy (deletes disallowed). Web registration inserts through Drizzle
-  (app-level), not the client.
+- **registrations**: authenticated users can SELECT their own legacy
+  registrations. Admins can SELECT all registrations and UPDATE them.
+  Only the server inserts registrations through Drizzle. RLS has no
+  client DELETE policy.
 - **profiles**: user can SELECT own row or admin can SELECT all; user
   can UPDATE own row but `role` is locked to its current value in the
   `WITH CHECK` clause, which uses a private lookup of the caller's current
@@ -73,8 +72,9 @@ remain as a backstop for any future direct client use.
   superseded by service-role uploads
 - **SELECT** (`authenticated`): admins only (`profiles.role = 'admin'`); regular
   users cannot read files back, not even their own
-- **UPDATE / DELETE**: no policies — uploads are immutable once submitted
-  (paths are timestamped, so retries create new objects, never upserts)
+- **UPDATE / DELETE**: there are no client policies. Failed submissions
+  use the server's service role to clean up their attempted uploads.
+  Retries use new paths.
 - Admin dashboard serves file responses through `/admin/registrations/file`,
   which requires `requireAdmin()`, validates the path prefix, and redirects to
   a short-lived (5 min) signed URL minted with the signed-in admin's session

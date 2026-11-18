@@ -6,6 +6,12 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-18 — Backend rollout documentation
+- Reconciled route contracts and documented clean setup and upgrade order.
+- Added a backend preview checklist for both Vercel apps and staged Supabase.
+- Verified a clean install and a populated upgrade on local Postgres with
+  Supabase Auth and Storage schema fixtures.
+
 ## 2026-11-18 — Registration search and CSV export
 - Shared the registration query between the admin table and CSV export.
 - Combined search and status filters and included submitted participant names.
