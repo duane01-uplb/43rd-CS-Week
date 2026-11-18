@@ -5,6 +5,7 @@ import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
 import { requireAdmin } from '$lib/server/auth-guards';
+import { formatEventStart, readEventForm } from '$lib/server/event-form';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -13,27 +14,23 @@ export const load: PageServerLoad = async (event) => {
   const target = await db.query.events.findFirst({ where: eq(events.id, event.params.id) });
   if (!target) throw error(404, 'Event not found');
   const registrationCount = await countConfirmedRegistrations(db, target.id);
-  return { event: target, registrationCount };
+  return { event: target, registrationCount, startAtInput: formatEventStart(target.startAt) };
 };
 
 export const actions: Actions = {
   default: async (event) => {
     await requireAdmin(event);
-    const form = await event.request.formData();
-    const title = String(form.get('title') ?? '').trim();
-    const startAt = new Date(String(form.get('startAt') ?? ''));
-    const capacityValue = String(form.get('capacity') ?? '');
-    const capacity = capacityValue ? Number(capacityValue) : null;
-    const status = String(form.get('status') ?? 'draft');
-
-    if (!title || Number.isNaN(startAt.getTime())) {
-      return fail(400, { error: 'Title and start time are required.' });
-    }
+    const form = await event.request.formData().catch(() => null);
+    if (!form) return fail(400, { error: 'Could not read the event form.' });
+    const input = readEventForm(form);
+    if (!input.values) return fail(400, { error: input.error });
+    const values = input.values;
+    const { capacity } = values;
 
     const eventId = event.params.id;
     const failure = await getDb().transaction(async (tx) => {
       // Signups take the same lock before checking status and reserving a seat.
-      const [target] = await tx.select({ id: events.id }).from(events).where(eq(events.id, eventId)).for('update');
+      const [target] = await tx.select({ startAt: events.startAt }).from(events).where(eq(events.id, eventId)).for('update');
       if (!target) throw error(404, 'Event not found');
 
       if (capacity !== null) {
@@ -45,16 +42,10 @@ export const actions: Actions = {
         }
       }
 
-      await tx
-        .update(events)
-        .set({
-          title,
-          description: String(form.get('description') ?? '').trim() || null,
-          startAt,
-          capacity,
-          status
-        })
-        .where(eq(events.id, eventId));
+      await tx.update(events).set({
+        ...values,
+        startAt: formatEventStart(target.startAt) === formatEventStart(values.startAt) ? target.startAt : values.startAt
+      }).where(eq(events.id, eventId));
     }, { isolationLevel: 'read committed' });
     if (failure) return failure;
 

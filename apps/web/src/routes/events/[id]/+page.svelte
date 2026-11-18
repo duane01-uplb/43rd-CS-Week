@@ -2,6 +2,7 @@
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { getExternalRegistration } from '$lib/externalRegistration';
+	import { REGISTRATION_UPLOAD_MIME_TYPES } from '$lib/registration-uploads';
 
 	let { data, form } = $props();
 
@@ -294,7 +295,7 @@
 											id={`field-${field.fieldKey}`}
 											name={field.fieldKey}
 											type="file"
-											accept="image/*"
+											accept={REGISTRATION_UPLOAD_MIME_TYPES.join(',')}
 											required={field.isRequired}
 											class="file-input"
 										/>
@@ -304,7 +305,7 @@
 												<polyline points="17 8 12 3 7 8" />
 												<line x1="12" y1="3" x2="12" y2="15" />
 											</svg>
-											<span>Supported: PNG, JPG, WebP, or HEIC (up to 4 MB)</span>
+											<span>Supported: PNG, JPEG, WebP, HEIC, or HEIF (up to 4 MB)</span>
 										</div>
 									</div>
 								{:else}
@@ -316,6 +317,7 @@
 										id={`field-${field.fieldKey}`}
 										name={field.fieldKey}
 										type={field.fieldType}
+										step={field.fieldType === 'number' ? 'any' : undefined}
 										required={field.isRequired}
 										placeholder={field.fieldType === 'email' ? 'e.g. name@up.edu.ph' : ''}
 									/>

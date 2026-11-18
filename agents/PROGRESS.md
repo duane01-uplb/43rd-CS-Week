@@ -6,6 +6,11 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-18 — Server form validation
+- Validated registration answers against configured field types and options.
+- Matched accepted upload MIME types and file size to the Storage bucket.
+- Shared admin event validation and interpreted start times in Asia/Manila.
+
 ## 2026-11-18 — Concurrent registration capacity
 - Serialized signup and admin event edits with a shared event row lock.
 - Used confirmed registrations for both signup and admin capacity decisions.

@@ -21,7 +21,9 @@ Only three events take registrations right now; their fields are seeded via
 ## File uploads (`field_type = 'file'`)
 - Scope: manual-payment evidence only (bank/GCash QR screenshot). NOT payment processing — payments remain descoped (DECISIONS.md).
 - Private bucket `registration-uploads`; path convention `{auth.uid()}/{event_id}/{timestamp}-{filename}`.
-- Server action accepts images only (PNG/JPG/WebP/HEIC per bucket allowlist), ≤ 4 MB (Vercel request-body cap); uploads happen only after duplicate/capacity checks pass.
+- The server checks the upload MIME type against the bucket allowlist
+  (PNG, JPEG, WebP, HEIC, and HEIF) and enforces a 4 MB per-file limit.
+  Uploads start after answer validation and the initial capacity check.
 - `registrations.responses[field_key]` stores the storage path string, never raw bytes.
 - Admin dashboard renders file responses as signed-URL links (`/admin/registrations/file`, admin-only, 5-minute expiry) backed by the "admins read uploads" storage policy.
 

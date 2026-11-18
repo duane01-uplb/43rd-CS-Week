@@ -21,7 +21,7 @@
 		<textarea id="description" name="description" placeholder="What attendees can expect…"></textarea>
 	</div>
 	<div class="field">
-		<label for="startAt">Starts</label>
+		<label for="startAt">Starts (Manila time)</label>
 		<input id="startAt" name="startAt" type="datetime-local" required />
 	</div>
 	<div class="field">

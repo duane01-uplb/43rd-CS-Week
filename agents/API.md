@@ -33,3 +33,5 @@
 - `POST /admin/events/:id/edit` is role-gated by `requireAdmin()`. It
   acquires the same event lock before checking confirmed seats and saving
   capacity or status changes.
+- Admin create and edit share event input validation. Start times are
+  entered in Asia/Manila and stored as a timezone-aware timestamp.
