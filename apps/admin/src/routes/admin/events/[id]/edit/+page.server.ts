@@ -60,13 +60,7 @@ export const actions: Actions = {
       })
       .where(eq(events.id, target.id));
 
-    // Reflect the change on public listings/homepage and the dashboard.
-    await cache.bust(
-      cacheKeys.adminOverview,
-      cacheKeys.webHome,
-      ...cacheKeys.webEventsVariants,
-      cacheKeys.webEvent(target.id)
-    );
+    await cache.bust(cacheKeys.adminOverview);
 
     throw redirect(303, '/admin/events');
   }

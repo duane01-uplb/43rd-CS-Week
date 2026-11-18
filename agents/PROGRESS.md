@@ -6,6 +6,13 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-18 — Backend access enforcement
+- Added per-loader admin authorization before dashboard, event, and registration reads.
+- Restricted public event and registration-field reads to published events.
+  Public event pages now read Postgres directly to honor status changes.
+- Added a forward RLS migration that resolves recursive profile policy checks
+  and removes direct client registration inserts.
+
 ## 2026-09-21 — RecordRecharge UI chrome on a separate branch
 - Branch `cursor/recordrecharge-ui-styles` restyles public web chrome after
   Authenticom RecordRecharge: dark sticky nav, outline header CTA, left
