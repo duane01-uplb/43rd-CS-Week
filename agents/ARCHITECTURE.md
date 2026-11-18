@@ -79,14 +79,11 @@ Not implemented. All registrations are free (see DECISIONS.md).
 - Both apps wrap the same Upstash Redis instance via `@csweek/cache`
   (`packages/cache/`), created from `UPSTASH_REDIS_REST_URL` +
   `UPSTASH_REDIS_REST_TOKEN` in each app's `lib/server/cache.ts`.
-- **Read-through TTL cache:** homepage (`web:home`), `/events` listings
-  (`web:events:*`), event detail (`web:event:{id}`) — TTL 30s; admin overview
-  counts (`admin:overview`) — TTL 15s. Only public/display reads are cached;
-  the capacity check inside the registration action still hits Postgres so it
-  never oversells.
-- **Cache invalidation (best-effort):** successful anonymous registration
-  busts `admin:overview`; admin event create/edit busts `admin:overview`,
-  `web:home`, all `web:events:*` variants, and `web:event:{id}`.
+- **Read-through TTL cache:** admin overview counts (`admin:overview`) have
+  a 15-second TTL. Public event pages read Postgres directly so changes to
+  draft visibility take effect on the next server read.
+- **Cache invalidation (best-effort):** successful anonymous registrations
+  and admin event creates or edits invalidate `admin:overview`.
 - **Rate limiting:** the anonymous registration action enforces fixed-window
   counters before any DB work — 10 attempts per event per IP per 15 min
   (`rl:register:event:{eventId}:{ip}`) and 50 per IP per hour

@@ -113,20 +113,6 @@ export function createCacheFromEnv(env: EnvLike): Cache {
  * must stay consistent — admin mutations bust web keys and vice versa.
  */
 export const cacheKeys = {
-	/** Homepage read (`upcoming` events + open count). */
-	webHome: 'web:home',
-	/** `/events` listing, by filter combination. */
-	webEvents: (status: string | null, upcoming: boolean) =>
-		`web:events:${status ?? 'all'}:${upcoming ? 'upcoming' : 'all'}`,
-	/** Every `/events` variant, for blanket busting after an edit. */
-	webEventsVariants: [
-		'web:events:all:all',
-		'web:events:all:upcoming',
-		'web:events:open:all',
-		'web:events:open:upcoming'
-	],
-	/** Event detail (event + its dynamic fields). */
-	webEvent: (eventId: string) => `web:event:${eventId}`,
 	/** Admin dashboard summary counts. */
 	adminOverview: 'admin:overview',
 	/** Registration rate-limit keys (per event+IP and per IP globally). */

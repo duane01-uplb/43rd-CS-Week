@@ -1,9 +1,12 @@
 import { asc, eq, ilike, or } from 'drizzle-orm';
 import { eventRegistrationFields, events, profiles, registrations } from '@csweek/db';
 import { getDb } from '$lib/server/db';
+import { requireAdmin } from '$lib/server/auth-guards';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async (event) => {
+	await requireAdmin(event);
+	const { url } = event;
 	const q = url.searchParams.get('q')?.trim();
 	const status = url.searchParams.get('status');
 	const db = getDb();

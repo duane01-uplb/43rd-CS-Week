@@ -1,12 +1,14 @@
-import { and, count, eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { events, registrations } from '@csweek/db';
 import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
+import { requireAdmin } from '$lib/server/auth-guards';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () =>
-	cache.getJson(cacheKeys.adminOverview, 15, async () => {
+export const load: PageServerLoad = async (event) => {
+	await requireAdmin(event);
+	return cache.getJson(cacheKeys.adminOverview, 15, async () => {
 		const db = getDb();
 
 		const [eventRow] = await db.select({ total: count() }).from(events);
@@ -29,3 +31,4 @@ export const load: PageServerLoad = async () =>
 			confirmedCount: confirmedRow.total
 		};
 	});
+};

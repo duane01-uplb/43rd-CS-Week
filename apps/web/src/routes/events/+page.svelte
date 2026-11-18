@@ -11,7 +11,7 @@
 	<title>Event Schedule & Registration | CASC4D3</title>
 	<meta
 		name="description"
-		content="Explore all talks, workshops, and contests happening during the 43rd Computer Science Week. Free registration for all participants."
+		content="Explore all talks, workshops, and contests happening during the 43rd Computer Science Week. No account required."
 	/>
 </svelte:head>
 
@@ -21,7 +21,7 @@
 		<p class="eyebrow">Event Schedule & Registration</p>
 		<h1>Events Roster</h1>
 		<p class="lede">
-			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week. All events are 100% free with no account required.
+			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week. No account required.
 		</p>
 	</header>
 
@@ -48,6 +48,7 @@
 						<span class="checkbox-custom" aria-hidden="true"></span>
 						<span>Upcoming only</span>
 					</label>
+					<p class="filter-hint">Home Open Events only lists upcoming dates. Leave this unchecked to see every open event.</p>
 				</div>
 			</div>
 
@@ -107,8 +108,10 @@
 		max-width: 38rem;
 	}
 	.events-header h1 {
-		font-size: clamp(2.2rem, 5vw, 3.2rem);
-		line-height: 1.15;
+		font-size: clamp(2.4rem, 6vw, 3.6rem);
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-transform: uppercase;
 		margin: 0 0 0.75rem;
 	}
 
@@ -121,9 +124,9 @@
 		flex-wrap: wrap;
 		background: var(--card);
 		border: 1px solid var(--line);
-		border-radius: var(--radius);
+		border-radius: var(--radius-sm);
 		padding: 1.25rem 1.5rem;
-		box-shadow: var(--shadow);
+		box-shadow: none;
 	}
 	.filter-controls {
 		display: flex;
@@ -170,7 +173,17 @@
 	}
 	.filter-checkbox-field {
 		justify-content: flex-end;
-		padding-bottom: 0.55rem;
+		padding-bottom: 0.15rem;
+		max-width: 22rem;
+	}
+	.filter-hint {
+		margin: 0.35rem 0 0;
+		font-size: 0.78rem;
+		line-height: 1.45;
+		color: var(--plum-soft);
+		font-weight: 400;
+		text-transform: none;
+		letter-spacing: normal;
 	}
 	.checkbox-label {
 		display: inline-flex;

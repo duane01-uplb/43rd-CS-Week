@@ -1,10 +1,11 @@
-import { and, count, eq } from 'drizzle-orm';
-import { error, fail } from '@sveltejs/kit';
+import { and, count, eq, ne } from 'drizzle-orm';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { ANONYMOUS_USER_ID, eventRegistrationFields, events, registrations } from '@csweek/db';
 import { cacheKeys } from '@csweek/cache';
 import { cache } from '$lib/server/cache';
 import { getDb } from '$lib/server/db';
 import { createServiceRoleClient } from '$lib/server/supabase';
+import { getExternalRegistration } from '$lib/externalRegistration';
 import type { Actions, PageServerLoad } from './$types';
 
 const UPLOAD_BUCKET = 'registration-uploads';
@@ -26,18 +27,17 @@ function sanitizeFileName(name: string) {
 	return cleaned.slice(-80) || 'upload';
 }
 
-export const load: PageServerLoad = async ({ params }) =>
-	cache.getJson(cacheKeys.webEvent(params.id), 30, async () => {
-		const db = getDb();
-		const event = await db.query.events.findFirst({ where: eq(events.id, params.id) });
-		if (!event) throw error(404, 'Event not found');
-		const fields = await db
-			.select()
-			.from(eventRegistrationFields)
-			.where(eq(eventRegistrationFields.eventId, event.id))
-			.orderBy(eventRegistrationFields.sortOrder);
-		return { event, fields };
-	});
+export const load: PageServerLoad = async ({ params }) => {
+	const rows = await getDb()
+		.select({ event: events, field: eventRegistrationFields })
+		.from(events)
+		.leftJoin(eventRegistrationFields, eq(eventRegistrationFields.eventId, events.id))
+		.where(and(eq(events.id, params.id), ne(events.status, 'draft')))
+		.orderBy(eventRegistrationFields.sortOrder);
+	const event = rows[0]?.event;
+	if (!event) throw error(404, 'Event not found');
+	return { event, fields: rows.flatMap(({ field }) => (field ? [field] : [])) };
+};
 
 export const actions: Actions = {
   register: async (event) => {
@@ -52,6 +52,8 @@ export const actions: Actions = {
     const db = getDb();
     const target = await db.query.events.findFirst({ where: eq(events.id, eventId) });
     if (!target || target.status !== 'open') return fail(400, { error: 'This event is not open for registration.' });
+    const external = getExternalRegistration(target.title);
+    if (external) throw redirect(303, external.url);
     const fields = await db.select().from(eventRegistrationFields).where(eq(eventRegistrationFields.eventId, target.id));
     const form = await event.request.formData();
     const responses: Record<string, string | boolean> = {};
