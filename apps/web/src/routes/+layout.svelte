@@ -9,6 +9,7 @@
 	import '@fontsource/macondo-swash-caps/400.css';
 	import '@fontsource/press-start-2p/400.css';
 	import { page } from '$app/state';
+	import SakuraWind from '$lib/components/SakuraWind.svelte';
 
 	let { children } = $props();
 	let menuOpen = $state(false);
@@ -58,6 +59,7 @@
 </script>
 
 <svelte:window onscroll={handleScroll} />
+
 
 <svelte:head>
 	<title>CASC4D3 — The 43rd Computer Science Week</title>
@@ -177,73 +179,24 @@
 		<circle cx="980" cy="150" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
 	</svg>
 
-	<!-- Sakura Wind Breeze: flowing wavy gusts + fine wind-carried particles -->
-	<div class="sakura-wind" aria-hidden="true">
-		<svg width="0" height="0" style="position:absolute">
-			<defs>
-				<linearGradient id="windGrad1" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(246,227,233,0.6)" />
-					<stop offset="70%" stop-color="rgba(198,80,114,0.4)" />
-					<stop offset="100%" stop-color="rgba(198,80,114,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad2" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="35%" stop-color="rgba(255,199,218,0.55)" />
-					<stop offset="75%" stop-color="rgba(166,58,92,0.35)" />
-					<stop offset="100%" stop-color="rgba(166,58,92,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad3" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(255,199,218,0.5)" />
-					<stop offset="70%" stop-color="rgba(194,80,114,0.4)" />
-					<stop offset="100%" stop-color="rgba(194,80,114,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad4" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(255,199,218,0.45)" />
-					<stop offset="70%" stop-color="rgba(246,227,233,0.35)" />
-					<stop offset="100%" stop-color="rgba(246,227,233,0)" />
-				</linearGradient>
-			</defs>
-		</svg>
-		<svg class="wind-gust gust-1" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 30 C 60 6, 120 54, 180 30 S 300 6, 400 30" stroke="url(#windGrad1)" stroke-width="3.5" stroke-linecap="round" />
-			<path d="M0 46 C 70 30, 130 62, 200 46 S 320 30, 400 46" stroke="url(#windGrad1)" stroke-width="2" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-2" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 36 C 70 10, 140 52, 200 32 S 320 12, 400 30" stroke="url(#windGrad2)" stroke-width="3" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-3" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 24 C 80 52, 150 6, 220 34 S 330 54, 400 22" stroke="url(#windGrad3)" stroke-width="2.5" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-4" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 38 C 60 16, 120 50, 190 34 S 310 48, 400 28" stroke="url(#windGrad4)" stroke-width="2" stroke-linecap="round" />
-		</svg>
-		<div class="wind-part-frail wp-1"></div>
-		<div class="wind-part-frail wp-2"></div>
-		<div class="wind-part-frail wp-3"></div>
-		<div class="wind-part-frail wp-4"></div>
-		<div class="wind-part-frail wp-5"></div>
-		<div class="wind-part-frail wp-6"></div>
-		<div class="wind-part-frail wp-7"></div>
-		<div class="wind-part-frail wp-8"></div>
-	</div>
+	{#if !isHome}
+		<SakuraWind />
 
-	<!-- Drifting Sakura Petals -->
-	<div class="sakura-petals-container">
-		{#each Array(14) as _, i}
-			<div class={`sakura-petal petal-${i + 1}`}>
-				<svg viewBox="0 0 9 9" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-					<rect x="3" y="0" width="3" height="3" fill="#ffc7da" />
-					<rect x="0" y="3" width="3" height="3" fill="#c25072" />
-					<rect x="3" y="3" width="3" height="3" fill="#ff8fb3" />
-					<rect x="6" y="3" width="3" height="3" fill="#c25072" />
-					<rect x="3" y="6" width="3" height="3" fill="#a63a5c" />
-				</svg>
-			</div>
-		{/each}
-	</div>
+		<!-- Drifting Sakura Petals -->
+		<div class="sakura-petals-container">
+			{#each Array(14) as _, i}
+				<div class={`sakura-petal petal-${i + 1}`}>
+					<svg viewBox="0 0 9 9" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+						<rect x="3" y="0" width="3" height="3" fill="#ffc7da" />
+						<rect x="0" y="3" width="3" height="3" fill="#c25072" />
+						<rect x="3" y="3" width="3" height="3" fill="#ff8fb3" />
+						<rect x="6" y="3" width="3" height="3" fill="#c25072" />
+						<rect x="3" y="6" width="3" height="3" fill="#a63a5c" />
+					</svg>
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <main class:isHome class="page">
@@ -426,82 +379,6 @@
 		height: min(22vh, 240px);
 		opacity: 0.82;
 		transform: scaleX(-1);
-	}
-	:global(.site-backdrop) :global(.sakura-wind) {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		pointer-events: none;
-		z-index: 1;
-	}
-	:global(.site-backdrop) :global(.wind-gust) {
-		position: absolute;
-		height: 7vh;
-		overflow: visible;
-		opacity: 0.7;
-		filter: blur(0.6px);
-		animation: windFlow ease-in-out infinite;
-		will-change: transform, opacity;
-	}
-	:global(.site-backdrop) :global(.wind-gust path) {
-		stroke-dasharray: 500;
-		stroke-dashoffset: 0;
-		animation: gustFlow 3s ease-in-out infinite alternate;
-	}
-	:global(.site-backdrop) :global(.gust-1) { top: 14%; left: -32%; width: 52%; animation-duration: 12s; animation-delay: 0s; opacity: 0.55; }
-	:global(.site-backdrop) :global(.gust-2) { top: 34%; left: -24%; width: 44%; animation-duration: 15s; animation-delay: 2.5s; opacity: 0.4; }
-	:global(.site-backdrop) :global(.gust-3) { top: 56%; left: -36%; width: 58%; animation-duration: 13s; animation-delay: 5s; opacity: 0.5; }
-	:global(.site-backdrop) :global(.gust-4) { top: 78%; left: -28%; width: 48%; animation-duration: 16s; animation-delay: 1.2s; opacity: 0.35; }
-	:global(.site-backdrop) :global(.wind-part-frail) {
-		position: absolute;
-		width: 4px;
-		height: 4px;
-		border-radius: 50%;
-		background: rgba(255, 199, 218, 0.75);
-		box-shadow: 0 0 10px rgba(194, 80, 114, 0.55);
-		opacity: 0.6;
-		animation: windFlow ease-in-out infinite;
-		will-change: transform, opacity;
-	}
-	:global(.site-backdrop) :global(.wp-1) { top: 22%; left: -5%; animation-duration: 10s; animation-delay: 0s; }
-	:global(.site-backdrop) :global(.wp-2) { top: 40%; left: -8%; animation-duration: 13s; animation-delay: 1.5s; }
-	:global(.site-backdrop) :global(.wp-3) { top: 58%; left: -6%; animation-duration: 11s; animation-delay: 4s; }
-	:global(.site-backdrop) :global(.wp-4) { top: 74%; left: -9%; animation-duration: 14s; animation-delay: 3s; }
-	:global(.site-backdrop) :global(.wp-5) { top: 30%; left: -7%; animation-duration: 12s; animation-delay: 6s; }
-	:global(.site-backdrop) :global(.wp-6) { top: 63%; left: -5%; animation-duration: 15s; animation-delay: 8s; }
-	:global(.site-backdrop) :global(.wp-7) { top: 47%; left: -9%; animation-duration: 11s; animation-delay: 2s; }
-	:global(.site-backdrop) :global(.wp-8) { top: 80%; left: -6%; animation-duration: 12.5s; animation-delay: 5.5s; }
-
-	@keyframes windFlow {
-		0% {
-			transform: translateX(-2vw) translateY(0) rotate(-4deg) scaleX(0.6);
-			opacity: 0;
-		}
-		10% {
-			transform: translateX(8vw) translateY(-2vh) rotate(-3deg) scaleX(0.8);
-			opacity: 0.6;
-		}
-		30% {
-			transform: translateX(32vw) translateY(4vh) rotate(2deg) scaleX(1);
-		}
-		48% {
-			transform: translateX(56vw) translateY(-4vh) rotate(-2deg) scaleX(1.02);
-		}
-		66% {
-			transform: translateX(80vw) translateY(5vh) rotate(3deg) scaleX(1);
-		}
-		86% {
-			transform: translateX(106vw) translateY(-2vh) rotate(-2deg) scaleX(0.85);
-			opacity: 0.5;
-		}
-		100% {
-			transform: translateX(126vw) translateY(3vh) rotate(2deg) scaleX(0.6);
-			opacity: 0;
-		}
-	}
-	@keyframes gustFlow {
-		from { stroke-dashoffset: 500; }
-		to { stroke-dashoffset: 0; }
 	}
 	:global(.site-backdrop) :global(.sakura-petals-container) {
 		position: absolute;
@@ -835,7 +712,7 @@
 	:global(.badge-open),
 	:global(.badge-confirmed) {
 		background: #e5f2eb;
-		color: var(--ok);
+		color: var(--ok-foreground);
 	}
 	:global(.badge-draft),
 	:global(.badge-pending) {
@@ -891,7 +768,7 @@
 		padding: 3rem 2rem;
 		text-align: center;
 	}
-	:global(.empty-card h3) {
+	:global(.empty-card h2, .empty-card h3) {
 		font-size: 1.2rem;
 		margin: 0 0 0.4rem;
 	}
@@ -937,6 +814,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.85rem;
+		min-width: 0;
 		text-decoration: none;
 	}
 	.brand:hover {
@@ -983,9 +861,10 @@
 		display: flex;
 		flex-direction: column;
 		line-height: 1.15;
+		overflow-wrap: anywhere;
 	}
 	.brand-kicker {
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.16em;
 		color: var(--rose-100);
@@ -1005,18 +884,25 @@
 		z-index: 50;
 		background: var(--plum);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease,
+			backdrop-filter 180ms ease;
 	}
-	.site-nav.isHome:not(.scrolled) {
-		position: absolute;
+	.site-nav.isHome {
+		position: fixed;
 		left: 0;
 		right: 0;
+	}
+	.site-nav.isHome:not(.scrolled) {
 		background: linear-gradient(180deg, rgba(43, 36, 48, 0.72) 0%, rgba(43, 36, 48, 0) 100%);
 		border-bottom-color: transparent;
 	}
 	.site-nav.isHome.scrolled {
-		position: sticky;
-		background: var(--plum);
+		position: fixed;
+		background: rgba(43, 36, 48, 0.92);
 		border-bottom-color: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(12px);
 	}
 
 	.nav-row {
@@ -1122,7 +1008,7 @@
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--rose-600);
+		color: var(--rose-on-dark);
 		margin-bottom: 0.35rem;
 	}
 	.footer-col a {
@@ -1142,17 +1028,24 @@
 	}
 	.footer-legal {
 		margin: 0;
-		color: rgba(255, 255, 255, 0.45);
+		color: var(--muted-on-dark);
 		font-size: 0.82rem;
 	}
 
 	/* ---- responsive behavior ---- */
 	@media (max-width: 720px) {
+		.nav-row {
+			height: auto;
+			min-height: 64px;
+			padding-block: 0.5rem;
+			gap: 0.75rem;
+		}
 		.nav-links {
 			display: none;
 		}
 		.nav-toggle {
 			display: inline-flex;
+			flex-shrink: 0;
 		}
 		.mobile-menu {
 			display: flex;
@@ -1193,9 +1086,6 @@
 		:global(*) {
 			animation-duration: 0.001ms !important;
 			transition-duration: 0.001ms !important;
-		}
-		:global(.site-backdrop) :global(.sakura-wind) {
-			opacity: 0;
 		}
 	}
 </style>

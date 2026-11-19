@@ -9,6 +9,8 @@
 	--rose-800: #8f2d4c;
 	--rose-700: #a63a5c;
 	--rose-600: #c25072;
+	--rose-on-dark: #e58ca6;
+	--muted-on-dark: #bdb0be;
 	--rose-100: #f6e3e9;
 	--rose-050: #fbf1f4;
 	--plum: #2b2430;
@@ -17,6 +19,7 @@
 	--card: #ffffff;
 	--line: #ece3e6;
 	--ok: #3e7a5c;
+	--ok-foreground: #31694d;
 	--warn: #b7791f;
 	--danger: #b13a3a;
 	--radius: 12px;

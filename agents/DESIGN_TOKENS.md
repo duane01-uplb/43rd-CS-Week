@@ -18,7 +18,7 @@ and responsive behavior.
 ## Philosophy
 
 **Sakura, but not flowery.** The Japanese influence lives in the dusky-rose
-palette and the Mincho display face — not in floral decoration. Warm paper
+palette and Space Mono — not in floral decoration. Warm paper
 backgrounds, hairline rose-tinted borders, restrained use of display type.
 Clean, editorial, friendly. No gradients except the brand mark and CTA band.
 
@@ -71,7 +71,9 @@ Badge tint backgrounds (hardcoded, appear in admin shell CSS):
   avoid a cramped, dense look at large sizes.
 - **Body/UI:** IBM Plex Sans — `--font-body: 'IBM Plex Sans',system-ui,
   -apple-system,sans-serif`. Weights: 400, 500, 600 (web also loads 700).
-- Loaded via Google Fonts `<link>` in each app's root layout.
+- Loaded via **Fontsource** in each app's root layout (`@fontsource/space-mono`,
+  `@fontsource/ibm-plex-sans`). The public site also loads Macondo Swash Caps
+  and Press Start 2P for hero ornament type.
 
 ### Scale (headings use `clamp()` on web)
 
@@ -111,7 +113,13 @@ Body uses `-webkit-font-smoothing: antialiased`. Number metrics optional.
 
 - Transitions: `background / border-color / box-shadow / transform`,
   `0.12–0.15s ease`; `:active` buttons `translateY(1px)` with `0.05s`.
-- Card hover lift: `translateY(-2px)` (admin, web event/prop cards), `-3px` web props.
+- Public site motion: hero copy staggers on load; scrolling out of the hero
+  eases the grove away with a paper mist (Anime.js `onScroll` sync). Pixel
+  sakura whistle across on a wind path when scroll thresholds are crossed.
+  Sections, event cards, pillars, and 01/02/03 steps reveal on enter.
+  Skip all of this when `prefers-reduced-motion: reduce`.
+- Card hover lift: `translateY(-2px)` (admin only). Public event cards do
+  not lift on hover (RecordRecharge chrome).
 - Links with arrows animate `translateX(3px)` on hover.
 - `@media (prefers-reduced-motion: reduce)` — zero out animation/transition
   durations (both apps already do this).

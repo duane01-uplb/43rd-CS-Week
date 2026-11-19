@@ -1,10 +1,28 @@
 <script lang="ts">
-	import EventCard from '$lib/components/EventCard.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import { getExternalRegistration } from '$lib/externalRegistration';
+	import type { PageData } from './$types';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import Button from '$lib/components/Button.svelte';
 
-	let { data } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const isFiltered = $derived(data.status !== 'all' || data.upcoming);
+	const filterQuery = $derived(`status=${data.status}${data.upcoming ? '&upcoming=1' : ''}`);
+
+	const dayFormat = new Intl.DateTimeFormat('en-PH', { dateStyle: 'full', timeZone: 'Asia/Manila' });
+	const timeFormat = new Intl.DateTimeFormat('en-PH', { timeStyle: 'short', timeZone: 'Asia/Manila' });
+
+	function groupByDay(events: Awaited<PageData['events']>) {
+		const days = new Map<string, typeof events>();
+		for (const event of events) {
+			const day = dayFormat.format(new Date(event.startAt));
+			const group = days.get(day);
+			if (group) group.push(event);
+			else days.set(day, [event]);
+		}
+		return days;
+	}
 </script>
 
 <svelte:head>
@@ -18,16 +36,16 @@
 <div class="events-page">
 	<!-- Page Header -->
 	<header class="events-header">
-		<p class="eyebrow">Event Schedule & Registration</p>
-		<h1>Events Roster</h1>
+		<h1>Event schedule</h1>
 		<p class="lede">
-			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week. No account required.
+			Explore the 43rd Computer Science Week program. All times are in Manila time. No account required.
 		</p>
 	</header>
 
 	<!-- Filter Controls -->
 	<section class="filter-section" aria-label="Event filters">
 		<form method="GET" class="filter-card">
+			<noscript><input type="hidden" name="render" value="full" /></noscript>
 			<div class="filter-controls">
 				<div class="filter-field">
 					<label for="status-select">Registration Status</label>
@@ -48,7 +66,6 @@
 						<span class="checkbox-custom" aria-hidden="true"></span>
 						<span>Upcoming only</span>
 					</label>
-					<p class="filter-hint">Home Open Events only lists upcoming dates. Leave this unchecked to see every open event.</p>
 				</div>
 			</div>
 
@@ -61,39 +78,71 @@
 		</form>
 	</section>
 
-	<!-- Events Grid -->
+	<!-- Daily program -->
 	<section class="events-content" aria-label="Event listing">
-		{#if data.events.length === 0}
-			<div class="empty-card">
-				<div class="empty-icon" aria-hidden="true">
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="3" y="4" width="18" height="18" rx="2" />
-						<path d="M3 10h18" />
-						<path d="M8 2v4M16 2v4" />
-						<path d="M10 16h4" />
-					</svg>
+		{#await data.events}
+			<LoadingScreen label="Loading the event roster" />
+			<noscript><a href={`/events?${filterQuery}&render=full`}>Load the event roster</a></noscript>
+		{:then events}
+			{#if events.length === 0}
+				<div class="empty-card">
+					<div class="empty-icon" aria-hidden="true">
+						<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="4" width="18" height="18" rx="2" />
+							<path d="M3 10h18" />
+							<path d="M8 2v4M16 2v4" />
+							<path d="M10 16h4" />
+						</svg>
+					</div>
+					<h2>No events match your selected filters</h2>
+					<p>Try switching to "All statuses" or unchecking "Upcoming only" to see the full schedule.</p>
+					<div style="margin-top: 1.5rem;">
+						<Button variant="primary" size="sm" href="/events?status=all">View all events</Button>
+					</div>
 				</div>
-				<h3>No events match your selected filters</h3>
-				<p>Try switching to "All statuses" or unchecking "Upcoming only" to see the full schedule.</p>
-				<div style="margin-top: 1.5rem;">
-					<Button variant="primary" size="sm" href="/events?status=all">View all events</Button>
+			{:else}
+				<div class="events-summary">
+					<p class="summary-text">
+						Showing <strong>{events.length}</strong> {events.length === 1 ? 'event' : 'events'}
+						{#if data.status === 'open'}· Open for registration{/if}
+						{#if data.upcoming}· Upcoming schedule{/if}
+					</p>
 				</div>
-			</div>
-		{:else}
-			<div class="events-summary">
-				<p class="summary-text">
-					Showing <strong>{data.events.length}</strong> {data.events.length === 1 ? 'event' : 'events'}
-					{#if data.status === 'open'}· Open for registration{/if}
-					{#if data.upcoming}· Upcoming schedule{/if}
-				</p>
-			</div>
 
-			<div class="events-grid">
-				{#each data.events as event (event.id)}
-					<EventCard {event} variant="grid" />
+				{#each groupByDay(events) as [day, sessions] (day)}
+					<section class="program-day">
+						<h2>{day}</h2>
+						{#each sessions as event (event.id)}
+							{@const external = getExternalRegistration(event.title)}
+							{@const details = `/events/${event.id}`}
+							<article class="session">
+								<time datetime={new Date(event.startAt).toISOString()}>{timeFormat.format(new Date(event.startAt))}</time>
+								<div class="session-info">
+									<h3><a href={details}>{event.title}</a></h3>
+									{#if event.description}<p>{event.description}</p>{/if}
+									<small>{event.capacity == null ? 'Open capacity' : `Capacity: ${event.capacity}`}</small>
+								</div>
+								<div class="status">
+									{#if event.status === 'open'}
+										<Badge variant="open" showDot={false}>Open for registration</Badge>
+									{:else}
+										<Badge variant="closed" showDot={false}>Registration closed</Badge>
+									{/if}
+								</div>
+								<a class="session-action" href={event.status === 'open' ? external?.url ?? details : details}>
+									{event.status === 'open' ? (external ? `Register at ${external.hostLabel}` : 'Register') : 'View details'}
+									<span aria-hidden="true"> →</span>
+								</a>
+							</article>
+						{/each}
+					</section>
 				{/each}
+			{/if}
+		{:catch}
+			<div class="empty-card">
+				<p>The event roster couldn’t load. <a href={`/events?${filterQuery}`} data-sveltekit-reload>Try again</a>.</p>
 			</div>
-		{/if}
+		{/await}
 	</section>
 </div>
 
@@ -176,15 +225,6 @@
 		padding-bottom: 0.15rem;
 		max-width: 22rem;
 	}
-	.filter-hint {
-		margin: 0.35rem 0 0;
-		font-size: 0.78rem;
-		line-height: 1.45;
-		color: var(--plum-soft);
-		font-weight: 400;
-		text-transform: none;
-		letter-spacing: normal;
-	}
 	.checkbox-label {
 		display: inline-flex;
 		align-items: center;
@@ -219,10 +259,32 @@
 		color: var(--plum-soft);
 	}
 
-	.events-grid {
+	.program-day + .program-day { margin-top: 2.5rem; }
+	.program-day h2 {
+		margin: 0;
+		padding-block: 0.75rem;
+		border-bottom: 2px solid var(--rose-700);
+		font-size: clamp(1.1rem, 2vw, 1.5rem);
+		color: var(--rose-900);
+	}
+	.session {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 1.75rem;
+		grid-template-columns: 6rem minmax(0, 1fr) 10rem 11rem;
+		align-items: baseline;
+		gap: 1.25rem;
+		padding-block: 1.25rem;
+		border-bottom: 1px solid var(--line);
+	}
+	.session time { font: 0.9rem/1.5 var(--font-display); font-variant-numeric: tabular-nums; }
+	.session h3 { margin: 0; font-size: 1.25rem; }
+	.session h3 a { color: var(--plum); }
+	.session-info { overflow-wrap: anywhere; }
+	.session-info p { margin: 0.4rem 0; }
+	.session-info small { color: var(--plum-soft); }
+	.session-action { font-weight: 600; align-self: start; padding-block: 0.35rem; }
+	@media (max-width: 900px) {
+		.session { grid-template-columns: auto minmax(0, 1fr); gap: 0.5rem 1rem; }
+		.status, .session-action { grid-column: 2; }
 	}
 
 	.empty-icon {
@@ -256,9 +318,4 @@
 		}
 	}
 
-	@media (max-width: 520px) {
-		.events-grid {
-			grid-template-columns: 1fr;
-		}
-	}
 </style>

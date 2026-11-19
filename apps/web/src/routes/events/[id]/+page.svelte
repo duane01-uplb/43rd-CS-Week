@@ -3,6 +3,8 @@
 	import Button from '$lib/components/Button.svelte';
 	import { getExternalRegistration } from '$lib/externalRegistration';
 	import { REGISTRATION_UPLOAD_MIME_TYPES } from '$lib/registration-uploads';
+	import { onMount } from 'svelte';
+	import { mountPageMotion } from '$lib/motion';
 
 	let { data, form } = $props();
 
@@ -17,6 +19,8 @@
 	const external = $derived(getExternalRegistration(data.event.title));
 
 	let isSubmitting = $state(false);
+
+	onMount(() => mountPageMotion());
 </script>
 
 <svelte:head>
@@ -45,7 +49,7 @@
 	<!-- Main 2-column layout -->
 	<div class="detail-grid">
 		<!-- Left: Event Information -->
-		<div class="detail-info">
+		<div class="detail-info" data-stagger=".detail-header, .info-strip, .description-card, .notes-card">
 			<header class="detail-header">
 				<div class="header-badges">
 					<span class="eyebrow-pill">43RD CS WEEK</span>
@@ -74,6 +78,7 @@
 					<div class="info-text">
 						<span class="info-label">Date & Time</span>
 						<span class="info-val">{formatDateTime(data.event.startAt)}</span>
+						<a href={`/events/${data.event.id}/calendar.ics`} download class="calendar-link">Add to calendar</a>
 					</div>
 				</div>
 
@@ -166,7 +171,7 @@
 		</div>
 
 		<!-- Right: Registration Form / Status Panel -->
-		<aside class="detail-action-col" aria-label="Event Registration">
+		<aside class="detail-action-col" aria-label="Event Registration" data-reveal>
 			<div class="registration-card">
 				{#if form?.success}
 					<div class="success-state" role="status">
@@ -350,6 +355,11 @@
 </div>
 
 <style>
+	input::placeholder {
+		color: var(--plum-soft);
+		opacity: 1;
+	}
+
 	.event-detail-page {
 		display: flex;
 		flex-direction: column;
@@ -372,6 +382,12 @@
 		color: var(--rose-700);
 		text-decoration: none;
 		transform: translateX(-2px);
+	}
+	.arrow-back svg {
+		transition: transform 0.15s ease;
+	}
+	.arrow-back:hover svg {
+		transform: translateX(-3px);
 	}
 
 	/* Two-column layout */
@@ -450,6 +466,15 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.15rem;
+	}
+	.calendar-link {
+		align-self: flex-start;
+		padding-block: 0.25rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--rose-700);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
 	}
 	.info-label {
 		font-size: 0.74rem;

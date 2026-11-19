@@ -37,7 +37,7 @@
 	.badge-open,
 	.badge-confirmed {
 		background: #e5f2eb;
-		color: var(--ok);
+		color: var(--ok-foreground);
 	}
 	.badge-draft,
 	.badge-pending {
@@ -57,5 +57,23 @@
 		height: 6px;
 		border-radius: 50%;
 		background: currentColor;
+	}
+	.badge-open .badge-dot {
+		animation: badgeDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+	@keyframes badgeDotPulse {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.4);
+			opacity: 0.7;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.badge-open .badge-dot {
+			animation: none !important;
+		}
 	}
 </style>

@@ -19,10 +19,12 @@
 
 	let {
 		event,
-		variant = 'grid'
+		variant = 'grid',
+		titleTag = 'h3'
 	}: {
 		event: EventItem;
 		variant?: 'grid' | 'track';
+		titleTag?: 'h2' | 'h3';
 	} = $props();
 
 	const formatDateTime = (date: Date | string) =>
@@ -52,9 +54,9 @@
 		</time>
 	</div>
 
-	<h3 class="card-title">
+	<svelte:element this={titleTag} class="card-title">
 		<a href={`/events/${event.id}`}>{event.title}</a>
-	</h3>
+	</svelte:element>
 
 	<p class="card-desc">
 		{event.description ?? 'Event information, timeline, and participant requirements.'}
@@ -126,6 +128,39 @@
 		border-radius: var(--radius-sm);
 		box-shadow: none;
 		padding: 1.65rem;
+		position: relative;
+		overflow: hidden;
+		transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+					box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+					border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+		will-change: transform, opacity;
+	}
+	.event-card-root::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(90deg, transparent, rgba(194, 80, 114, 0.7), transparent);
+		opacity: 0;
+		transform: scaleX(0.4);
+		transition: opacity 0.35s ease, transform 0.35s ease;
+	}
+	.event-card-root:hover {
+		transform: translateY(-6px);
+		box-shadow: 0 16px 36px -10px rgba(122, 31, 61, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
+		border-color: rgba(194, 80, 114, 0.38);
+	}
+	.event-card-root:hover::before {
+		opacity: 1;
+		transform: scaleX(1);
+	}
+	.event-card-root:hover .card-footer :global(svg) {
+		transform: translateX(3px);
+	}
+	.card-footer :global(svg) {
+		transition: transform 0.25s ease;
 	}
 
 	.card-top {

@@ -1,59 +1,73 @@
 <script lang="ts">
 	import EventCard from '$lib/components/EventCard.svelte';
+	import { program } from '$lib/program';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import { gsap } from 'gsap';
+	import { onMount } from 'svelte';
 	import MusicIcon from '@lucide/svelte/icons/music';
 	import AudioLinesIcon from '@lucide/svelte/icons/audio-lines';
+	import { reducedMotion } from '$lib/motion';
+	import { createScrollSound } from '$lib/scroll-sound';
 
 	let { data } = $props();
 
-	// Ambient sakura soundtrack: plays on first user interaction (browsers
-	// block autoplay until then), toggled by the floating music button.
 	const AUDIO_SRC = '/florews-sakura-325896.mp3';
-	let audio: HTMLAudioElement | undefined = $state();
-	let playing = $state(false);
+	let soundtrack: HTMLAudioElement | undefined;
+	let scrollAudio: AudioContext | undefined;
+	let playScrollSound: ((intensity: number) => void) | undefined;
+	let soundEnabled = $state(false);
 
-	$effect(() => {
-		if (audio) {
-			audio.loop = true;
-			audio.volume = 0.7;
-		}
-	});
+	function stopSound() {
+		soundEnabled = false;
+		soundtrack?.pause();
+		soundtrack = undefined;
+		playScrollSound = undefined;
+		void scrollAudio?.close().catch(() => {});
+		scrollAudio = undefined;
+	}
 
-	function toggleMusic() {
-		if (!audio) {
-			audio = new Audio(AUDIO_SRC);
-			audio.loop = true;
-			audio.volume = 0.7;
+	function toggleSound() {
+		if (soundEnabled) {
+			stopSound();
+			return;
 		}
-		if (audio.paused) {
-			audio.play().catch(() => {});
-			playing = true;
-		} else {
-			audio.pause();
-			playing = false;
+
+		const audio = new Audio(AUDIO_SRC);
+		audio.loop = true;
+		audio.volume = 0.7;
+		soundtrack = audio;
+		soundEnabled = true;
+		void audio.play().catch(() => {
+			if (soundtrack === audio) stopSound();
+		});
+
+		const AudioContextClass =
+			window.AudioContext ||
+			(window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+		if (AudioContextClass && !reducedMotion()) {
+			try {
+				scrollAudio = new AudioContextClass();
+				playScrollSound = createScrollSound(scrollAudio);
+				void scrollAudio.resume().catch(() => {});
+			} catch {
+				// The soundtrack still works when Web Audio is unavailable.
+			}
 		}
 	}
 
-	onMount(() => {
-		if (typeof window === 'undefined') return;
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-		const content = document.querySelector('.hero-content');
-		const stats = document.querySelector('.hero-stat-bar');
-		if (content) {
-			gsap.fromTo(content, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out' });
-		}
-		if (stats) {
-			gsap.fromTo(stats, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.15, ease: 'power2.out' });
-		}
+	const eventTime = new Intl.DateTimeFormat('en-PH', {
+		weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila'
 	});
-
-	onDestroy(() => {
-		audio?.pause();
-		audio = undefined;
-	});
+	let passedHero = false;
+	function handleScroll() {
+		const past = window.scrollY > window.innerHeight * 0.5;
+		if (past && !passedHero) playScrollSound?.(0.6);
+		passedHero = past;
+	}
+	onMount(() => stopSound);
 </script>
+
+<svelte:window onscroll={handleScroll} />
 
 <svelte:head>
 	<title>CASC4D3</title>
@@ -61,7 +75,7 @@
 
 <!-- ============================== CINEMATIC HERO ============================== -->
 <section class="hero-cinematic" aria-label="Hero Introduction">
-	<!-- Central Hero Overlay Content -->
+	<div class="petal-sweep" aria-hidden="true"><i></i><i></i><i></i></div>
 	<div class="hero-inner shell">
 		<div class="hero-content">
 			<p class="hero-kicker">43rd Computer Science Week</p>
@@ -73,7 +87,7 @@
 
 			<p class="hero-description">
 				The Annual Flagship Event of UPLB Computer Science Society.
-				Register without an account. Slots lock in when organizers confirm.
+				Explore the week’s events and register without an account.
 			</p>
 
 			<div class="hero-action-row">
@@ -90,59 +104,64 @@
 			</div>
 		</div>
 
-		<!-- Bottom Metadata & Stat Bar -->
-		<div class="hero-stat-bar">
-			<div class="stat-item">
-				<span class="stat-val">{data.openCount}</span>
-				<span class="stat-lbl">Open events</span>
-			</div>
-			<div class="stat-divider" aria-hidden="true"></div>
-			<div class="stat-item">
-				<span class="stat-val">No account</span>
-				<span class="stat-lbl">Required</span>
-			</div>
-			<div class="stat-divider" aria-hidden="true"></div>
-			<div class="stat-item">
-				<span class="stat-val">43rd</span>
-				<span class="stat-lbl">Edition</span>
-			</div>
-			<div class="stat-divider" aria-hidden="true"></div>
-			<div class="stat-item">
-				<span class="stat-val">UPLB</span>
-				<span class="stat-lbl">ComSci Soc</span>
-			</div>
+		<div class="next-event">
+			{#await data.summary}
+				<a href="/events">Browse the event schedule →</a>
+			{:then { upcoming }}
+				{#if upcoming.length}
+					{@const next = upcoming[0]}
+					<span class="next-label">Next open event</span>
+					<time datetime={new Date(next.startAt).toISOString()}>{eventTime.format(new Date(next.startAt))} · Manila</time>
+					<a href={"/events/" + next.id}>{next.title} <span aria-hidden="true">→</span></a>
+				{:else}
+					<a href="/events">Browse the event schedule →</a>
+				{/if}
+			{:catch}
+				<a href="/events">Browse the event schedule →</a>
+			{/await}
 		</div>
 	</div>
 
-	<!-- Floating ambient music toggle -->
 	<button
 		class="music-toggle"
 		type="button"
-		onclick={toggleMusic}
-		aria-label={playing ? 'Pause ambient music' : 'Play ambient music'}
-		title="Toggle ambient music"
+		onclick={toggleSound}
+		aria-pressed={soundEnabled}
+		title="Toggle ambient music and scroll sounds"
 	>
-		{#if playing}
-			<AudioLinesIcon size={18} strokeWidth={2} />
+		{#if soundEnabled}
+			<AudioLinesIcon size={18} strokeWidth={2} aria-hidden="true" />
 		{:else}
-			<MusicIcon size={18} strokeWidth={2} />
+			<MusicIcon size={18} strokeWidth={2} aria-hidden="true" />
 		{/if}
+		Sound
 	</button>
+
 </section>
 
+<div class="home-body">
 <!-- ====================== SECTION 1: IDENTITY & OVERVIEW ====================== -->
 <section class="section-intro" id="intro">
 	<div class="shell">
 		<div class="intro-grid">
 			<div class="intro-heading-col">
-				<p class="eyebrow">The 43rd Celebration</p>
-				<h2>Where computing curiosity cascades into impact.</h2>
+				<p class="eyebrow write-copy">The 43rd Celebration</p>
+				<h2
+					class="writing-heading"
+					aria-label="Where computing curiosity cascades into impact."
+				>
+					<span class="write-line" aria-hidden="true">Where</span>
+					<span class="write-line" aria-hidden="true">computing</span>
+					<span class="write-line" aria-hidden="true">curiosity</span>
+					<span class="write-line" aria-hidden="true">cascades</span>
+					<span class="write-line" aria-hidden="true">into impact.</span>
+				</h2>
 			</div>
 			<div class="intro-body-col">
-				<p class="intro-lead">
+				<p class="intro-lead write-copy">
 					CASC4D3 honors the legacy of Computer Science at UPLB by creating an open arena for everyone — from first-year explorers to senior systems architects.
 				</p>
-				<p class="intro-sub">
+				<p class="intro-sub write-copy">
 					No gatekeeping. Just passion for algorithms, interfaces, design challenges, and community.
 				</p>
 			</div>
@@ -157,7 +176,7 @@
 			<div>
 				<p class="eyebrow">Schedule & Registration</p>
 				<h2>Open Events</h2>
-				<p class="lede">Active registration streams. Slots are reserved instantly upon form submission.</p>
+				<p class="lede">Explore upcoming events accepting registrations.</p>
 			</div>
 			<a href="/events" class="arrow-link">
 				<span>View complete event schedule</span>
@@ -168,72 +187,57 @@
 			</a>
 		</div>
 
-		{#if data.upcoming.length === 0}
-			<div class="empty-card">
-				<h3>No events currently accepting registrations</h3>
-				<p>Organizers are preparing the next batch of sessions and challenges. Check back soon.</p>
-				<div style="margin-top: 1.25rem;">
-					<Button variant="ghost" size="sm" href="/events">Browse full event catalog</Button>
+		{#await data.summary}
+			<LoadingScreen label="Loading upcoming events" />
+			<noscript><a href="/?render=full#event">Load upcoming events</a></noscript>
+		{:then { upcoming }}
+			{#if upcoming.length === 0}
+				<div class="empty-card">
+					<h3>No events currently accepting registrations</h3>
+					<p>Organizers are preparing the next batch of sessions and challenges. Check back soon.</p>
+					<div style="margin-top: 1.25rem;">
+						<Button variant="ghost" size="sm" href="/events">Browse full event catalog</Button>
+					</div>
 				</div>
+			{:else}
+				<div class="track-grid">
+					{#each upcoming as event (event.id)}
+						<EventCard {event} variant="track" />
+					{/each}
+				</div>
+			{/if}
+		{:catch}
+			<div class="empty-card">
+				<p>Upcoming events couldn’t load. <a href="/events">Open the event roster</a>.</p>
 			</div>
-		{:else}
-			<div class="track-grid">
-				{#each data.upcoming as event (event.id)}
-					<EventCard {event} variant="track" />
-				{/each}
-			</div>
-		{/if}
+		{/await}
 	</div>
 </section>
 
 <!-- ====================== SECTION 3: THREE EXPERIENCE PILLARS ====================== -->
-<section class="section-experience" id="experience">
+<section class="section-experience" id="experience" aria-labelledby="program-title">
 	<div class="shell">
-		<div class="section-head">
-			<p class="eyebrow">Pillars of CASC4D3</p>
-			<h2>Curated for every aspect of computing.</h2>
-			<p class="lede">A balanced blend of academic insights, technical rigor, and spirited friendly competition.</p>
-		</div>
-
-		<div class="pillars-grid">
-			<article class="pillar-card">
-				<span class="pillar-icon" aria-hidden="true">
-					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="3" y="4" width="18" height="18" rx="2" />
-						<path d="M3 10h18" />
-						<path d="M8 2v4M16 2v4" />
-						<path d="m9 16 2 2 4-4" />
-					</svg>
-				</span>
-				<h3>Career & Tech Orientation</h3>
-				<p>An opportunity for participants to gain valuable insights into the world of Computer Science and explore career opportunities. Expert guest speakers will share their knowledge and experiences, highlighting the realities and advantages of pursuing a career in Computer Science, with a particular focus on the current Computer Science Week theme.</p>
-			</article>
-
-			<article class="pillar-card">
-				<span class="pillar-icon" aria-hidden="true">
-					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-						<polygon points="12 2 2 7 12 12 22 7 12 2" />
-						<polyline points="2 17 12 22 22 17" />
-						<polyline points="2 12 12 17 22 12" />
-					</svg>
-				</span>
-				<h3>Warframes Design & Code</h3>
-				<p>An event where participants can showcase their creative prowess and technical acumen in wireframe design. This competition serves as a platform for talented individuals and teams to demonstrate their ability to craft visually captivating, user-friendly, and innovative wireframes using Figma, based on a provided case study.</p>
-			</article>
-
-			<article class="pillar-card">
-				<span class="pillar-icon" aria-hidden="true">
-					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-						<line x1="6" y1="12" x2="10" y2="12" />
-						<line x1="8" y1="10" x2="8" y2="14" />
-						<line x1="15" y1="13" x2="15.01" y2="13" />
-						<line x1="18" y1="11" x2="18.01" y2="11" />
-						<rect x="2" y="6" width="20" height="12" rx="2" />
-					</svg>
-				</span>
-				<h3>Games Day Showdown</h3>
-				<p>An annual video game tournament organized by the UPLB Computer Science Society during their Computer Science Week. This year, the event exclusively features Valorant, where teams from all around the Philippines compete for a cash prize and the prestigious title of Games Day Champion.</p>
-			</article>
+		<h2 id="program-title">Explore the program</h2>
+		<div class="program-grid">
+			{#each program as area (area.title)}
+				<article class="program-feature">
+					<img src={area.image} alt="" loading="lazy" decoding="async" />
+					<h3>{area.title}</h3>
+					<p>{area.description}</p>
+					{#await data.summary}
+						<a href="/events">Browse the schedule <span aria-hidden="true">→</span></a>
+					{:then { programEvents }}
+						{@const match = programEvents.find((event) => area.aliases.includes(event.title.trim().toLowerCase()))}
+						{#if match}
+							<a href={`/events/${match.id}`} aria-label={`View ${area.title} event details`}>View event <span aria-hidden="true">→</span></a>
+						{:else}
+							<a href="/events">Browse the schedule <span aria-hidden="true">→</span></a>
+						{/if}
+					{:catch}
+						<a href="/events">Browse the schedule <span aria-hidden="true">→</span></a>
+					{/await}
+				</article>
+			{/each}
 		</div>
 	</div>
 </section>
@@ -242,26 +246,37 @@
 <section class="section-howto" id="how-it-works">
 	<div class="shell">
 		<div class="section-head">
-			<p class="eyebrow">Registration Flow</p>
-			<h2>Fast, frictionless, account-free.</h2>
-			<p class="lede">We eliminated sign-up hurdles so your entry is confirmed in less than a minute.</p>
+			<h2>How to register</h2>
+			<p class="lede">Choose an event and follow its registration instructions.</p>
 		</div>
 
 		<ol class="steps-flow">
 			<li class="step-card">
-				<span class="step-counter" aria-hidden="true">01</span>
-				<h3>Choose Your Event</h3>
-				<p>Browse the roster of live events, check the schedule, and select the session you want to join.</p>
+				<span class="step-counter" aria-hidden="true">
+					<span class="step-num">01</span>
+				</span>
+				<div class="step-body">
+					<h3>Choose Your Event</h3>
+					<p>Browse the roster of live events, check the schedule, and select the session you want to join.</p>
+				</div>
 			</li>
 			<li class="step-card">
-				<span class="step-counter" aria-hidden="true">02</span>
-				<h3>Submit Responses</h3>
-				<p>Answer the specific organizer questions directly in the form — no username or password required.</p>
+				<span class="step-counter" aria-hidden="true">
+					<span class="step-num">02</span>
+				</span>
+				<div class="step-body">
+					<h3>Submit Responses</h3>
+					<p>Answer the specific organizer questions directly in the form — no username or password required.</p>
+				</div>
 			</li>
 			<li class="step-card">
-				<span class="step-counter" aria-hidden="true">03</span>
-				<h3>Instant Reservation</h3>
-				<p>Your spot is locked in as soon as the organizers confirm your registration.</p>
+				<span class="step-counter" aria-hidden="true">
+					<span class="step-num">03</span>
+				</span>
+				<div class="step-body">
+					<h3>Check your confirmation</h3>
+					<p>Forms on this site confirm your seat when you submit successfully. For external forms, follow the organizer’s confirmation instructions.</p>
+				</div>
 			</li>
 		</ol>
 	</div>
@@ -271,14 +286,19 @@
 <section class="section-cta" id="register">
 	<div class="shell">
 		<div class="cta-master-card">
-			<p class="cta-kicker">GET INVOLVED IN CASC4D3</p>
 			<h2>Be part of the 43rd Computer Science Week.</h2>
 			<p class="cta-summary">
-				{#if data.openCount > 0}
-					{data.openCount} {data.openCount === 1 ? 'event track is' : 'events are'} accepting registrations right now. Claim your spot.
-				{:else}
-					The full event roster is ready. Discover all upcoming sessions and be first to register.
-				{/if}
+				{#await data.summary}
+					Explore the event roster for registration details.
+				{:then { openCount }}
+					{#if openCount > 0}
+						{openCount} {openCount === 1 ? 'event track is' : 'events are'} accepting registrations right now. Claim your spot.
+					{:else}
+						The full event roster is ready. Discover all upcoming sessions and be first to register.
+					{/if}
+				{:catch}
+					Explore the event roster for registration details.
+				{/await}
 			</p>
 			<div class="cta-buttons">
 				<Button variant="white" size="lg" href="/events">Explore Full Schedule</Button>
@@ -286,15 +306,16 @@
 		</div>
 	</div>
 </section>
+</div>
 
 <style>
 	/* ============================== CINEMATIC HERO ============================== */
 	.hero-cinematic {
 		position: relative;
+		isolation: isolate;
 		min-height: 100vh;
 		min-height: 100dvh;
-		height: 100vh;
-		height: 100dvh;
+
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
@@ -303,7 +324,7 @@
 		color: #ffffff;
 		overflow: hidden;
 		padding-top: 5rem;
-		padding-bottom: 1.75rem;
+		padding-bottom: 2rem;
 		box-sizing: border-box;
 	}
 
@@ -313,13 +334,15 @@
 		position: relative;
 		z-index: 2;
 		width: 100%;
-		height: 100%;
+		flex: 1;
+		gap: 1.25rem;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		align-items: flex-start;
 		text-align: left;
 		box-sizing: border-box;
+		transform-origin: 50% 22%;
 	}
 	.hero-content {
 		max-width: 46rem;
@@ -335,19 +358,19 @@
 		font-weight: 700;
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
-		color: var(--rose-600);
+		color: var(--rose-on-dark);
 	}
 
 	.hero-title {
-		font-family: var(--font-display);
-		font-size: clamp(2.8rem, 7vw, 5.2rem);
-		font-weight: 700;
-		line-height: 0.92;
-		letter-spacing: -0.01em;
+		font-family: 'Macondo Swash Caps', var(--font-display);
+		font-size: clamp(3rem, 7.5vw, 5.4rem);
+		font-weight: 400;
+		line-height: 0.98;
+		letter-spacing: 0.04em;
 		margin: 0 0 0.5rem;
 		color: #ffffff;
-		text-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-		text-transform: uppercase;
+		text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+		text-transform: none;
 	}
 	.hero-digit {
 		display: inline-block;
@@ -359,6 +382,7 @@
 		text-shadow: 0 0 12px rgba(194, 80, 114, 0.65), 0 2px 0 rgba(122, 31, 61, 0.9);
 		transform: translateY(0.05em);
 		text-transform: none;
+
 	}
 	.hero-subtitle-line {
 		display: block;
@@ -387,49 +411,71 @@
 		margin-bottom: 1rem;
 	}
 
-	/* Bottom Stat Bar */
-	.hero-stat-bar {
-		display: flex;
-		align-items: flex-end;
-		justify-content: flex-start;
-		gap: 2.25rem;
-		flex-wrap: wrap;
-		padding: 0 0 0.35rem;
+	.next-event {
+		width: min(100%, 43rem);
+		display: grid;
+		gap: 0.3rem;
+		border-top: 1px solid var(--muted-on-dark);
+		padding-top: 0.9rem;
+	}
+	.next-label, .next-event time {
+		font: 0.8rem/1.5 var(--font-display);
+		color: var(--rose-100);
+	}
+	.next-event a {
+		width: fit-content;
+		color: white;
+		font-size: clamp(1.12rem, 3vw, 1.6rem);
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+	.petal-sweep { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+	.petal-sweep i {
+		position: absolute;
+		top: 22%; right: 12%; width: 9px; height: 14px;
+		border-radius: 70% 15% 65% 35%;
+		background: var(--rose-on-dark);
+		transform: rotate(28deg);
+	}
+	.petal-sweep i:nth-child(2) { top: 28%; right: 16%; }
+	.petal-sweep i:nth-child(3) { top: 32%; right: 9%; }
+	@media (prefers-reduced-motion: no-preference) {
+		.petal-sweep i { animation: settle 750ms ease-out both; }
+		.petal-sweep i:nth-child(2) { animation-delay: 75ms; }
+		.petal-sweep i:nth-child(3) { animation-delay: 140ms; }
+	}
+	@keyframes settle {
+		from { transform: translate(3rem, -2rem) rotate(-40deg); opacity: 0; }
+		to { transform: rotate(28deg); opacity: 1; }
+	}
+
+	.home-body {
+		position: relative;
+		z-index: 5;
+		margin-top: 0;
 		border-radius: 0;
-		background: transparent;
-		border: 0;
-		backdrop-filter: none;
+		overflow: clip;
 		box-shadow: none;
 	}
-	.stat-item {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.2rem;
+	.section-event :global(.badge-open .badge-dot) {
+		animation: none;
 	}
-	.stat-val {
-		font-family: var(--font-display);
-		font-size: 1.35rem;
-		font-weight: 700;
-		color: #ffffff;
-		line-height: 1.1;
-	}
-	.stat-lbl {
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		color: rgba(255, 255, 255, 0.55);
-	}
-	.stat-divider {
-		width: 1px;
-		height: 28px;
-		background: rgba(255, 255, 255, 0.16);
+	.home-body::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 24%;
+		right: 24%;
+		height: 1px;
+		z-index: 6;
+		pointer-events: none;
+		background: linear-gradient(90deg, transparent, rgba(194, 80, 114, 0.8), transparent);
 	}
 
 	/* ============================== SECTION 1: INTRO ============================== */
 	.section-intro {
 		background: var(--paper);
-		padding: clamp(5rem, 9vw, 7.5rem) 0;
+		padding: clamp(3rem, 6vw, 4.75rem) 0 clamp(5rem, 9vw, 7.5rem);
 		border-bottom: 1px solid var(--line);
 	}
 	.intro-grid {
@@ -444,6 +490,16 @@
 		letter-spacing: -0.01em;
 		text-transform: uppercase;
 		margin: 0;
+	}
+	.write-line,
+	.write-copy {
+		clip-path: inset(0 0 0 0);
+
+	}
+	.write-line {
+		display: block;
+		width: max-content;
+		max-width: 100%;
 	}
 	.intro-lead {
 		font-size: 1.18rem;
@@ -468,67 +524,54 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 		gap: 1.75rem;
+		perspective: 1200px;
 	}
 
 	/* ============================== SECTION 3: PILLARS ============================== */
 	.section-experience {
 		background: var(--plum);
-		border-block: 0;
-		padding: clamp(5rem, 9vw, 7.5rem) 0;
-		color: rgba(255, 255, 255, 0.78);
+		color: var(--paper);
+		padding-block: clamp(3rem, 7vw, 6rem);
 	}
-	.section-experience :global(.eyebrow) {
-		color: var(--rose-600);
+	.section-experience h2 {
+		margin: 0 0 1.5rem;
+		color: var(--paper);
+		font-size: clamp(1.8rem, 4vw, 3rem);
 	}
-	.section-experience h2,
-	.section-experience .pillar-card h3 {
-		color: #ffffff;
-	}
-	.section-experience :global(.lede) {
-		color: rgba(255, 255, 255, 0.62);
-	}
-	.pillars-grid {
+	.program-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 1.25rem;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(1rem, 3vw, 2rem);
 	}
-	.pillar-card {
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+	.program-feature { display: flex; flex-direction: column; align-items: flex-start; }
+	.program-feature img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 4 / 5;
+		object-fit: cover;
 		border-radius: var(--radius-sm);
-		box-shadow: none;
-		padding: 2.1rem 1.75rem;
 	}
-	.pillar-card p {
-		margin: 0;
-		color: rgba(255, 255, 255, 0.62);
-		font-size: 0.95rem;
-		line-height: 1.65;
+	.program-feature h3 {
+		margin: 1rem 0 0.4rem;
+		color: var(--paper);
+		font-size: clamp(1.15rem, 2.2vw, 1.65rem);
 	}
-	.pillar-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 52px;
-		height: 52px;
-		border-radius: 14px;
-		background: var(--rose-100);
-		color: var(--rose-700);
-		margin-bottom: 1.5rem;
+	.program-feature p { margin: 0 0 0.75rem; line-height: 1.55; }
+	.program-feature a {
+		margin-top: auto;
+		padding-block: 0.4rem;
+		color: var(--rose-on-dark);
+		font-weight: 600;
 	}
-	.pillar-card h3 {
-		font-size: 1.25rem;
-		margin: 0 0 0.6rem;
-		color: #ffffff;
+	@media (max-width: 680px) {
+		.program-grid { grid-template-columns: 1fr; gap: 2rem; }
+		.program-feature img { aspect-ratio: 3 / 2; object-position: center 42%; }
 	}
 
 	/* ============================== SECTION 4: HOW IT WORKS ============================== */
 	.section-howto {
 		padding: clamp(5rem, 9vw, 7.5rem) 0;
 		background: var(--plum);
-	}
-	.section-howto :global(.eyebrow) {
-		color: var(--rose-600);
 	}
 	.section-howto h2,
 	.section-howto h3 {
@@ -537,45 +580,95 @@
 	.section-howto :global(.lede) {
 		color: rgba(255, 255, 255, 0.62);
 	}
+
+	/* ── Container ────────────────────────────── */
 	.steps-flow {
 		list-style: none;
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 1.75rem;
+		gap: 0;
 		padding: 0;
 		margin: 0;
-		max-width: 42rem;
+		max-width: 44rem;
+		position: relative;
+	}
+
+	/* ── Animated connector line ──────────────── */
+	.steps-flow::before {
+		content: '';
+		position: absolute;
+		left: 1.3rem;
+		top: 2rem;
+		bottom: 2rem;
+		width: 2px;
+		transform: translateX(-50%);
+		z-index: 0;
+		pointer-events: none;
+		background: linear-gradient(
+			180deg,
+			rgba(255, 156, 189, 0.55) 0%,
+			rgba(194, 80, 114, 0.35) 60%,
+			transparent 100%
+		);
+		transform: translateX(-50%);
 	}
 	.step-card {
 		background: transparent;
 		border: 0;
 		border-radius: 0;
 		box-shadow: none;
-		padding: 0;
+		padding: 1.1rem 1.1rem 1.1rem 0;
 		display: grid;
 		grid-template-columns: auto 1fr;
-		column-gap: 1.25rem;
-		row-gap: 0.35rem;
+		column-gap: 1.5rem;
+		align-items: start;
+		position: relative;
+		z-index: 1;
 	}
 	.step-counter {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		grid-row: 1 / span 2;
-		width: 2.4rem;
-		height: 2.4rem;
-		border: 1px solid rgba(255, 255, 255, 0.22);
+		width: 2.6rem;
+		height: 2.6rem;
+		z-index: 2;
+		margin-top: 0.05rem;
+		flex-shrink: 0;
+	}
+	.step-num {
+		position: relative;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		border: 1.5px solid rgba(255, 199, 218, 0.35);
+		background: var(--plum);
 		font-family: var(--font-display);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		line-height: 1;
 		color: #ffffff;
-		margin: 0.15rem 0 0;
+		transition:
+			background 0.35s ease,
+			border-color 0.35s ease,
+			box-shadow 0.35s ease,
+			transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+	.step-body {
+		padding-top: 0.1rem;
 	}
 	.step-card h3 {
-		font-size: 1.35rem;
-		margin: 0;
+		font-size: 1.25rem;
+		margin: 0 0 0.4rem;
 		color: #ffffff;
+		transition: color 0.25s ease;
+	}
+	.step-card:hover h3 {
+		color: #ffc7da;
 	}
 	.step-card p {
 		margin: 0;
@@ -584,6 +677,7 @@
 		line-height: 1.65;
 	}
 
+	/* ── Keyframes ────────────────────────────── */
 	/* ============================== SECTION 5: CTA ============================== */
 	.section-cta {
 		padding: clamp(4rem, 8vw, 6.5rem) 0;
@@ -595,13 +689,25 @@
 		text-align: left;
 		padding: clamp(3rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 3rem);
 		box-shadow: none;
+		position: relative;
+		overflow: hidden;
+		isolation: isolate;
+		transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+
 	}
-	.cta-kicker {
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.18em;
-		color: rgba(255, 255, 255, 0.78);
-		margin: 0 0 1rem;
+	.cta-master-card::before {
+		content: '';
+		position: absolute;
+		inset: -20%;
+		background: radial-gradient(circle at 75% 30%, rgba(255, 199, 218, 0.28), transparent 50%),
+					radial-gradient(circle at 20% 80%, rgba(122, 31, 61, 0.35), transparent 45%);
+		pointer-events: none;
+		z-index: 0;
+
+	}
+	.cta-master-card > * {
+		position: relative;
+		z-index: 1;
 	}
 	.cta-master-card h2 {
 		color: #ffffff;
@@ -622,11 +728,19 @@
 		display: flex;
 		justify-content: flex-start;
 	}
+	.cta-buttons :global(.btn) {
+		transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+	}
+	.cta-buttons :global(.btn:hover) {
+		transform: translateY(-3px) scale(1.02);
+		box-shadow: 0 12px 24px -4px rgba(60, 10, 24, 0.35);
+	}
 
 	/* ============================== RESPONSIVE BREAKPOINTS ============================== */
 	@media (max-width: 900px) {
 		.hero-cinematic {
-			min-height: auto;
+			height: auto;
+			min-height: 100svh;
 			padding-top: 6rem;
 			padding-bottom: 4.5rem;
 		}
@@ -636,35 +750,17 @@
 		}
 	}
 
-	@media (max-width: 720px) {
-		.hero-stat-bar {
-			gap: 1.25rem;
-			padding: 0;
-		}
-		.stat-divider {
-			display: none;
-		}
-		.stat-item {
-			width: calc(50% - 0.75rem);
-		}
-	}
-
 	@media (max-width: 520px) {
 		.hero-action-row :global(.btn) {
-			width: 100%;
-		}
-		.hero-stat-bar .stat-item {
 			width: 100%;
 		}
 		.music-toggle {
 			bottom: 1rem;
 			right: 1rem;
-			width: 42px;
-			height: 42px;
 		}
 	}
 
-	/* ============================== AMBIENT MUSIC TOGGLE ============================== */
+	/* ============================== SOUND TOGGLE ============================== */
 	.music-toggle {
 		position: fixed;
 		bottom: 1.5rem;
@@ -673,15 +769,17 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 46px;
+		gap: 0.4rem;
+		padding-inline: 0.8rem;
 		height: 46px;
 		border-radius: 999px;
 		border: 1px solid rgba(255, 199, 218, 0.4);
 		background: rgba(20, 8, 16, 0.55);
 		backdrop-filter: blur(8px);
 		color: #ffc7da;
+		font: inherit;
 		cursor: pointer;
-		transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
+		transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 	}
 	.music-toggle:hover {
 		background: rgba(194, 80, 114, 0.35);
@@ -691,39 +789,5 @@
 	.music-toggle:active {
 		transform: translateY(0);
 	}
-	.music-bars {
-		display: inline-flex;
-		align-items: flex-end;
-		gap: 2px;
-		height: 16px;
-	}
-	.music-bars i {
-		display: block;
-		width: 3px;
-		border-radius: 2px;
-		background: #ffc7da;
-		animation: musicBounce 0.9s ease-in-out infinite;
-	}
-	.music-bars i:nth-child(1) { height: 6px; animation-delay: 0s; }
-	.music-bars i:nth-child(2) { height: 14px; animation-delay: 0.15s; }
-	.music-bars i:nth-child(3) { height: 9px; animation-delay: 0.3s; }
-	.music-bars i:nth-child(4) { height: 12px; animation-delay: 0.45s; }
 
-	@keyframes musicBounce {
-		0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
-		50% { transform: scaleY(1); opacity: 1; }
-	}
-
-	@media (max-width: 520px) {
-		.music-toggle {
-			bottom: 1rem;
-			right: 1rem;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.music-bars i {
-			animation: none !important;
-		}
-	}
 </style>
