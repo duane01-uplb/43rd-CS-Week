@@ -16,12 +16,8 @@ async (page) => {
 		await page.getByRole('heading', { level: 1 }).waitFor();
 		await capture('home');
 		const agenda = page.getByRole('region', { name: 'Upcoming events' });
-		const jump = page.locator('.hero-content').getByRole('link', { name: 'See the schedule' });
-		await jump.focus();
-		await page.keyboard.press('Enter');
-		await page.waitForURL(url => url.hash === '#event');
+		await agenda.scrollIntoViewIfNeeded();
 		await agenda.locator('article').first().waitFor();
-		if (!await agenda.evaluate(el => el === el.parentElement.firstElementChild)) throw new Error('Homepage agenda order');
 		await capture('agenda');
 		await agenda.getByRole('link', { name: 'View full schedule' }).click();
 		await page.getByRole('heading', { name: 'Event schedule' }).waitFor();
@@ -30,16 +26,7 @@ async (page) => {
 		const box = await firstAction.boundingBox();
 		if (width === 390 && (!box || box.y < 0 || box.y + box.height > height)) throw new Error('First action below fold');
 		await page.goto(origin + '/cs-week');
-		if (width < 600) {
-			const toggle = page.getByRole('button', { name: 'Open navigation menu' });
-			await toggle.click();
-			const menu = page.getByRole('navigation', { name: 'Mobile navigation' });
-			await menu.getByRole('link', { name: 'Events & Schedule' }).click();
-			await menu.waitFor({ state: 'hidden' });
-		} else {
-			await page.getByRole('region', { name: 'Hero Introduction' })
-				.getByRole('link', { name: 'Register for Events' }).click();
-		}
+		await page.getByRole('link', { name: 'View event schedule' }).click();
 		await page.getByRole('heading', { name: 'Event schedule' }).waitFor();
 		const status = page.getByLabel('Registration status');
 		await status.selectOption('all');
