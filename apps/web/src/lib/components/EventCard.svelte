@@ -19,10 +19,12 @@
 
 	let {
 		event,
-		variant = 'grid'
+		variant = 'grid',
+		titleTag = 'h3'
 	}: {
 		event: EventItem;
 		variant?: 'grid' | 'track';
+		titleTag?: 'h2' | 'h3';
 	} = $props();
 
 	const formatDateTime = (date: Date | string) =>
@@ -52,23 +54,23 @@
 		</time>
 	</div>
 
-	<h3 class="card-title">
+	<svelte:element this={titleTag} class="card-title">
 		<a href={`/events/${event.id}`}>{event.title}</a>
-	</h3>
+	</svelte:element>
 
-	<p class="card-desc">
-		{event.description ?? 'Event information, timeline, and participant requirements.'}
-	</p>
+	{#if event.description}
+		<p class="card-desc">{event.description}</p>
+	{/if}
 
 	{#if variant === 'grid'}
 		<div class="card-meta-grid">
 			<div class="meta-item">
 				<span class="meta-label">Capacity</span>
 				<span class="meta-val">
-					{#if event.capacity !== null}
+					{#if event.capacity != null}
 						{event.capacity} spots
 					{:else}
-						Open Capacity
+						Open capacity
 					{/if}
 				</span>
 			</div>
@@ -82,12 +84,12 @@
 	<div class="card-footer">
 		{#if variant === 'track'}
 			<div class="track-capacity">
-				{#if event.capacity !== null}
+				{#if event.capacity != null}
 					<UsersIcon size={14} strokeWidth={2} />
 					<span>{event.capacity} total slots</span>
 				{:else}
 					<CircleCheckIcon size={14} strokeWidth={2} />
-					<span>Open Capacity</span>
+					<span>Open capacity</span>
 				{/if}
 			</div>
 		{/if}
@@ -126,6 +128,12 @@
 		border-radius: var(--radius-sm);
 		box-shadow: none;
 		padding: 1.65rem;
+		position: relative;
+		overflow: hidden;
+		transition: border-color 0.15s ease;
+	}
+	.event-card-root:hover, .event-card-root:focus-within {
+		border-color: var(--rose-600);
 	}
 
 	.card-top {

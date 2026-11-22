@@ -5,7 +5,7 @@
 <svelte:head><title>Edit event · CS Week Admin</title></svelte:head>
 
 <section class="head">
-	<p class="eyebrow">Schedule</p>
+
 	<h1>Edit event</h1>
 	<p class="lede">Update the basics below. Changes apply to anyone who hasn't signed up yet.</p>
 </section>

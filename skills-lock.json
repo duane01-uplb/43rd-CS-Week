@@ -1,23 +1,30 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+      "computedHash": "e1481fcd7484d1bc55f2ca7170b788d7357821f5595d27e7132ec7df6841b0cf"
     },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/supabase/SKILL.md",
-      "computedHash": "a6260582f48df8ba53380bb9b9e870ed2ae5fe147799e90ed783b8aa25167d50"
+      "computedHash": "338d074a99b84c8e0882b623d413c16250279c75d185c5c00770d7c8670c9f4e"
     },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
-      "computedHash": "128fac78002d916c8ca908245d398e634f540d8bcf20915b2b2359aeb18eba59"
+      "computedHash": ""
+    },
+    "uncodixfy": {
+      "source": "cyxzdev/Uncodixfy",
+      "commit": "e0e028058b5259debdd94b78147c6d6c77bf7da2",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "a1bf19e828dfba24167d0b16f2cc9a19af8907f646064036feb6265e61cb6036"
     }
   }
 }

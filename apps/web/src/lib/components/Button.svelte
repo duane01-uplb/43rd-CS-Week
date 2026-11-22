@@ -56,13 +56,10 @@
 		cursor: pointer;
 		text-decoration: none;
 		white-space: nowrap;
-		transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease, color 0.15s ease;
+		transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 	}
 	.btn:hover {
 		text-decoration: none;
-	}
-	.btn:active:not(:disabled) {
-		transform: translateY(1px);
 	}
 	.btn:disabled {
 		opacity: 0.65;
@@ -72,12 +69,10 @@
 	.btn-primary {
 		background: var(--rose-700);
 		color: #ffffff;
-		box-shadow: 0 2px 8px rgba(166, 58, 92, 0.25);
 	}
 	.btn-primary:hover:not(:disabled) {
 		background: var(--rose-800);
 		color: #ffffff;
-		box-shadow: 0 4px 14px rgba(166, 58, 92, 0.35);
 	}
 	.btn-ghost {
 		background: transparent;
@@ -93,7 +88,6 @@
 		background: rgba(255, 255, 255, 0.06);
 		color: #ffffff;
 		border-color: rgba(255, 255, 255, 0.18);
-		backdrop-filter: blur(8px);
 	}
 	.btn-ghost-dark:hover:not(:disabled) {
 		background: rgba(255, 255, 255, 0.12);
@@ -122,7 +116,7 @@
 	.btn-lg {
 		padding: 0.85rem 1.65rem;
 		font-size: 1.02rem;
-		border-radius: var(--radius);
+		border-radius: var(--radius-sm);
 	}
 	.btn-full {
 		width: 100%;

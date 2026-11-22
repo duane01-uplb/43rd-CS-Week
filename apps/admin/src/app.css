@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Sakura tokens — source: agents/DESIGN_TOKENS.md */
+:root {
+	--rose-900: #7a1f3d;
+	--rose-800: #8f2d4c;
+	--rose-700: #a63a5c;
+	--rose-600: #c25072;
+	--rose-100: #f6e3e9;
+	--rose-050: #fbf1f4;
+	--plum: #2b2430;
+	--plum-soft: #6f6676;
+	--paper: #faf7f4;
+	--card: #ffffff;
+	--line: #ece3e6;
+	--ok: #3e7a5c;
+	--warn: #b7791f;
+	--danger: #b13a3a;
+	--radius: 12px;
+	--radius-sm: 8px;
+	--shadow: 0 1px 2px rgba(43, 36, 48, 0.05), 0 8px 24px rgba(43, 36, 48, 0.06);
+	--shadow-hover: 0 2px 4px rgba(43, 36, 48, 0.05), 0 14px 34px rgba(43, 36, 48, 0.09);
+	--focus: 0 0 0 3px rgba(194, 80, 114, 0.35);
+
+	--background: var(--paper);
+	--foreground: var(--plum);
+	--card-foreground: var(--plum);
+	--popover: #ffffff;
+	--popover-foreground: var(--plum);
+	--primary: var(--rose-700);
+	--primary-foreground: #ffffff;
+	--secondary: var(--rose-050);
+	--secondary-foreground: var(--rose-900);
+	--muted: var(--rose-050);
+	--muted-foreground: var(--plum-soft);
+	--accent: var(--rose-100);
+	--accent-foreground: var(--rose-900);
+	--destructive: var(--danger);
+	--border: var(--line);
+	--input: var(--line);
+	--ring: var(--rose-600);
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-rose-900: var(--rose-900);
+	--color-rose-800: var(--rose-800);
+	--color-rose-700: var(--rose-700);
+	--color-rose-600: var(--rose-600);
+	--color-rose-100: var(--rose-100);
+	--color-rose-050: var(--rose-050);
+	--color-plum: var(--plum);
+	--color-plum-soft: var(--plum-soft);
+	--color-paper: var(--paper);
+	--color-ok: var(--ok);
+	--color-warn: var(--warn);
+	--color-danger: var(--danger);
+	--font-display: 'Space Mono', 'Courier New', monospace;
+	--font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+	--font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+}

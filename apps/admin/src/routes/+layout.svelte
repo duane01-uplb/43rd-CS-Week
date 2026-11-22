@@ -1,13 +1,16 @@
-<script lang="ts">let { children } = $props();</script>
+<script lang="ts">
+	import '../app.css';
+	import '@fontsource/space-mono/400.css';
+	import '@fontsource/space-mono/700.css';
+	import '@fontsource/ibm-plex-sans/400.css';
+	import '@fontsource/ibm-plex-sans/500.css';
+	import '@fontsource/ibm-plex-sans/600.css';
+
+	let { children } = $props();
+</script>
 
 <svelte:head>
 	<title>CS Week Admin</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
-		rel="stylesheet"
-	/>
 </svelte:head>
 
 {@render children()}
@@ -82,14 +85,6 @@
 	}
 
 	/* ---------- shared page-header pattern ---------- */
-	:global(.eyebrow) {
-		margin: 0 0 0.15rem;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: var(--rose-700);
-	}
 	:global(.head h1) {
 		font-size: clamp(1.5rem, 3vw, 2rem);
 	}
@@ -176,28 +171,21 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.18rem 0.6rem;
-		border-radius: 999px;
+		border-radius: 6px;
 		font-size: 0.74rem;
 		font-weight: 600;
 		letter-spacing: 0.02em;
 		white-space: nowrap;
 	}
-	:global(.badge::before) {
-		content: '';
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: currentColor;
-	}
 	:global(.badge-open),
 	:global(.badge-confirmed) {
 		background: #e5f2eb;
-		color: var(--ok);
+		color: #31694d;
 	}
 	:global(.badge-draft),
 	:global(.badge-pending) {
 		background: #f4efe4;
-		color: var(--warn);
+		color: #775018;
 	}
 	:global(.badge-closed) {
 		background: #ece6ea;
@@ -209,6 +197,10 @@
 	}
 
 	/* ---------- shared alert / status message ---------- */
+	:global(.stat-value), :global(td), :global(.count) {
+		font-variant-numeric: tabular-nums;
+	}
+
 	:global(.status-msg) {
 		padding: 0.7rem 0.9rem;
 		border-radius: 8px;

@@ -6,6 +6,50 @@ Do not delete history — only append. For the "why" behind a decision, see
 
 ---
 
+## 2026-11-19 — Public journey verification
+- Verified homepage links, registration entry points and calendar downloads for six published events. Simplified the registration heading and CTA and darkened the email placeholder after desktop and mobile contrast checks.
+
+## 2026-11-19 — Calendar downloads and admin numerals
+- Added an iCalendar download beside the date on public event pages. It includes the event title, UTC start, available end time, and detail link.
+- Aligned dashboard and table numerals and matched positive status text to the public badge color.
+
+## 2026-11-19 — Illustrated homepage program
+- Added static pixel-art illustrations, concise descriptions, and published event links for Career Orientation, Warframes, and Games Day. The program links to the schedule when a matching event is unavailable.
+
+## 2026-11-19 — Date-grouped event schedule
+- Grouped the public roster by Manila date, with times, event details, registration status and destination in each row. Schedule rows stack on narrow screens and render without entry animations.
+
+## 2026-11-19 — Homepage event preview and motion
+- Replaced the hero statistics with the next open event and its Manila start time. The schedule link remains available during loading and when no event can be shown.
+- Replaced homepage scroll reveals and decorative loops with a brief petal entrance and a static reduced-motion presentation. Clarified confirmation for local and external registrations.
+
+## 2026-11-19 — Admin overview
+- Removed the chart that duplicated the Events, Registrations, and Confirmed totals. Kept the linked totals and common tasks.
+
+## 2026-11-19 — Event heading hierarchy
+- Used second-level headings for roster cards and the roster empty state, with third-level card headings under Open Events on the homepage.
+
+## 2026-11-19 — Homepage sound control
+- Made ambient music and scroll sounds opt-in through one Sound toggle.
+- Stop both audio sources when sound is turned off or the visitor leaves the homepage.
+
+## 2026-11-19 — Public page loading
+- Removed the full-page splash and its navigation timers. The public shell renders independently of streamed event data and font readiness.
+- Kept the sakura loading indicator in the event sections with a visible status label and reduced-motion support.
+
+## 2026-11-19 — Public text readability
+- Improved contrast for the hero label, footer headings and legal text, and open and confirmed status badges.
+- Increased the public brand label to 0.75rem and let the mobile header grow when the label wraps.
+
+## 2026-11-19 — Sakura backdrop wind
+- Replaced the drifting wind shapes with staggered strokes that follow curved paths across the backdrop.
+
+## 2026-11-19 — Public loading screen
+- Reused the opening Sakura bloom for in-site page transitions and pending event data.
+- Added a standalone opening splash that covers the site until startup and initial event data settle.
+- Added a Sakura-themed loading screen for slow navigation and pending home and roster queries.
+- Added a reduced-motion variant, query error messages, and links to render event data without JavaScript.
+
 ## 2026-11-18 — Backend rollout documentation
 - Reconciled route contracts and documented clean setup and upgrade order.
 - Added a backend preview checklist for both Vercel apps and staged Supabase.
@@ -33,6 +77,141 @@ Do not delete history — only append. For the "why" behind a decision, see
   Public event pages now read Postgres directly to honor status changes.
 - Added a forward RLS migration that resolves recursive profile policy checks
   and removes direct client registration inserts.
+
+## 2026-09-23 — Scattered petal endpoints
+- Replaced the randomized fade timing with randomized horizontal travel
+  distances, so petals now disappear at varied coordinates across the screen.
+- Kept every seventh petal on the full opposite-edge trajectory while the
+  remaining petals end between roughly 38% and 95% of that distance.
+- Browser-verified 32 distinct final coordinates across 36 petals and six
+  full-edge trajectories.
+
+## 2026-09-23 — Scattered petal fade positions
+- Added a stable random fade point to every scroll petal so they begin
+  disappearing at different horizontal positions along their paths.
+- Preserved each petal's full scroll-linked trajectory and edge destination;
+  only the hold and fade portions vary.
+
+## 2026-09-23 — Randomized scroll petal distribution
+- Removed the fixed one-second petal fade behavior and restored the
+  scroll-linked travel and natural end-of-path fade.
+- Replaced the patterned placement formula with stable seeded randomization
+  for each petal's height, size, and depth, avoiding hydration shifts while
+  producing 36 unique vertical positions.
+
+## 2026-09-23 — Scattered petals with timed fade
+- Redistributed all 36 scroll petals across unique, irregular vertical
+  positions spanning the viewport and retained varied size and depth.
+- Decoupled petal visibility from travel: each petal now fades out within one
+  second while its hidden trajectory continues to the opposite screen edge.
+- Browser-measured the visible, faded, and final edge positions to verify the
+  timing and full-distance motion.
+
+## 2026-09-23 — Tripled scroll sakura density
+- Increased the hero handoff's organic sakura petals from 12 to 36, with each
+  generated pass varying vertical placement, size, and visual depth.
+- Redistributed all 36 Anime.js trigger points across the available hero
+  scroll distance so the added petals animate instead of waiting beyond the
+  section.
+- Browser-verified all 36 petals in motion without runtime errors.
+
+## 2026-09-23 — Writing reset aligned to section visibility
+- Moved the intro writing observer from the text grid to the complete intro
+  section and aligned its thresholds to the viewport edges.
+- The sequence now remains complete while even one pixel of the section is
+  visible, then resets only after the section has fully exited above or below
+  the viewport.
+
+## 2026-09-23 — Replayable full intro writing sequence
+- Extended the writing reveal across the celebration label, all five headline
+  lines, the CASC4D3 legacy paragraph, and the “No gatekeeping” paragraph.
+- Configured directional Anime.js scroll actions to restart the sequence on
+  either re-entry, complete it after passing, and reset it above the section.
+- Browser-verified the initial reveal, completed state, backward re-entry,
+  reset state, and a second forward replay.
+
+## 2026-09-23 — Seamless writing reveal for intro statement
+- Split the homepage's “Where computing curiosity cascades into impact.”
+  statement into accessible visual lines and added a continuous left-to-right
+  Anime.js ink reveal as the section enters the viewport.
+- Kept the complete sentence as the heading's accessible name and disables
+  clipping entirely for reduced-motion visitors.
+
+## 2026-09-23 — Static post-hero section restored
+- Removed the scroll-linked transform, clipping, and opacity transition from
+  the homepage body and opening section.
+- Kept the restored two-stage sakura tree motion in the hero while returning
+  the section after it to a stable, full-opacity layout.
+
+## 2026-09-23 — Restored grove and body handoff motion
+- Restored a two-stage scroll response for the hero's sakura trees: the grove
+  lifts first, then settles and fades as the hero gives way to the page.
+- Added a clipped, rising reveal for the body and its opening section while
+  keeping the body's natural boundary after the full-screen hero.
+- Preserved a static, fully visible handoff when reduced motion is requested.
+
+## 2026-09-23 — Natural scroll petals and full-screen hero
+- Replaced the pixel-cross scroll flybys with curved sakura petal silhouettes,
+  vein detail, near/mid/far depth, varied opacity, and multi-stage flutter,
+  tumble, and flip paths.
+- Removed the homepage body's negative margin, rounded sheet, and shadow. The
+  hero now owns exactly one full viewport and the body begins at its boundary
+  without peeking or overlapping.
+- Browser-verified `heroHeight === viewport` and `bodyTop === viewport` at
+  rest; reduced-motion keeps petals hidden and the hero static.
+
+## 2026-09-23 — Seamless homepage hero handoff
+- Corrected the Anime.js hero scroll range so the copy, grove, mist, and
+  whistle blooms now progress across the full hero instead of remaining
+  static.
+- Homepage navigation stays fixed before and after its scrolled state,
+  eliminating the 64px document-flow jump. The paper sheet overlaps farther
+  into the grove with a softer mist, shadow, hairline, and blossom trails.
+- Raised the hero stat rail above the incoming sheet and browser-verified the
+  top, midpoint, completed handoff, and reduced-motion presentation.
+
+## 2026-09-22 — Restore hero after route changes
+- Motion handles are now scoped to the page that created them. Leaving the
+  events roster can no longer tear down the newly mounted homepage animation
+  and leave hero elements at their CSS-hidden state.
+- Removed obsolete music-bar CSS warnings. The web client and SSR bundles
+  compile cleanly; browser-verified the Events → Home transition.
+
+## 2026-09-22 — Fix Anime.js hero handoff range
+- `onScroll` thresholds are container-then-target. Leave is now `top bottom`
+  so the grove actually eases out across the hero height instead of a zero
+  range. Mist leads, copy follows. Whistle blooms scrub across a short
+  window of that same scroll so they stay on the wind path.
+
+## 2026-09-22 — Refine homepage scroll with Anime.js
+- Homepage motion now uses Anime.js (`animejs` 4) instead of GSAP scrub:
+  grove copy eases away on a smoothed `onScroll` timeline, paper mist
+  follows, and sakura whistle on wind-path keyframes when thresholds are
+  crossed (play/reset, not dragged). Intro columns stagger independently.
+  The body sheet no longer translates against native scroll.
+
+## 2026-09-22 — Sakura whistle across the hero-to-body scroll
+- Pixel blossoms streak left and right during the homepage handoff, with
+  rose wind-trails. Ambient petals blow sideways instead of fading out.
+  A quiet airy whoosh can play after a click if scroll is fast enough.
+  Reduced-motion hides the whistle layer.
+
+## 2026-09-22 — Hero-to-body scroll handoff
+- Scrolling out of the homepage hero now scrubs: copy lifts and fades, pixel
+  trees recede, a paper mist rolls up, and the body arrives as a rounded
+  sheet with a rose hairline. Reduced-motion skips the scrub and overlap.
+
+## 2026-09-22 — Restore Macondo Swash Caps on hero CASC4D3
+- Homepage wordmark uses Macondo Swash Caps again (Press Start 2P digits
+  unchanged). RecordRecharge Space Mono uppercase stays on other headlines.
+
+## 2026-09-22 — Public site motion (GSAP stagger + scroll reveals)
+- Homepage hero staggers kicker → title → description → CTAs → stats.
+  Press Start digits keep a slow sakura glow; the music toggle fades in
+  after the copy. Sections, event cards, pillars, and 01/02/03 steps
+  reveal once via GSAP ScrollTrigger. Events listing and event detail
+  use the same helper (`apps/web/src/lib/motion.ts`).
+- Respects `prefers-reduced-motion`. No grid hover and no card lift.
 
 ## 2026-09-21 — RecordRecharge UI chrome on a separate branch
 - Branch `cursor/recordrecharge-ui-styles` restyles public web chrome after

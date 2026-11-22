@@ -23,9 +23,9 @@ Two SvelteKit apps in one Bun workspace, deployed to Vercel:
   events CRUD, registrations review/search/export, file serving. This is the
   ONLY place auth lives.
 
-The week runs talks, workshops, and contests. Everyone registers free via
-per-event dynamic forms. The look is **sakura but not flowery** — dusky rose
-palette, warm paper, Mincho display type, editorial and friendly.
+The week runs talks, workshops, and contests. Participants register via
+per-event dynamic forms (no accounts). The look is **sakura but not flowery** — dusky rose
+palette, warm paper, Space Mono display type, editorial and friendly.
 
 ## 2. Infrastructure you must match
 
@@ -33,7 +33,11 @@ palette, warm paper, Mincho display type, editorial and friendly.
 |---|---|
 | Package manager | **Bun** workspaces — run `bun`, never `npm`/`npx` |
 | Framework | SvelteKit 2.70+ / **Svelte 5 runes** (`$props`, `$state`, `$derived`) |
-| Styling | Plain **scoped `<style>`** per component + CSS custom properties (no Tailwind, no CSS libs) |
+| Styling | **Tailwind CSS v4** + CSS tokens (`src/app.css`). Scoped styles remain for cinematic/hero work. **shadcn-svelte** in `$lib/components/ui`. **Bits UI** for headless primitives. |
+| Icons | **Lucide** (`@lucide/svelte`) for UI icons. Social brand marks (Facebook, Instagram, TikTok) stay inline SVGs — Lucide no longer ships trademarked logos. |
+| Animation | **Motion for Svelte** (`@humanspeak/svelte-motion`) for UI motion; **Anime.js** (`animejs`) for scroll-synced hero handoff, sakura whistle, and section reveals (`apps/web/src/lib/motion.ts`); **GSAP** remains available |
+| Charts | **LayerChart** (admin overview) |
+| Fonts | **Fontsource** (Space Mono + IBM Plex Sans; web also Macondo Swash Caps and Press Start 2P) |
 | DB | Postgres via **Drizzle** (`@csweek/db`) — server-side only, direct connection |
 | Auth | **Supabase Auth**, admin-only; email + password |
 | Files | Supabase Storage (service-role on server for uploads) |

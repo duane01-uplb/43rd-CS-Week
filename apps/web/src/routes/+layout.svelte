@@ -9,6 +9,7 @@
 	import '@fontsource/macondo-swash-caps/400.css';
 	import '@fontsource/press-start-2p/400.css';
 	import { page } from '$app/state';
+	import SakuraBackdrop from '$lib/components/SakuraBackdrop.svelte';
 
 	let { children } = $props();
 	let menuOpen = $state(false);
@@ -24,40 +25,10 @@
 		}
 	}
 
-	// Pixel-art sakura tree (22 wide). '.' empty, 'P' blossom, 'L' light
-	// blossom, 'D' deep blossom, 'T' trunk.
-	const PTREE = [
-		'......PPPP..PPPP......',
-		'.....PPPPPPPPPP.......',
-		'....PPPPPPPPPPPP......',
-		'....DDDDDDPPPPPPP.....',
-		'...PPPPPPPPPPPPPP.....',
-		'...PPPPPPLLPPPPPP.....',
-		'..PPPPPPPPPPPPPPPP....',
-		'...PP..PPPPPPPP..PP...',
-		'...PP.PPPPPPPP.PP.....',
-		'.....PP.PPPP.PP.......',
-		'......PPP..PPP........',
-		'.......TT....TT.......',
-		'.......TT....TT.......',
-		'.......TTT..TTT.......',
-		'........TTTTTT........',
-		'........TTTTTT........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........'
-	];
-	const PCOLORS: Record<string, string> = {
-		P: '#ff8fb3',
-		L: '#ffc7da',
-		D: '#c25072',
-		T: '#46333f'
-	};
 </script>
 
 <svelte:window onscroll={handleScroll} />
+
 
 <svelte:head>
 	<title>CASC4D3 — The 43rd Computer Science Week</title>
@@ -123,128 +94,9 @@
 </header>
 
 <!-- Site-wide atmospheric Sakura backdrop shared across every page -->
-<div class="site-backdrop" aria-hidden="true">
-	<div class="ambient-glow"></div>
-	<div class="sakura-bloom-glow"></div>
-
-	<!-- Pixel-Art Sakura Trees on the sides (petals fall from their canopies) -->
-	<svg class="pixel-tree tree-left" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-right" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-left-mid" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-right-mid" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-
-	<!-- Decorative Sakura Branch Silhouettes -->
-	<svg class="sakura-branches" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-		<path d="M-50 -20 C180 60, 320 180, 480 120 C560 90, 640 160, 720 110" stroke="#7a1f3d" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" fill="none" />
-		<path d="M1490 -30 C1280 80, 1150 200, 980 150 C900 125, 840 210, 760 170" stroke="#7a1f3d" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round" fill="none" />
-		<!-- Soft Blossom Clusters -->
-		<circle cx="320" cy="180" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
-		<circle cx="480" cy="120" r="18" fill="#f6e3e9" fill-opacity="0.25" filter="blur(3px)" />
-		<circle cx="640" cy="160" r="12" fill="#c25072" fill-opacity="0.18" filter="blur(2px)" />
-		<circle cx="1150" cy="200" r="16" fill="#f6e3e9" fill-opacity="0.22" filter="blur(2px)" />
-		<circle cx="980" cy="150" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
-	</svg>
-
-	<!-- Sakura Wind Breeze: flowing wavy gusts + fine wind-carried particles -->
-	<div class="sakura-wind" aria-hidden="true">
-		<svg width="0" height="0" style="position:absolute">
-			<defs>
-				<linearGradient id="windGrad1" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(246,227,233,0.6)" />
-					<stop offset="70%" stop-color="rgba(198,80,114,0.4)" />
-					<stop offset="100%" stop-color="rgba(198,80,114,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad2" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="35%" stop-color="rgba(255,199,218,0.55)" />
-					<stop offset="75%" stop-color="rgba(166,58,92,0.35)" />
-					<stop offset="100%" stop-color="rgba(166,58,92,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad3" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(255,199,218,0.5)" />
-					<stop offset="70%" stop-color="rgba(194,80,114,0.4)" />
-					<stop offset="100%" stop-color="rgba(194,80,114,0)" />
-				</linearGradient>
-				<linearGradient id="windGrad4" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="rgba(246,227,233,0)" />
-					<stop offset="30%" stop-color="rgba(255,199,218,0.45)" />
-					<stop offset="70%" stop-color="rgba(246,227,233,0.35)" />
-					<stop offset="100%" stop-color="rgba(246,227,233,0)" />
-				</linearGradient>
-			</defs>
-		</svg>
-		<svg class="wind-gust gust-1" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 30 C 60 6, 120 54, 180 30 S 300 6, 400 30" stroke="url(#windGrad1)" stroke-width="3.5" stroke-linecap="round" />
-			<path d="M0 46 C 70 30, 130 62, 200 46 S 320 30, 400 46" stroke="url(#windGrad1)" stroke-width="2" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-2" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 36 C 70 10, 140 52, 200 32 S 320 12, 400 30" stroke="url(#windGrad2)" stroke-width="3" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-3" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 24 C 80 52, 150 6, 220 34 S 330 54, 400 22" stroke="url(#windGrad3)" stroke-width="2.5" stroke-linecap="round" />
-		</svg>
-		<svg class="wind-gust gust-4" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M0 38 C 60 16, 120 50, 190 34 S 310 48, 400 28" stroke="url(#windGrad4)" stroke-width="2" stroke-linecap="round" />
-		</svg>
-		<div class="wind-part-frail wp-1"></div>
-		<div class="wind-part-frail wp-2"></div>
-		<div class="wind-part-frail wp-3"></div>
-		<div class="wind-part-frail wp-4"></div>
-		<div class="wind-part-frail wp-5"></div>
-		<div class="wind-part-frail wp-6"></div>
-		<div class="wind-part-frail wp-7"></div>
-		<div class="wind-part-frail wp-8"></div>
-	</div>
-
-	<!-- Drifting Sakura Petals -->
-	<div class="sakura-petals-container">
-		{#each Array(14) as _, i}
-			<div class={`sakura-petal petal-${i + 1}`}>
-				<svg viewBox="0 0 9 9" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-					<rect x="3" y="0" width="3" height="3" fill="#ffc7da" />
-					<rect x="0" y="3" width="3" height="3" fill="#c25072" />
-					<rect x="3" y="3" width="3" height="3" fill="#ff8fb3" />
-					<rect x="6" y="3" width="3" height="3" fill="#c25072" />
-					<rect x="3" y="6" width="3" height="3" fill="#a63a5c" />
-				</svg>
-			</div>
-		{/each}
-	</div>
-</div>
+{#if !isHome}
+	<SakuraBackdrop />
+{/if}
 
 <main class:isHome class="page">
 	{@render children()}
@@ -286,7 +138,7 @@
 				</a>
 				<a href="https://www.tiktok.com/@uplbcossph?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-						<path d="M14.5 3c.4 2.6 1.9 4.4 4.5 4.7v3.1c-1.5 0-2.9-.5-4.1-1.3v6.7c0 3.7-3 6.8-6.7 6.8S1.5 19.9 1.5 16.2c0-3.5 2.7-6.4 6.1-6.7v3.2c-1.4.3-2.4 1.5-2.4 3 0 1.7 1.4 3.1 3.1s3.1-1.4 3.1-3.1V3h3.1Z" />
+						<path d="M14.5 3c.4 2.6 1.9 4.4 4.5 4.7v3.1c-1.5 0-2.9-.5-4.1-1.3v6.7c0 3.7-3 6.8-6.7 6.8S1.5 19.9 1.5 16.2c0-3.5 2.7-6.4 6.1-6.7v3.2c-1.4.3-2.4 1.5-2.4 3 c0 1.7 1.4 3.1 3.1 3.1s3.1-1.4 3.1-3.1V3h3.1Z" />
 					</svg>
 				</a>
 			</div>
@@ -361,220 +213,6 @@
 		font-size: 16px;
 		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
-	}
-
-	/* ---- site-wide sakura backdrop ---- */
-	:global(.site-backdrop) {
-		position: fixed;
-		inset: 0;
-		z-index: 0;
-		pointer-events: none;
-		overflow: hidden;
-	}
-	:global(.site-backdrop) :global(.ambient-glow) {
-		position: absolute;
-		top: 15%;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 800px;
-		height: 800px;
-		border-radius: 50%;
-		background: radial-gradient(circle, rgba(194, 80, 114, 0.24) 0%, rgba(122, 31, 61, 0.12) 45%, rgba(35, 28, 39, 0) 75%);
-		filter: blur(40px);
-	}
-	:global(.site-backdrop) :global(.sakura-bloom-glow) {
-		position: absolute;
-		top: 5%;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 1000px;
-		height: 600px;
-		border-radius: 50%;
-		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
-		filter: blur(50px);
-	}
-	:global(.site-backdrop) :global(.sakura-branches) {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-	}
-	:global(.site-backdrop) :global(.pixel-tree) {
-		position: absolute;
-		bottom: 0;
-		height: min(30vh, 320px);
-		pointer-events: none;
-		z-index: 1;
-		filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.5));
-	}
-	:global(.site-backdrop) :global(.tree-left) {
-		left: -1vw;
-	}
-	:global(.site-backdrop) :global(.tree-right) {
-		right: -1vw;
-		transform: scaleX(-1);
-	}
-	:global(.site-backdrop) :global(.tree-left-mid) {
-		left: 9vw;
-		height: min(22vh, 240px);
-		opacity: 0.82;
-	}
-	:global(.site-backdrop) :global(.tree-right-mid) {
-		right: 9vw;
-		height: min(22vh, 240px);
-		opacity: 0.82;
-		transform: scaleX(-1);
-	}
-	:global(.site-backdrop) :global(.sakura-wind) {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		pointer-events: none;
-		z-index: 1;
-	}
-	:global(.site-backdrop) :global(.wind-gust) {
-		position: absolute;
-		height: 7vh;
-		overflow: visible;
-		opacity: 0.7;
-		filter: blur(0.6px);
-		animation: windFlow ease-in-out infinite;
-		will-change: transform, opacity;
-	}
-	:global(.site-backdrop) :global(.wind-gust path) {
-		stroke-dasharray: 500;
-		stroke-dashoffset: 0;
-		animation: gustFlow 3s ease-in-out infinite alternate;
-	}
-	:global(.site-backdrop) :global(.gust-1) { top: 14%; left: -32%; width: 52%; animation-duration: 12s; animation-delay: 0s; opacity: 0.55; }
-	:global(.site-backdrop) :global(.gust-2) { top: 34%; left: -24%; width: 44%; animation-duration: 15s; animation-delay: 2.5s; opacity: 0.4; }
-	:global(.site-backdrop) :global(.gust-3) { top: 56%; left: -36%; width: 58%; animation-duration: 13s; animation-delay: 5s; opacity: 0.5; }
-	:global(.site-backdrop) :global(.gust-4) { top: 78%; left: -28%; width: 48%; animation-duration: 16s; animation-delay: 1.2s; opacity: 0.35; }
-	:global(.site-backdrop) :global(.wind-part-frail) {
-		position: absolute;
-		width: 4px;
-		height: 4px;
-		border-radius: 50%;
-		background: rgba(255, 199, 218, 0.75);
-		box-shadow: 0 0 10px rgba(194, 80, 114, 0.55);
-		opacity: 0.6;
-		animation: windFlow ease-in-out infinite;
-		will-change: transform, opacity;
-	}
-	:global(.site-backdrop) :global(.wp-1) { top: 22%; left: -5%; animation-duration: 10s; animation-delay: 0s; }
-	:global(.site-backdrop) :global(.wp-2) { top: 40%; left: -8%; animation-duration: 13s; animation-delay: 1.5s; }
-	:global(.site-backdrop) :global(.wp-3) { top: 58%; left: -6%; animation-duration: 11s; animation-delay: 4s; }
-	:global(.site-backdrop) :global(.wp-4) { top: 74%; left: -9%; animation-duration: 14s; animation-delay: 3s; }
-	:global(.site-backdrop) :global(.wp-5) { top: 30%; left: -7%; animation-duration: 12s; animation-delay: 6s; }
-	:global(.site-backdrop) :global(.wp-6) { top: 63%; left: -5%; animation-duration: 15s; animation-delay: 8s; }
-	:global(.site-backdrop) :global(.wp-7) { top: 47%; left: -9%; animation-duration: 11s; animation-delay: 2s; }
-	:global(.site-backdrop) :global(.wp-8) { top: 80%; left: -6%; animation-duration: 12.5s; animation-delay: 5.5s; }
-
-	@keyframes windFlow {
-		0% {
-			transform: translateX(-2vw) translateY(0) rotate(-4deg) scaleX(0.6);
-			opacity: 0;
-		}
-		10% {
-			transform: translateX(8vw) translateY(-2vh) rotate(-3deg) scaleX(0.8);
-			opacity: 0.6;
-		}
-		30% {
-			transform: translateX(32vw) translateY(4vh) rotate(2deg) scaleX(1);
-		}
-		48% {
-			transform: translateX(56vw) translateY(-4vh) rotate(-2deg) scaleX(1.02);
-		}
-		66% {
-			transform: translateX(80vw) translateY(5vh) rotate(3deg) scaleX(1);
-		}
-		86% {
-			transform: translateX(106vw) translateY(-2vh) rotate(-2deg) scaleX(0.85);
-			opacity: 0.5;
-		}
-		100% {
-			transform: translateX(126vw) translateY(3vh) rotate(2deg) scaleX(0.6);
-			opacity: 0;
-		}
-	}
-	@keyframes gustFlow {
-		from { stroke-dashoffset: 500; }
-		to { stroke-dashoffset: 0; }
-	}
-	:global(.site-backdrop) :global(.sakura-petals-container) {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		pointer-events: none;
-		z-index: 2;
-	}
-	:global(.site-backdrop) :global(.sakura-petal) {
-		position: absolute;
-		top: -30px;
-		opacity: 0.8;
-		filter: drop-shadow(0 2px 4px rgba(122, 31, 61, 0.3));
-		animation: petalFall linear infinite;
-	}
-	:global(.site-backdrop) :global(.sakura-petal svg) {
-		width: 100%;
-		height: 100%;
-		animation: petalSway ease-in-out infinite alternate;
-	}
-	:global(.site-backdrop) :global(.petal-1) { left: 5%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 0s; }
-	:global(.site-backdrop) :global(.petal-2) { left: 13%; width: 17px; height: 17px; animation-duration: 13s; animation-delay: 2.5s; }
-	:global(.site-backdrop) :global(.petal-3) { left: 21%; width: 12px; height: 12px; animation-duration: 10s; animation-delay: 5s; opacity: 0.65; }
-	:global(.site-backdrop) :global(.petal-4) { left: 29%; width: 15px; height: 15px; animation-duration: 12s; animation-delay: 1.2s; }
-	:global(.site-backdrop) :global(.petal-5) { left: 37%; width: 11px; height: 11px; animation-duration: 11.5s; animation-delay: 6.5s; opacity: 0.6; }
-	:global(.site-backdrop) :global(.petal-6) { left: 45%; width: 14px; height: 14px; animation-duration: 14s; animation-delay: 3.5s; }
-	:global(.site-backdrop) :global(.petal-7) { left: 53%; width: 16px; height: 16px; animation-duration: 12.5s; animation-delay: 8s; opacity: 0.75; }
-	:global(.site-backdrop) :global(.petal-8) { left: 61%; width: 15px; height: 15px; animation-duration: 12s; animation-delay: 1s; }
-	:global(.site-backdrop) :global(.petal-9) { left: 69%; width: 12px; height: 12px; animation-duration: 10.5s; animation-delay: 4s; opacity: 0.6; }
-	:global(.site-backdrop) :global(.petal-10) { left: 77%; width: 17px; height: 17px; animation-duration: 13.5s; animation-delay: 2s; }
-	:global(.site-backdrop) :global(.petal-11) { left: 84%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 9s; opacity: 0.8; }
-	:global(.site-backdrop) :global(.petal-12) { left: 90%; width: 11px; height: 11px; animation-duration: 10s; animation-delay: 5.5s; opacity: 0.65; }
-	:global(.site-backdrop) :global(.petal-13) { left: 95%; width: 16px; height: 16px; animation-duration: 12.5s; animation-delay: 7s; }
-	:global(.site-backdrop) :global(.petal-14) { left: 42%; width: 13px; height: 13px; animation-duration: 11.5s; animation-delay: 10.5s; opacity: 0.7; }
-
-	@keyframes petalFall {
-		0% {
-			transform: translate(0, -20px) rotate(0deg);
-			opacity: 0;
-		}
-		8% {
-			opacity: 0.85;
-		}
-		30% {
-			transform: translate(10vw, 30vh) rotate(90deg);
-		}
-		55% {
-			transform: translate(20vw, 55vh) rotate(200deg);
-		}
-		78% {
-			transform: translate(28vw, 82vh) rotate(300deg);
-			opacity: 0.7;
-		}
-		100% {
-			transform: translate(34vw, 108vh) rotate(360deg);
-			opacity: 0;
-		}
-	}
-	@keyframes petalSway {
-		0% {
-			transform: translateX(-14px) translateY(4px) rotateX(0deg) rotateY(0deg) rotate(-30deg);
-		}
-		50% {
-			transform: translateX(16px) translateY(-8px) rotateX(50deg) rotateY(70deg) rotate(40deg);
-		}
-		100% {
-			transform: translateX(-14px) translateY(6px) rotateX(0deg) rotateY(0deg) rotate(-20deg);
-		}
-	}
-	@media (max-width: 720px) {
-		:global(.site-backdrop) :global(.pixel-tree) {
-			display: none;
-		}
 	}
 
 	:global(main.page), :global(.site-nav), :global(.site-footer) {
@@ -835,7 +473,7 @@
 	:global(.badge-open),
 	:global(.badge-confirmed) {
 		background: #e5f2eb;
-		color: var(--ok);
+		color: var(--ok-foreground);
 	}
 	:global(.badge-draft),
 	:global(.badge-pending) {
@@ -891,7 +529,7 @@
 		padding: 3rem 2rem;
 		text-align: center;
 	}
-	:global(.empty-card h3) {
+	:global(.empty-card h2, .empty-card h3) {
 		font-size: 1.2rem;
 		margin: 0 0 0.4rem;
 	}
@@ -937,6 +575,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.85rem;
+		min-width: 0;
 		text-decoration: none;
 	}
 	.brand:hover {
@@ -983,9 +622,10 @@
 		display: flex;
 		flex-direction: column;
 		line-height: 1.15;
+		overflow-wrap: anywhere;
 	}
 	.brand-kicker {
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.16em;
 		color: var(--rose-100);
@@ -1005,18 +645,25 @@
 		z-index: 50;
 		background: var(--plum);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease,
+			backdrop-filter 180ms ease;
 	}
-	.site-nav.isHome:not(.scrolled) {
-		position: absolute;
+	.site-nav.isHome {
+		position: fixed;
 		left: 0;
 		right: 0;
+	}
+	.site-nav.isHome:not(.scrolled) {
 		background: linear-gradient(180deg, rgba(43, 36, 48, 0.72) 0%, rgba(43, 36, 48, 0) 100%);
 		border-bottom-color: transparent;
 	}
 	.site-nav.isHome.scrolled {
-		position: sticky;
-		background: var(--plum);
+		position: fixed;
+		background: rgba(43, 36, 48, 0.92);
 		border-bottom-color: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(12px);
 	}
 
 	.nav-row {
@@ -1122,7 +769,7 @@
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--rose-600);
+		color: var(--rose-on-dark);
 		margin-bottom: 0.35rem;
 	}
 	.footer-col a {
@@ -1142,17 +789,24 @@
 	}
 	.footer-legal {
 		margin: 0;
-		color: rgba(255, 255, 255, 0.45);
+		color: var(--muted-on-dark);
 		font-size: 0.82rem;
 	}
 
 	/* ---- responsive behavior ---- */
 	@media (max-width: 720px) {
+		.nav-row {
+			height: auto;
+			min-height: 64px;
+			padding-block: 0.5rem;
+			gap: 0.75rem;
+		}
 		.nav-links {
 			display: none;
 		}
 		.nav-toggle {
 			display: inline-flex;
+			flex-shrink: 0;
 		}
 		.mobile-menu {
 			display: flex;
@@ -1193,9 +847,6 @@
 		:global(*) {
 			animation-duration: 0.001ms !important;
 			transition-duration: 0.001ms !important;
-		}
-		:global(.site-backdrop) :global(.sakura-wind) {
-			opacity: 0;
 		}
 	}
 </style>

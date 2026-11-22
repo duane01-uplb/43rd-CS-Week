@@ -1,11 +1,15 @@
 # Architecture
 
 ## Stack
-- Framework: **Svelte / SvelteKit** (corrected — see note below)
+- Framework: **Svelte / SvelteKit** (Svelte 5)
+- UI: **Tailwind CSS v4**, **shadcn-svelte** (`$lib/components/ui`), **Bits UI**, **Lucide** (`@lucide/svelte`)
+- Motion: **Motion for Svelte** (`@humanspeak/svelte-motion`) + **Anime.js** (`animejs`) for scroll-synced hero handoff, sakura whistle, and section reveals (`apps/web/src/lib/motion.ts`); **GSAP** remains available
+- Charts: **LayerChart** (admin overview)
+- Fonts: **Fontsource** (Space Mono, IBM Plex Sans; web also Macondo Swash Caps + Press Start 2P)
 - Backend/DB: Supabase (Postgres, Auth, Storage)
 - Cache/Rate-limit: **Upstash Redis** (serverless REST — see "Caching & Rate Limiting" below)
 - Hosting: Vercel
- - Package Manager: Bun (use `bun install`, `bun add`, `bun run`, and `bunx`; do NOT use `npm`/`npx`)
+- Package Manager: Bun (use `bun install`, `bun add`, `bun run`, and `bunx`; do NOT use `npm`/`npx`)
 
 > **Correction note:** This document originally specified Next.js (App Router). The project was scaffolded with Next.js first (`next-scaffold/`), but the frontend was rebuilt on Svelte/SvelteKit. `next-scaffold/` is abandoned — see `DECISIONS.md`. Svelte/SvelteKit is the current and only frontend framework in use.
 

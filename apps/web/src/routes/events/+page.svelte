@@ -1,10 +1,14 @@
 <script lang="ts">
-	import EventCard from '$lib/components/EventCard.svelte';
+	import EventAgenda from '$lib/components/EventAgenda.svelte';
+	import type { PageData } from './$types';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import Button from '$lib/components/Button.svelte';
 
-	let { data } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const isFiltered = $derived(data.status !== 'all' || data.upcoming);
+	const filterQuery = $derived(`status=${data.status}${data.upcoming ? '&upcoming=1' : ''}`);
+
 </script>
 
 <svelte:head>
@@ -18,19 +22,19 @@
 <div class="events-page">
 	<!-- Page Header -->
 	<header class="events-header">
-		<p class="eyebrow">Event Schedule & Registration</p>
-		<h1>Events Roster</h1>
+		<h1>Event schedule</h1>
 		<p class="lede">
-			Discover tech talks, hands-on workshops, and friendly contests planned for the 43rd Computer Science Week. No account required.
+			All times are in Manila time. No account required.
 		</p>
 	</header>
 
 	<!-- Filter Controls -->
 	<section class="filter-section" aria-label="Event filters">
 		<form method="GET" class="filter-card">
+			<noscript><input type="hidden" name="render" value="full" /></noscript>
 			<div class="filter-controls">
 				<div class="filter-field">
-					<label for="status-select">Registration Status</label>
+					<label for="status-select">Registration status</label>
 					<div class="select-wrap">
 						<select id="status-select" name="status" value={data.status}>
 							<option value="open">Open for registration</option>
@@ -45,10 +49,8 @@
 				<div class="filter-field filter-checkbox-field">
 					<label class="checkbox-label">
 						<input type="checkbox" name="upcoming" value="1" checked={data.upcoming} />
-						<span class="checkbox-custom" aria-hidden="true"></span>
 						<span>Upcoming only</span>
 					</label>
-					<p class="filter-hint">Home Open Events only lists upcoming dates. Leave this unchecked to see every open event.</p>
 				</div>
 			</div>
 
@@ -61,39 +63,44 @@
 		</form>
 	</section>
 
-	<!-- Events Grid -->
+	<!-- Daily program -->
 	<section class="events-content" aria-label="Event listing">
-		{#if data.events.length === 0}
-			<div class="empty-card">
-				<div class="empty-icon" aria-hidden="true">
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="3" y="4" width="18" height="18" rx="2" />
-						<path d="M3 10h18" />
-						<path d="M8 2v4M16 2v4" />
-						<path d="M10 16h4" />
-					</svg>
+		{#await data.events}
+			<LoadingScreen label="Loading the event roster" />
+			<noscript><a href={`/events?${filterQuery}&render=full`}>Load the event roster</a></noscript>
+		{:then events}
+			{#if events.length === 0}
+				<div class="empty-card">
+					<div class="empty-icon" aria-hidden="true">
+						<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="4" width="18" height="18" rx="2" />
+							<path d="M3 10h18" />
+							<path d="M8 2v4M16 2v4" />
+							<path d="M10 16h4" />
+						</svg>
+					</div>
+					<h2>No events match your selected filters</h2>
+					<p>Try switching to "All statuses" or unchecking "Upcoming only" to see the full schedule.</p>
+					<div style="margin-top: 1.5rem;">
+						<Button variant="primary" size="sm" href="/events?status=all">View all events</Button>
+					</div>
 				</div>
-				<h3>No events match your selected filters</h3>
-				<p>Try switching to "All statuses" or unchecking "Upcoming only" to see the full schedule.</p>
-				<div style="margin-top: 1.5rem;">
-					<Button variant="primary" size="sm" href="/events?status=all">View all events</Button>
+			{:else}
+				<div class="events-summary">
+					<p class="summary-text">
+						Showing <strong>{events.length}</strong> {events.length === 1 ? 'event' : 'events'}
+						{#if data.status === 'open'}· Open for registration{/if}
+						{#if data.upcoming}· Upcoming schedule{/if}
+					</p>
 				</div>
-			</div>
-		{:else}
-			<div class="events-summary">
-				<p class="summary-text">
-					Showing <strong>{data.events.length}</strong> {data.events.length === 1 ? 'event' : 'events'}
-					{#if data.status === 'open'}· Open for registration{/if}
-					{#if data.upcoming}· Upcoming schedule{/if}
-				</p>
-			</div>
 
-			<div class="events-grid">
-				{#each data.events as event (event.id)}
-					<EventCard {event} variant="grid" />
-				{/each}
+				<EventAgenda {events} />
+			{/if}
+		{:catch}
+			<div class="empty-card">
+				<p>The event roster couldn’t load. <a href={`/events?${filterQuery}`} data-sveltekit-reload>Try again</a>.</p>
 			</div>
-		{/if}
+		{/await}
 	</section>
 </div>
 
@@ -101,7 +108,7 @@
 	.events-page {
 		display: flex;
 		flex-direction: column;
-		gap: 2.5rem;
+		gap: 1.25rem;
 	}
 
 	.events-header {
@@ -111,7 +118,6 @@
 		font-size: clamp(2.4rem, 6vw, 3.6rem);
 		line-height: 1.05;
 		letter-spacing: -0.01em;
-		text-transform: uppercase;
 		margin: 0 0 0.75rem;
 	}
 
@@ -119,19 +125,16 @@
 	.filter-card {
 		display: flex;
 		align-items: flex-end;
-		justify-content: space-between;
-		gap: 1.5rem;
+		justify-content: flex-start;
+		gap: 0.75rem 1rem;
 		flex-wrap: wrap;
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		padding: 1.25rem 1.5rem;
-		box-shadow: none;
+		border-block: 1px solid var(--line);
+		padding-block: 0.75rem;
 	}
 	.filter-controls {
 		display: flex;
 		align-items: flex-end;
-		gap: 1.75rem;
+		gap: 0.5rem 1rem;
 		flex-wrap: wrap;
 	}
 	.filter-field {
@@ -142,8 +145,6 @@
 	.filter-field label {
 		font-size: 0.82rem;
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--plum-soft);
 	}
 	.select-wrap {
@@ -163,7 +164,7 @@
 		font-size: 0.92rem;
 		font-weight: 500;
 		cursor: pointer;
-		min-width: 200px;
+		min-width: 0;
 	}
 	.select-arrow {
 		position: absolute;
@@ -175,15 +176,6 @@
 		justify-content: flex-end;
 		padding-bottom: 0.15rem;
 		max-width: 22rem;
-	}
-	.filter-hint {
-		margin: 0.35rem 0 0;
-		font-size: 0.78rem;
-		line-height: 1.45;
-		color: var(--plum-soft);
-		font-weight: 400;
-		text-transform: none;
-		letter-spacing: normal;
 	}
 	.checkbox-label {
 		display: inline-flex;
@@ -219,12 +211,6 @@
 		color: var(--plum-soft);
 	}
 
-	.events-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 1.75rem;
-	}
-
 	.empty-icon {
 		display: inline-flex;
 		align-items: center;
@@ -237,28 +223,4 @@
 		margin-bottom: 1.25rem;
 	}
 
-	/* Responsive */
-	@media (max-width: 720px) {
-		.filter-card {
-			flex-direction: column;
-			align-items: stretch;
-		}
-		.filter-controls {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 1rem;
-		}
-		.select-wrap select {
-			width: 100%;
-		}
-		.filter-actions {
-			justify-content: flex-start;
-		}
-	}
-
-	@media (max-width: 520px) {
-		.events-grid {
-			grid-template-columns: 1fr;
-		}
-	}
 </style>
