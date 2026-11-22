@@ -4,6 +4,7 @@ node_modules/
 .pnp.js
 
 # build output
+vite.config.*.timestamp-*.mjs
 .next/
 out/
 build/
@@ -49,6 +50,7 @@ supabase/.temp/
 # testing
 coverage/
 .playwright/
+.playwright-cli/
 test-results/
 
 # python bytecode

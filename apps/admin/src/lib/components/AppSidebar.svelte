@@ -13,7 +13,6 @@
 
 <aside class="sidebar" aria-label="Admin sections">
 	<div class="brand">
-		<span class="brand-mark" aria-hidden="true"></span>
 		<div class="brand-text">
 			<span class="brand-kicker">Computer Science Week</span>
 			<span class="brand-title">Admin Console</span>
@@ -61,32 +60,14 @@
 		gap: 0.75rem;
 		padding: 0 0.375rem;
 	}
-	.brand-mark {
-		width: 34px;
-		height: 34px;
-		border-radius: 50%;
-		background: linear-gradient(135deg, var(--rose-600), var(--rose-900));
-		position: relative;
-		flex-shrink: 0;
-		box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.15);
-	}
-	.brand-mark::after {
-		content: '';
-		position: absolute;
-		inset: 7px;
-		border-radius: 50%;
-		border: 2px solid rgba(255, 255, 255, 0.6);
-	}
 	.brand-text {
 		display: flex;
 		flex-direction: column;
 		line-height: 1.25;
 	}
 	.brand-kicker {
-		font-size: 0.66rem;
+		font-size: 0.875rem;
 		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
 		color: var(--rose-700);
 	}
 	.brand-title {
@@ -135,7 +116,7 @@
 		bottom: 20%;
 		width: 3px;
 		border-radius: 0 2px 2px 0;
-		background: linear-gradient(var(--rose-600), var(--rose-900));
+		background: var(--rose-700);
 	}
 	.nav-hint {
 		font-size: 0.7rem;
@@ -148,36 +129,13 @@
 			position: static;
 			width: 100%;
 			height: auto;
-			flex-direction: row;
-			align-items: center;
-			justify-content: space-between;
 			border-right: none;
 			border-bottom: 1px solid var(--line);
 			padding: 0.75rem 1rem;
-			gap: 0.75rem;
+			gap: 0.5rem;
 		}
-		.brand-kicker {
-			display: none;
-		}
-		.nav-list {
-			flex-direction: row;
-			gap: 0.25rem;
-		}
-		.nav-item {
-			padding: 0.45rem 0.6rem;
-		}
-		.nav-item.active::before {
-			left: auto;
-			right: 20%;
-			left: 20%;
-			top: auto;
-			bottom: -0.75rem;
-			width: auto;
-			height: 3px;
-			border-radius: 2px 2px 0 0;
-		}
-		.nav-hint {
-			display: none;
-		}
+		.brand-kicker, .nav-hint, .nav-item.active::before { display: none; }
+		.nav-list { flex-direction: row; flex-wrap: wrap; }
+		.nav-item { padding: 0.5rem 0.625rem; }
 	}
 </style>

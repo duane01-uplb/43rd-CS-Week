@@ -58,19 +58,19 @@
 		<a href={`/events/${event.id}`}>{event.title}</a>
 	</svelte:element>
 
-	<p class="card-desc">
-		{event.description ?? 'Event information, timeline, and participant requirements.'}
-	</p>
+	{#if event.description}
+		<p class="card-desc">{event.description}</p>
+	{/if}
 
 	{#if variant === 'grid'}
 		<div class="card-meta-grid">
 			<div class="meta-item">
 				<span class="meta-label">Capacity</span>
 				<span class="meta-val">
-					{#if event.capacity !== null}
+					{#if event.capacity != null}
 						{event.capacity} spots
 					{:else}
-						Open Capacity
+						Open capacity
 					{/if}
 				</span>
 			</div>
@@ -84,12 +84,12 @@
 	<div class="card-footer">
 		{#if variant === 'track'}
 			<div class="track-capacity">
-				{#if event.capacity !== null}
+				{#if event.capacity != null}
 					<UsersIcon size={14} strokeWidth={2} />
 					<span>{event.capacity} total slots</span>
 				{:else}
 					<CircleCheckIcon size={14} strokeWidth={2} />
-					<span>Open Capacity</span>
+					<span>Open capacity</span>
 				{/if}
 			</div>
 		{/if}
@@ -130,37 +130,10 @@
 		padding: 1.65rem;
 		position: relative;
 		overflow: hidden;
-		transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-					box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-					border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-		will-change: transform, opacity;
+		transition: border-color 0.15s ease;
 	}
-	.event-card-root::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(90deg, transparent, rgba(194, 80, 114, 0.7), transparent);
-		opacity: 0;
-		transform: scaleX(0.4);
-		transition: opacity 0.35s ease, transform 0.35s ease;
-	}
-	.event-card-root:hover {
-		transform: translateY(-6px);
-		box-shadow: 0 16px 36px -10px rgba(122, 31, 61, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
-		border-color: rgba(194, 80, 114, 0.38);
-	}
-	.event-card-root:hover::before {
-		opacity: 1;
-		transform: scaleX(1);
-	}
-	.event-card-root:hover .card-footer :global(svg) {
-		transform: translateX(3px);
-	}
-	.card-footer :global(svg) {
-		transition: transform 0.25s ease;
+	.event-card-root:hover, .event-card-root:focus-within {
+		border-color: var(--rose-600);
 	}
 
 	.card-top {

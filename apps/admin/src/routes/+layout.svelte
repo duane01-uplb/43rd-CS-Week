@@ -85,14 +85,6 @@
 	}
 
 	/* ---------- shared page-header pattern ---------- */
-	:global(.eyebrow) {
-		margin: 0 0 0.15rem;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: var(--rose-700);
-	}
 	:global(.head h1) {
 		font-size: clamp(1.5rem, 3vw, 2rem);
 	}
@@ -179,18 +171,11 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.18rem 0.6rem;
-		border-radius: 999px;
+		border-radius: 6px;
 		font-size: 0.74rem;
 		font-weight: 600;
 		letter-spacing: 0.02em;
 		white-space: nowrap;
-	}
-	:global(.badge::before) {
-		content: '';
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: currentColor;
 	}
 	:global(.badge-open),
 	:global(.badge-confirmed) {
@@ -200,7 +185,7 @@
 	:global(.badge-draft),
 	:global(.badge-pending) {
 		background: #f4efe4;
-		color: var(--warn);
+		color: #775018;
 	}
 	:global(.badge-closed) {
 		background: #ece6ea;

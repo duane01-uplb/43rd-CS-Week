@@ -13,7 +13,7 @@
 
 <section class="head row">
 	<div>
-		<p class="eyebrow">Schedule</p>
+
 		<h1>Events</h1>
 	</div>
 	<a class="btn btn-primary" href="/admin/events/new">Create event</a>

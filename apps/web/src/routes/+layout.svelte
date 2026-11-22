@@ -9,7 +9,7 @@
 	import '@fontsource/macondo-swash-caps/400.css';
 	import '@fontsource/press-start-2p/400.css';
 	import { page } from '$app/state';
-	import SakuraWind from '$lib/components/SakuraWind.svelte';
+	import SakuraBackdrop from '$lib/components/SakuraBackdrop.svelte';
 
 	let { children } = $props();
 	let menuOpen = $state(false);
@@ -25,37 +25,6 @@
 		}
 	}
 
-	// Pixel-art sakura tree (22 wide). '.' empty, 'P' blossom, 'L' light
-	// blossom, 'D' deep blossom, 'T' trunk.
-	const PTREE = [
-		'......PPPP..PPPP......',
-		'.....PPPPPPPPPP.......',
-		'....PPPPPPPPPPPP......',
-		'....DDDDDDPPPPPPP.....',
-		'...PPPPPPPPPPPPPP.....',
-		'...PPPPPPLLPPPPPP.....',
-		'..PPPPPPPPPPPPPPPP....',
-		'...PP..PPPPPPPP..PP...',
-		'...PP.PPPPPPPP.PP.....',
-		'.....PP.PPPP.PP.......',
-		'......PPP..PPP........',
-		'.......TT....TT.......',
-		'.......TT....TT.......',
-		'.......TTT..TTT.......',
-		'........TTTTTT........',
-		'........TTTTTT........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........',
-		'.........TTTT.........'
-	];
-	const PCOLORS: Record<string, string> = {
-		P: '#ff8fb3',
-		L: '#ffc7da',
-		D: '#c25072',
-		T: '#46333f'
-	};
 </script>
 
 <svelte:window onscroll={handleScroll} />
@@ -125,79 +94,9 @@
 </header>
 
 <!-- Site-wide atmospheric Sakura backdrop shared across every page -->
-<div class="site-backdrop" aria-hidden="true">
-	<div class="ambient-glow"></div>
-	<div class="sakura-bloom-glow"></div>
-
-	<!-- Pixel-Art Sakura Trees on the sides (petals fall from their canopies) -->
-	<svg class="pixel-tree tree-left" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-right" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-left-mid" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-	<svg class="pixel-tree tree-right-mid" viewBox={`0 0 22 ${PTREE.length}`} shape-rendering="crispEdges" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-		{#each PTREE as row, r}
-			{#each row.split('') as px, c}
-				{#if px !== '.'}
-					<rect x={c} y={r} width="1" height="1" fill={PCOLORS[px] ?? '#ff8fb3'} />
-				{/if}
-			{/each}
-		{/each}
-	</svg>
-
-	<!-- Decorative Sakura Branch Silhouettes -->
-	<svg class="sakura-branches" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-		<path d="M-50 -20 C180 60, 320 180, 480 120 C560 90, 640 160, 720 110" stroke="#7a1f3d" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" fill="none" />
-		<path d="M1490 -30 C1280 80, 1150 200, 980 150 C900 125, 840 210, 760 170" stroke="#7a1f3d" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round" fill="none" />
-		<!-- Soft Blossom Clusters -->
-		<circle cx="320" cy="180" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
-		<circle cx="480" cy="120" r="18" fill="#f6e3e9" fill-opacity="0.25" filter="blur(3px)" />
-		<circle cx="640" cy="160" r="12" fill="#c25072" fill-opacity="0.18" filter="blur(2px)" />
-		<circle cx="1150" cy="200" r="16" fill="#f6e3e9" fill-opacity="0.22" filter="blur(2px)" />
-		<circle cx="980" cy="150" r="14" fill="#c25072" fill-opacity="0.2" filter="blur(2px)" />
-	</svg>
-
-	{#if !isHome}
-		<SakuraWind />
-
-		<!-- Drifting Sakura Petals -->
-		<div class="sakura-petals-container">
-			{#each Array(14) as _, i}
-				<div class={`sakura-petal petal-${i + 1}`}>
-					<svg viewBox="0 0 9 9" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-						<rect x="3" y="0" width="3" height="3" fill="#ffc7da" />
-						<rect x="0" y="3" width="3" height="3" fill="#c25072" />
-						<rect x="3" y="3" width="3" height="3" fill="#ff8fb3" />
-						<rect x="6" y="3" width="3" height="3" fill="#c25072" />
-						<rect x="3" y="6" width="3" height="3" fill="#a63a5c" />
-					</svg>
-				</div>
-			{/each}
-		</div>
-	{/if}
-</div>
+{#if !isHome}
+	<SakuraBackdrop />
+{/if}
 
 <main class:isHome class="page">
 	{@render children()}
@@ -239,7 +138,7 @@
 				</a>
 				<a href="https://www.tiktok.com/@uplbcossph?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-						<path d="M14.5 3c.4 2.6 1.9 4.4 4.5 4.7v3.1c-1.5 0-2.9-.5-4.1-1.3v6.7c0 3.7-3 6.8-6.7 6.8S1.5 19.9 1.5 16.2c0-3.5 2.7-6.4 6.1-6.7v3.2c-1.4.3-2.4 1.5-2.4 3 0 1.7 1.4 3.1 3.1s3.1-1.4 3.1-3.1V3h3.1Z" />
+						<path d="M14.5 3c.4 2.6 1.9 4.4 4.5 4.7v3.1c-1.5 0-2.9-.5-4.1-1.3v6.7c0 3.7-3 6.8-6.7 6.8S1.5 19.9 1.5 16.2c0-3.5 2.7-6.4 6.1-6.7v3.2c-1.4.3-2.4 1.5-2.4 3 c0 1.7 1.4 3.1 3.1 3.1s3.1-1.4 3.1-3.1V3h3.1Z" />
 					</svg>
 				</a>
 			</div>
@@ -314,144 +213,6 @@
 		font-size: 16px;
 		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
-	}
-
-	/* ---- site-wide sakura backdrop ---- */
-	:global(.site-backdrop) {
-		position: fixed;
-		inset: 0;
-		z-index: 0;
-		pointer-events: none;
-		overflow: hidden;
-	}
-	:global(.site-backdrop) :global(.ambient-glow) {
-		position: absolute;
-		top: 15%;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 800px;
-		height: 800px;
-		border-radius: 50%;
-		background: radial-gradient(circle, rgba(194, 80, 114, 0.24) 0%, rgba(122, 31, 61, 0.12) 45%, rgba(35, 28, 39, 0) 75%);
-		filter: blur(40px);
-	}
-	:global(.site-backdrop) :global(.sakura-bloom-glow) {
-		position: absolute;
-		top: 5%;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 1000px;
-		height: 600px;
-		border-radius: 50%;
-		background: radial-gradient(ellipse at center, rgba(246, 227, 233, 0.14) 0%, rgba(194, 80, 114, 0.08) 40%, transparent 70%);
-		filter: blur(50px);
-	}
-	:global(.site-backdrop) :global(.sakura-branches) {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-	}
-	:global(.site-backdrop) :global(.pixel-tree) {
-		position: absolute;
-		bottom: 0;
-		height: min(30vh, 320px);
-		pointer-events: none;
-		z-index: 1;
-		filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.5));
-	}
-	:global(.site-backdrop) :global(.tree-left) {
-		left: -1vw;
-	}
-	:global(.site-backdrop) :global(.tree-right) {
-		right: -1vw;
-		transform: scaleX(-1);
-	}
-	:global(.site-backdrop) :global(.tree-left-mid) {
-		left: 9vw;
-		height: min(22vh, 240px);
-		opacity: 0.82;
-	}
-	:global(.site-backdrop) :global(.tree-right-mid) {
-		right: 9vw;
-		height: min(22vh, 240px);
-		opacity: 0.82;
-		transform: scaleX(-1);
-	}
-	:global(.site-backdrop) :global(.sakura-petals-container) {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		pointer-events: none;
-		z-index: 2;
-	}
-	:global(.site-backdrop) :global(.sakura-petal) {
-		position: absolute;
-		top: -30px;
-		opacity: 0.8;
-		filter: drop-shadow(0 2px 4px rgba(122, 31, 61, 0.3));
-		animation: petalFall linear infinite;
-	}
-	:global(.site-backdrop) :global(.sakura-petal svg) {
-		width: 100%;
-		height: 100%;
-		animation: petalSway ease-in-out infinite alternate;
-	}
-	:global(.site-backdrop) :global(.petal-1) { left: 5%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 0s; }
-	:global(.site-backdrop) :global(.petal-2) { left: 13%; width: 17px; height: 17px; animation-duration: 13s; animation-delay: 2.5s; }
-	:global(.site-backdrop) :global(.petal-3) { left: 21%; width: 12px; height: 12px; animation-duration: 10s; animation-delay: 5s; opacity: 0.65; }
-	:global(.site-backdrop) :global(.petal-4) { left: 29%; width: 15px; height: 15px; animation-duration: 12s; animation-delay: 1.2s; }
-	:global(.site-backdrop) :global(.petal-5) { left: 37%; width: 11px; height: 11px; animation-duration: 11.5s; animation-delay: 6.5s; opacity: 0.6; }
-	:global(.site-backdrop) :global(.petal-6) { left: 45%; width: 14px; height: 14px; animation-duration: 14s; animation-delay: 3.5s; }
-	:global(.site-backdrop) :global(.petal-7) { left: 53%; width: 16px; height: 16px; animation-duration: 12.5s; animation-delay: 8s; opacity: 0.75; }
-	:global(.site-backdrop) :global(.petal-8) { left: 61%; width: 15px; height: 15px; animation-duration: 12s; animation-delay: 1s; }
-	:global(.site-backdrop) :global(.petal-9) { left: 69%; width: 12px; height: 12px; animation-duration: 10.5s; animation-delay: 4s; opacity: 0.6; }
-	:global(.site-backdrop) :global(.petal-10) { left: 77%; width: 17px; height: 17px; animation-duration: 13.5s; animation-delay: 2s; }
-	:global(.site-backdrop) :global(.petal-11) { left: 84%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 9s; opacity: 0.8; }
-	:global(.site-backdrop) :global(.petal-12) { left: 90%; width: 11px; height: 11px; animation-duration: 10s; animation-delay: 5.5s; opacity: 0.65; }
-	:global(.site-backdrop) :global(.petal-13) { left: 95%; width: 16px; height: 16px; animation-duration: 12.5s; animation-delay: 7s; }
-	:global(.site-backdrop) :global(.petal-14) { left: 42%; width: 13px; height: 13px; animation-duration: 11.5s; animation-delay: 10.5s; opacity: 0.7; }
-
-	@keyframes petalFall {
-		0% {
-			transform: translate(0, -20px) rotate(0deg);
-			opacity: 0;
-		}
-		8% {
-			opacity: 0.85;
-		}
-		30% {
-			transform: translate(10vw, 30vh) rotate(90deg);
-		}
-		55% {
-			transform: translate(20vw, 55vh) rotate(200deg);
-		}
-		78% {
-			transform: translate(28vw, 82vh) rotate(300deg);
-			opacity: 0.7;
-		}
-		100% {
-			transform: translate(34vw, 108vh) rotate(360deg);
-			opacity: 0;
-		}
-	}
-	@keyframes petalSway {
-		0% {
-			transform: translateX(-14px) translateY(4px) rotateX(0deg) rotateY(0deg) rotate(-30deg);
-		}
-		50% {
-			transform: translateX(16px) translateY(-8px) rotateX(50deg) rotateY(70deg) rotate(40deg);
-		}
-		100% {
-			transform: translateX(-14px) translateY(6px) rotateX(0deg) rotateY(0deg) rotate(-20deg);
-		}
-	}
-	@media (max-width: 720px) {
-		:global(.site-backdrop) :global(.pixel-tree) {
-			display: none;
-		}
 	}
 
 	:global(main.page), :global(.site-nav), :global(.site-footer) {

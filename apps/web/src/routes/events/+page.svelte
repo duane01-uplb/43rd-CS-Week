@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Badge from '$lib/components/Badge.svelte';
-	import { getExternalRegistration } from '$lib/externalRegistration';
+	import EventAgenda from '$lib/components/EventAgenda.svelte';
 	import type { PageData } from './$types';
 	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -10,19 +9,6 @@
 	const isFiltered = $derived(data.status !== 'all' || data.upcoming);
 	const filterQuery = $derived(`status=${data.status}${data.upcoming ? '&upcoming=1' : ''}`);
 
-	const dayFormat = new Intl.DateTimeFormat('en-PH', { dateStyle: 'full', timeZone: 'Asia/Manila' });
-	const timeFormat = new Intl.DateTimeFormat('en-PH', { timeStyle: 'short', timeZone: 'Asia/Manila' });
-
-	function groupByDay(events: Awaited<PageData['events']>) {
-		const days = new Map<string, typeof events>();
-		for (const event of events) {
-			const day = dayFormat.format(new Date(event.startAt));
-			const group = days.get(day);
-			if (group) group.push(event);
-			else days.set(day, [event]);
-		}
-		return days;
-	}
 </script>
 
 <svelte:head>
@@ -38,7 +24,7 @@
 	<header class="events-header">
 		<h1>Event schedule</h1>
 		<p class="lede">
-			Explore the 43rd Computer Science Week program. All times are in Manila time. No account required.
+			All times are in Manila time. No account required.
 		</p>
 	</header>
 
@@ -48,7 +34,7 @@
 			<noscript><input type="hidden" name="render" value="full" /></noscript>
 			<div class="filter-controls">
 				<div class="filter-field">
-					<label for="status-select">Registration Status</label>
+					<label for="status-select">Registration status</label>
 					<div class="select-wrap">
 						<select id="status-select" name="status" value={data.status}>
 							<option value="open">Open for registration</option>
@@ -63,7 +49,6 @@
 				<div class="filter-field filter-checkbox-field">
 					<label class="checkbox-label">
 						<input type="checkbox" name="upcoming" value="1" checked={data.upcoming} />
-						<span class="checkbox-custom" aria-hidden="true"></span>
 						<span>Upcoming only</span>
 					</label>
 				</div>
@@ -109,34 +94,7 @@
 					</p>
 				</div>
 
-				{#each groupByDay(events) as [day, sessions] (day)}
-					<section class="program-day">
-						<h2>{day}</h2>
-						{#each sessions as event (event.id)}
-							{@const external = getExternalRegistration(event.title)}
-							{@const details = `/events/${event.id}`}
-							<article class="session">
-								<time datetime={new Date(event.startAt).toISOString()}>{timeFormat.format(new Date(event.startAt))}</time>
-								<div class="session-info">
-									<h3><a href={details}>{event.title}</a></h3>
-									{#if event.description}<p>{event.description}</p>{/if}
-									<small>{event.capacity == null ? 'Open capacity' : `Capacity: ${event.capacity}`}</small>
-								</div>
-								<div class="status">
-									{#if event.status === 'open'}
-										<Badge variant="open" showDot={false}>Open for registration</Badge>
-									{:else}
-										<Badge variant="closed" showDot={false}>Registration closed</Badge>
-									{/if}
-								</div>
-								<a class="session-action" href={event.status === 'open' ? external?.url ?? details : details}>
-									{event.status === 'open' ? (external ? `Register at ${external.hostLabel}` : 'Register') : 'View details'}
-									<span aria-hidden="true"> →</span>
-								</a>
-							</article>
-						{/each}
-					</section>
-				{/each}
+				<EventAgenda {events} />
 			{/if}
 		{:catch}
 			<div class="empty-card">
@@ -150,7 +108,7 @@
 	.events-page {
 		display: flex;
 		flex-direction: column;
-		gap: 2.5rem;
+		gap: 1.25rem;
 	}
 
 	.events-header {
@@ -160,7 +118,6 @@
 		font-size: clamp(2.4rem, 6vw, 3.6rem);
 		line-height: 1.05;
 		letter-spacing: -0.01em;
-		text-transform: uppercase;
 		margin: 0 0 0.75rem;
 	}
 
@@ -168,19 +125,16 @@
 	.filter-card {
 		display: flex;
 		align-items: flex-end;
-		justify-content: space-between;
-		gap: 1.5rem;
+		justify-content: flex-start;
+		gap: 0.75rem 1rem;
 		flex-wrap: wrap;
-		background: var(--card);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		padding: 1.25rem 1.5rem;
-		box-shadow: none;
+		border-block: 1px solid var(--line);
+		padding-block: 0.75rem;
 	}
 	.filter-controls {
 		display: flex;
 		align-items: flex-end;
-		gap: 1.75rem;
+		gap: 0.5rem 1rem;
 		flex-wrap: wrap;
 	}
 	.filter-field {
@@ -191,8 +145,6 @@
 	.filter-field label {
 		font-size: 0.82rem;
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--plum-soft);
 	}
 	.select-wrap {
@@ -212,7 +164,7 @@
 		font-size: 0.92rem;
 		font-weight: 500;
 		cursor: pointer;
-		min-width: 200px;
+		min-width: 0;
 	}
 	.select-arrow {
 		position: absolute;
@@ -259,34 +211,6 @@
 		color: var(--plum-soft);
 	}
 
-	.program-day + .program-day { margin-top: 2.5rem; }
-	.program-day h2 {
-		margin: 0;
-		padding-block: 0.75rem;
-		border-bottom: 2px solid var(--rose-700);
-		font-size: clamp(1.1rem, 2vw, 1.5rem);
-		color: var(--rose-900);
-	}
-	.session {
-		display: grid;
-		grid-template-columns: 6rem minmax(0, 1fr) 10rem 11rem;
-		align-items: baseline;
-		gap: 1.25rem;
-		padding-block: 1.25rem;
-		border-bottom: 1px solid var(--line);
-	}
-	.session time { font: 0.9rem/1.5 var(--font-display); font-variant-numeric: tabular-nums; }
-	.session h3 { margin: 0; font-size: 1.25rem; }
-	.session h3 a { color: var(--plum); }
-	.session-info { overflow-wrap: anywhere; }
-	.session-info p { margin: 0.4rem 0; }
-	.session-info small { color: var(--plum-soft); }
-	.session-action { font-weight: 600; align-self: start; padding-block: 0.35rem; }
-	@media (max-width: 900px) {
-		.session { grid-template-columns: auto minmax(0, 1fr); gap: 0.5rem 1rem; }
-		.status, .session-action { grid-column: 2; }
-	}
-
 	.empty-icon {
 		display: inline-flex;
 		align-items: center;
@@ -297,25 +221,6 @@
 		background: var(--rose-100);
 		color: var(--rose-700);
 		margin-bottom: 1.25rem;
-	}
-
-	/* Responsive */
-	@media (max-width: 720px) {
-		.filter-card {
-			flex-direction: column;
-			align-items: stretch;
-		}
-		.filter-controls {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 1rem;
-		}
-		.select-wrap select {
-			width: 100%;
-		}
-		.filter-actions {
-			justify-content: flex-start;
-		}
 	}
 
 </style>

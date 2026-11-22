@@ -52,7 +52,6 @@
 		<div class="detail-info" data-stagger=".detail-header, .info-strip, .description-card, .notes-card">
 			<header class="detail-header">
 				<div class="header-badges">
-					<span class="eyebrow-pill">43RD CS WEEK</span>
 					{#if data.event.status === 'open'}
 						<Badge variant="open">Open for registration</Badge>
 					{:else if data.event.status === 'closed'}
@@ -63,6 +62,9 @@
 				</div>
 
 				<h1>{data.event.title}</h1>
+				{#if data.event.status === 'open' && !form?.success}
+					<a class="registration-shortcut" href="#registration">Go to registration ↓</a>
+				{/if}
 			</header>
 
 			<!-- Quick Info Strip -->
@@ -171,7 +173,7 @@
 		</div>
 
 		<!-- Right: Registration Form / Status Panel -->
-		<aside class="detail-action-col" aria-label="Event Registration" data-reveal>
+		<aside id="registration" class="detail-action-col" aria-label="Event Registration" tabindex="-1" data-reveal>
 			<div class="registration-card">
 				{#if form?.success}
 					<div class="success-state" role="status">
@@ -271,12 +273,15 @@
 										</span>
 									</label>
 								{:else if field.fieldType === 'select'}
+									{@const consent = field.fieldKey === 'data_privacy_consent'}
 									<label for={`field-${field.fieldKey}`}>
-										{field.label}
+										{consent ? 'Data privacy consent' : field.label}
 										{#if field.isRequired}<span class="req-star" aria-hidden="true">*</span>{/if}
 									</label>
+									{#if consent}<p id="privacy-disclosure" class="disclosure">{field.label}</p>{/if}
 									<div class="select-wrapper">
 										<select
+											aria-describedby={consent ? 'privacy-disclosure' : undefined}
 											id={`field-${field.fieldKey}`}
 											name={field.fieldKey}
 											required={field.isRequired}
@@ -412,15 +417,8 @@
 		margin-bottom: 1rem;
 		flex-wrap: wrap;
 	}
-	.eyebrow-pill {
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		padding: 0.2rem 0.65rem;
-		background: var(--rose-100);
-		color: var(--rose-900);
-		border-radius: 999px;
-	}
+	.registration-shortcut { display: none; }
+	.detail-action-col { scroll-margin-top: 5rem; }
 
 	.detail-header h1 {
 		font-size: clamp(2.4rem, 6vw, 3.6rem);
@@ -568,6 +566,7 @@
 		font-size: 0.9rem;
 	}
 
+	.disclosure { margin: 0; color: var(--plum-soft); font-weight: 400; line-height: 1.5; }
 	.reg-form {
 		display: flex;
 		flex-direction: column;
@@ -750,8 +749,11 @@
 	/* Responsive */
 	@media (max-width: 900px) {
 		.detail-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
+		.registration-shortcut { display: inline-block; padding-block: 0.75rem; font-weight: 600; }
+		.detail-header h1, .detail-action-col { overflow-wrap: anywhere; }
+		.form-submit :global(.btn) { white-space: normal; }
 		.registration-card {
 			position: static;
 		}

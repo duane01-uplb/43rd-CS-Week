@@ -5,7 +5,7 @@
 <svelte:head><title>Create event · CS Week Admin</title></svelte:head>
 
 <section class="head">
-	<p class="eyebrow">Schedule</p>
+
 	<h1>Create event</h1>
 	<p class="lede">Set the basics. Registration fields are configured on the public site per event.</p>
 </section>

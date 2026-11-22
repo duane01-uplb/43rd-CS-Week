@@ -41,7 +41,7 @@
 
 <section class="head row">
 	<div>
-		<p class="eyebrow">Attendance</p>
+
 		<h1>Registrations</h1>
 	</div>
 	<a
