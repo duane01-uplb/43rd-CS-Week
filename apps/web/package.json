@@ -25,6 +25,7 @@
   "dependencies": {
     "@csweek/cache": "workspace:*",
     "@csweek/db": "workspace:*",
+    "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/ibm-plex-sans": "^5.3.0",
     "@fontsource/macondo-swash-caps": "^5.3.0",
     "@fontsource/press-start-2p": "^5.3.0",

@@ -16,7 +16,7 @@
 	let scrolled = $state(false);
 
 	const pathname = $derived(page.url.pathname);
-	const isHome = $derived(pathname === '/');
+	const isHome = $derived(pathname === '/cs-week');
 	const isEvents = $derived(pathname.startsWith('/events'));
 
 	function handleScroll() {
@@ -39,9 +39,12 @@
 	<meta name="theme-color" content="#2b2430" />
 </svelte:head>
 
+{#if pathname === '/'}
+	{@render children()}
+{:else}
 <header class="site-nav" class:isHome class:scrolled>
 	<div class="nav-row shell">
-		<a href="/" class="brand" aria-label="CASC4D3 — 43rd Computer Science Week Home">
+		<a href="/cs-week" class="brand" aria-label="CASC4D3 — 43rd Computer Science Week Home">
 			<span class="brand-mark-group">
 				<span class="brand-mark brand-mark-soc" aria-hidden="true">
 					<img src="/uplb-comsci-soc-logo.png" alt="" class="brand-logo-img" />
@@ -58,9 +61,9 @@
 		</a>
 
 		<nav class="nav-links" aria-label="Primary navigation">
-			<a href="/" class:active={isHome}>Home</a>
+			<a href="/cs-week" class:active={isHome}>Home</a>
 			<a href="/events" class:active={isEvents}>Events</a>
-			<a href="/#how-it-works">How It Works</a>
+			<a href="/cs-week#how-it-works">How It Works</a>
 			<a href="/events" class="btn btn-nav-outline btn-sm nav-cta">Register for Events →</a>
 		</nav>
 
@@ -83,9 +86,9 @@
 
 	{#if menuOpen}
 		<nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
-			<a href="/" class:active={isHome} onclick={() => (menuOpen = false)}>Home</a>
+			<a href="/cs-week" class:active={isHome} onclick={() => (menuOpen = false)}>Home</a>
 			<a href="/events" class:active={isEvents} onclick={() => (menuOpen = false)}>Events & Schedule</a>
-			<a href="/#how-it-works" onclick={() => (menuOpen = false)}>How It Works</a>
+			<a href="/cs-week#how-it-works" onclick={() => (menuOpen = false)}>How It Works</a>
 			<div class="mobile-menu-cta">
 				<a href="/events" class="btn btn-nav-outline btn-full" onclick={() => (menuOpen = false)}>Register for Events →</a>
 			</div>
@@ -146,14 +149,14 @@
 		<nav class="footer-links" aria-label="Footer navigation">
 			<div class="footer-col">
 				<span class="footer-col-title">Navigation</span>
-				<a href="/">Home</a>
+				<a href="/cs-week">Home</a>
 				<a href="/events">Events Roster</a>
-				<a href="/#how-it-works">Registration Flow</a>
+				<a href="/cs-week#how-it-works">Registration Flow</a>
 			</div>
 			<div class="footer-col">
 				<span class="footer-col-title">Community</span>
 				<a href="/events">Schedule & Details</a>
-				<a href="/#tracks">Open Tracks</a>
+				<a href="/cs-week#event">Open Tracks</a>
 			</div>
 		</nav>
 	</div>
@@ -161,6 +164,7 @@
 		<p class="footer-legal">© 2026 UPLB Computer Science Society. All rights reserved.</p>
 	</div>
 </footer>
+{/if}
 
 <style>
 	/* ------------------------------------------------------------------ *

@@ -6,7 +6,7 @@ async (page) => {
 	for (const [width, height] of [[1440, 900], [390, 844], [320, 740]]) {
 		await page.setViewportSize({ width, height });
 		await page.emulateMedia({ reducedMotion: 'reduce' });
-		await page.goto(origin);
+		await page.goto(origin + '/cs-week');
 		async function capture(step) {
 			await page.evaluate(() => document.fonts.ready);
 			const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -16,7 +16,7 @@ async (page) => {
 		await page.getByRole('heading', { level: 1 }).waitFor();
 		await capture('home');
 		const agenda = page.getByRole('region', { name: 'Upcoming events' });
-		const jump = page.getByRole('link', { name: 'See the schedule' });
+		const jump = page.locator('.hero-content').getByRole('link', { name: 'See the schedule' });
 		await jump.focus();
 		await page.keyboard.press('Enter');
 		await page.waitForURL(url => url.hash === '#event');
@@ -29,7 +29,7 @@ async (page) => {
 		await firstAction.waitFor();
 		const box = await firstAction.boundingBox();
 		if (width === 390 && (!box || box.y < 0 || box.y + box.height > height)) throw new Error('First action below fold');
-		await page.goto(origin);
+		await page.goto(origin + '/cs-week');
 		if (width < 600) {
 			const toggle = page.getByRole('button', { name: 'Open navigation menu' });
 			await toggle.click();
@@ -93,7 +93,7 @@ async (page) => {
 			'fixture-external', 'Code Wars', 'open'
 		], uses: {} }] }
 	}));
-	await page.goto(origin);
+	await page.goto(origin + '/cs-week');
 	await page.getByRole('region', { name: 'Upcoming events' }).getByRole('link', { name: 'View full schedule' }).click();
 	const closed = page.getByRole('article').filter({ hasText: 'Closed session' });
 	if (await closed.getByRole('link', { name: 'View details' }).getAttribute('href') !== '/events/fixture-closed') throw new Error('Closed destination');
